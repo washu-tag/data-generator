@@ -1,0 +1,33 @@
+numPatients : 200
+numStudies : 750
+numSeries : 3000
+patientAgeEncodingPercent : 85
+patientSizeEncodingPercent : 50
+patientSizeEncodedAsZeroPercent : 5
+patientWeightEncodingPercent : 90
+patientWeightEncodedAsZeroPercent : 5
+includePixelData : false
+protocols :
+  - type : mri_full
+  - type : mri_min
+  - type : mri_specialized_brain
+  - type : mri_outside
+  - type : mg4view
+  - type : mg
+  - type : petct
+  - type : ap_cr
+  - type : dx
+  - type : nm_mpi
+  - type : outside_nm_mpi
+  - type : us
+  - type : xa
+  - type : outside_xa
+  - type : petmr
+  - type : japanese_dx
+  - type : korean_dx
+  - type : sc_xr
+  - type : sc_mg
+  - type : greek_mri
+  - type : mri_rt_ko
+  - type : mg_pr
+  - type : petct2

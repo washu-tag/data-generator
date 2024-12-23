@@ -1,0 +1,38 @@
+{
+  "type" : "object",
+  "properties" : {
+    "objects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "string",
+            "description": "UID for imaging study"
+          },
+          "examination": {
+            "type": "string",
+            "description": "Brief description of imaging exam performed, not mentioning date"
+          },
+          "findings": {
+            "type": "string",
+            "description": "Detailed and lengthy narrative description of images"
+          },
+          "impressions": {
+            "type": "string",
+            "description": "Radiologist's detailed conclusions based on findings"
+          }
+        },
+        "required": [
+          "uid",
+          "examination",
+          "findings",
+          "impressions"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required" : ["objects"],
+  "additionalProperties" : false
+}
