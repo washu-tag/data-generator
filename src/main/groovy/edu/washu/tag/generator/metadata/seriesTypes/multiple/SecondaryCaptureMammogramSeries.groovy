@@ -1,5 +1,10 @@
 package edu.washu.tag.generator.metadata.seriesTypes.multiple
 
+import edu.washu.tag.generator.metadata.Instance
+import edu.washu.tag.generator.metadata.Series
+import edu.washu.tag.generator.metadata.SeriesType
+import edu.washu.tag.generator.metadata.pixels.PixelSource
+import edu.washu.tag.generator.metadata.protocols.MammogramFourView
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.metadata.enums.BodyPart
@@ -8,6 +13,8 @@ import edu.washu.tag.generator.metadata.module.instance.ImagePixelModule
 import edu.washu.tag.generator.util.RandomGenUtils
 
 class SecondaryCaptureMammogramSeries extends SecondaryCaptureSeries {
+
+    private static final List<SeriesType> pixelSourceTypes = new MammogramFourView().allSeriesTypes
 
     private static final EnumeratedDistribution<String> xnatCompliantModalityRandomizer = RandomGenUtils.setupWeightedLottery([
             'MG' : 90,
@@ -33,6 +40,11 @@ class SecondaryCaptureMammogramSeries extends SecondaryCaptureSeries {
     @Override
     String getSeriesDescription(Equipment scanner, BodyPart bodyPartExamined) {
         seriesDescriptionRandomizer.sample()
+    }
+
+    @Override
+    PixelSource pixelSourceFor(Series series, Instance instance) {
+        RandomGenUtils.randomListEntry(pixelSourceTypes).pixelSourceFor(series, instance)
     }
 
     @Override

@@ -61,17 +61,25 @@ abstract class MrSeriesType extends SeriesType {
 
     @Override
     PixelSource pixelSourceFor(Series series, Instance instance) {
-        ZippedPixelSource.ofRsnaTestData(
-            switch (series.bodyPartExamined) {
-                case BodyPart.ABDOMEN -> 'PICKER/MRIM50'
-                case BodyPart.BRAIN -> 'GEMS/MR/IM229'
-                case BodyPart.CHEST -> 'TOSHIBA/PAT00054/STD00055/SFS00056/OBJ00057'
-                case BodyPart.HEAD -> 'GEMS/MR/IM223'
-                case BodyPart.HEART -> 'PHILIPS/MR4_5/MRHEARTR'
-                case BodyPart.PELVIS -> 'TOSHIBA/PAT00042/STD00043/SFS00044/OBJ00045' // TODO: is this even correct? Do I have a better sample?
-                default -> throw new RuntimeException("Unknown body part: ${series.bodyPartExamined}")
-            }
-        )
+        if (series.bodyPartExamined == BodyPart.PELVIS) {
+            new ZippedPixelSource(
+                'https://marketing.webassets.siemens-healthineers.com/43305318886d0d30/a99b2b60c493/4_Pelvis_Free-Max.zip',
+                'siemens-pelvis-sample.zip',
+                '4b_Pelvis_t2_tse_stir_cor_p4_DRB.dcm',
+                '4b_Pelvis_t2_tse_stir_cor_p4_DRB.dcm'
+            )
+        } else {
+            ZippedPixelSource.ofRsnaTestData(
+                switch (series.bodyPartExamined) {
+                    case BodyPart.ABDOMEN -> 'PICKER/MRIM50'
+                    case BodyPart.BRAIN -> 'GEMS/MR/IM229'
+                    case BodyPart.CHEST -> 'TOSHIBA/PAT00054/STD00055/SFS00056/OBJ00057'
+                    case BodyPart.HEAD -> 'GEMS/MR/IM223'
+                    case BodyPart.HEART -> 'PHILIPS/MR4_5/MRHEARTR'
+                    default -> throw new RuntimeException("Unknown body part: ${series.bodyPartExamined}")
+                }
+            )
+        }
     }
 
     abstract EnumeratedDistribution<String> getSeriesDescriptionRandomizer(Equipment scanner)

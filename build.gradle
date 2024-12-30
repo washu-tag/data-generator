@@ -1,0 +1,81 @@
+plugins {
+    id 'groovy'
+    id 'java'
+}
+
+group = 'edu.washu.tag'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://maven.dcm4che.org/'
+    }
+    maven {
+        url 'https://raw.github.com/nroduit/mvn-repo/master/' // needed for dcm4che
+    }
+}
+
+final String vGroovy = '5.0.0-alpha-11'
+final String vJackson = '2.18.0'
+final String vHapiHl7V2 = '2.5.1'
+final String vCommonsIo = '2.17.0'
+final String vCommonsLang3 = '3.17.0'
+final String vDcm4che = '5.33.0'
+final String vAzureOpenai = '1.0.0-beta.12'
+final String vSlf4j = '2.0.16'
+final String vLog4j2Bridge = '2.24.2'
+final String vCommonsMath3 = '3.6.1'
+
+configurations {
+    all*.exclude group: 'ch.qos.logback', module: 'logback-classic'
+    all*.exclude group: 'ch.qos.logback', module: 'logback-core'
+}
+
+dependencies {
+    implementation("org.apache.groovy:groovy:${vGroovy}")
+    implementation("com.fasterxml.jackson.core:jackson-databind:${vJackson}")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${vJackson}")
+    implementation("ca.uhn.hapi:hapi-base:${vHapiHl7V2}")
+    implementation("ca.uhn.hapi:hapi-structures-v281:${vHapiHl7V2}")
+    implementation("commons-io:commons-io:${vCommonsIo}")
+    implementation("org.apache.commons:commons-lang3:${vCommonsLang3}")
+    implementation("org.dcm4che.tool:dcm4che-tool-storescu:${vDcm4che}")
+    implementation("com.azure:azure-ai-openai:${vAzureOpenai}")
+    implementation("org.slf4j:slf4j-api:${vSlf4j}")
+    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:${vLog4j2Bridge}")
+    implementation("org.apache.commons:commons-math3:${vCommonsMath3}")
+}
+
+java {
+    sourceCompatibility = '21'
+}
+
+tasks.register('generateSpecs', JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'edu.washu.tag.generator.PopulationGenerator'
+    args(
+            propertyWithDefault('config', 'default'),
+            propertyWithDefault('writeToFiles', false)
+    )
+}
+
+tasks.register('writeFiles', JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'edu.washu.tag.generator.BatchProcessor'
+    final String fullSpec = 'batchSpecs'
+    final String shortcut = 'standardSpecs'
+    if (project.hasProperty(fullSpec)) {
+        args(project.property(fullSpec))
+    } else if (project.hasProperty(shortcut)) {
+        args(
+                (0 .. Integer.parseInt(project.property(shortcut) as String)).collect {
+                    "batches/batch_${it}.yaml"
+                }.join(',')
+        )
+    }
+}
+
+Object propertyWithDefault(String propName, Object defaultVal) {
+    project.hasProperty(propName) ? project.property(propName) : defaultVal
+}
