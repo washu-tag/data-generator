@@ -62,13 +62,13 @@ class PopulationGenerator {
                 generatedSeries += study.series.size()
             }
             if (currentBatch.isFull()) {
-                currentBatch.writeToFileAndLog(expectedNumBatches)
+                currentBatch.writeToFileAndLog(expectedNumBatches, specificationParameters)
                 currentBatch = new BatchSpecification(id : currentBatch.id + 1)
             }
         }
 
         if (!currentBatch.written && currentBatch.patients.size() > 0) {
-            currentBatch.writeToFileAndLog(expectedNumBatches)
+            currentBatch.writeToFileAndLog(expectedNumBatches, specificationParameters)
         }
 
         println("STAGE 1 COMPLETE: manifests for data of ${specificationParameters.numPatients} patients have been created.")

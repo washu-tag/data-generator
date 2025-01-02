@@ -55,10 +55,11 @@ class Patient implements DicomEncoder {
             numStudies++
             numSeries += study.series.size()
         }
-        if (specificationParameters.generateRadiologyReports) {
-            reportGenerator.generateReportsForPatient(this)
-        }
         this
+    }
+
+    void generateReports() {
+        reportGenerator.generateReportsForPatient(this)
     }
 
     void encode(Attributes attributes) {

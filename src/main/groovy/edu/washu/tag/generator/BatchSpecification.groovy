@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.util.TimeUtils
+import groovyx.gpars.GParsPool
 
 import java.nio.file.Path
 import java.time.LocalDateTime
@@ -30,7 +31,14 @@ class BatchSpecification {
         written = true
     }
 
-    void writeToFileAndLog(int expectedNumBatches) {
+    void writeToFileAndLog(int expectedNumBatches, SpecificationParameters specificationParameters) {
+        if (specificationParameters.generateRadiologyReports) {
+            GParsPool.withPool {
+                patients.eachParallel { Patient patient ->
+                    patient.generateReports()
+                }
+            }
+        }
         writeToFile()
         println("  Specification for batch #${id} (out of roughly ${expectedNumBatches}) has been created in ${relativeFilePath()}")
     }

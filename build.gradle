@@ -26,6 +26,7 @@ final String vAzureOpenai = '1.0.0-beta.12'
 final String vSlf4j = '2.0.16'
 final String vLog4j2Bridge = '2.24.2'
 final String vCommonsMath3 = '3.6.1'
+final String vGpars = '1.2.1'
 
 configurations {
     all*.exclude group: 'ch.qos.logback', module: 'logback-classic'
@@ -45,6 +46,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:${vSlf4j}")
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:${vLog4j2Bridge}")
     implementation("org.apache.commons:commons-math3:${vCommonsMath3}")
+    implementation("org.codehaus.gpars:gpars:${vGpars}")
 }
 
 java {
