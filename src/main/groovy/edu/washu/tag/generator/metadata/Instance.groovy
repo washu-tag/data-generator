@@ -1,6 +1,6 @@
 package edu.washu.tag.generator.metadata
 
-import edu.washu.tag.generator.metadata.pixels.PixelCache
+import edu.washu.tag.generator.metadata.pixels.PixelSource
 import org.dcm4che3.data.Attributes
 import org.dcm4che3.data.Tag
 import org.dcm4che3.data.VR
@@ -15,7 +15,7 @@ class Instance implements DicomEncoder, PrivateElementContainer {
     String sopClassUid
     String sopInstanceUid
     String instanceNumber
-    String sourcePixelsId
+    PixelSource pixelSource
     List<PrivateBlock> privateBlocks = []
 
     void writeToDicomFile(Patient patient, Study study, Series series, File outputFile) {
@@ -33,8 +33,8 @@ class Instance implements DicomEncoder, PrivateElementContainer {
         setIfNonempty(attributes, Tag.ImageType, VR.CS, series.imageType)
 
         String transferSyntaxUid = series.transferSyntaxUid
-        if (sourcePixelsId != null) {
-            transferSyntaxUid = encodeImagePixelModule(attributes)
+        if (pixelSource != null) {
+            transferSyntaxUid = encodeImagePixelModule(study, series, attributes)
         }
 
         new DicomOutputStream(outputFile).withCloseable { dicomStream ->
@@ -42,13 +42,13 @@ class Instance implements DicomEncoder, PrivateElementContainer {
         }
     }
 
-    String encodeImagePixelModule(Attributes attributes) {
-        final Attributes pixelSource = PixelCache.lookup(sourcePixelsId)
+    String encodeImagePixelModule(Study study, Series series, Attributes attributes) {
+        final Attributes image = pixelSource.produceImage(study, series)
         attributes.addSelected(
-            pixelSource,
+            image,
             IMAGE_PIXEL_TAGS.toArray() as int[]
         )
-        pixelSource.getString(Tag.TransferSyntaxUID)
+        image.getString(Tag.TransferSyntaxUID)
     }
 
     @Override

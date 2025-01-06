@@ -3,7 +3,8 @@ package edu.washu.tag.generator.metadata.seriesTypes.multiple
 import edu.washu.tag.generator.metadata.Instance
 import edu.washu.tag.generator.metadata.Series
 import edu.washu.tag.generator.metadata.SeriesType
-import edu.washu.tag.generator.metadata.pixels.PixelSource
+import edu.washu.tag.generator.metadata.pixels.CachedPixelSpec
+import edu.washu.tag.generator.metadata.pixels.PixelSpecification
 import edu.washu.tag.generator.metadata.protocols.MammogramFourView
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import edu.washu.tag.generator.metadata.Equipment
@@ -43,8 +44,8 @@ class SecondaryCaptureMammogramSeries extends SecondaryCaptureSeries {
     }
 
     @Override
-    PixelSource pixelSourceFor(Series series, Instance instance) {
-        RandomGenUtils.randomListEntry(pixelSourceTypes).pixelSourceFor(series, instance)
+    PixelSpecification pixelSpecFor(Series series, Instance instance) {
+        RandomGenUtils.randomListEntry(pixelSourceTypes).pixelSpecFor(series, instance)
     }
 
     @Override

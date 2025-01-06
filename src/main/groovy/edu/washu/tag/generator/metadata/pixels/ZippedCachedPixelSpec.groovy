@@ -4,20 +4,20 @@ import java.nio.file.Files
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
-class ZippedPixelSource extends PixelSource {
+class ZippedCachedPixelSpec extends CachedPixelSpec {
 
     protected String localZipName
     protected String pathWithinZip
 
-    ZippedPixelSource(String url, String localZipName, String pathWithinZip, String localPath) {
+    ZippedCachedPixelSpec(String url, String localZipName, String pathWithinZip, String localPath) {
         this.url = url
         this.localZipName = localZipName
         this.pathWithinZip = pathWithinZip
         this.localPath = localPath
     }
 
-    static ZippedPixelSource ofRsnaTestData(String zipPath) {
-        new ZippedPixelSource(
+    static ZippedCachedPixelSpec ofRsnaTestData(String zipPath) {
+        new ZippedCachedPixelSpec(
             'https://download.nrg.wustl.edu/pub/data/multivendor_dcm.zip',
             'multivendor_dcm.zip',
             'RSNA2000/' + zipPath,
@@ -40,7 +40,7 @@ class ZippedPixelSource extends PixelSource {
                     it.name == pathWithinZip
                 } as ZipEntry
             ),
-            fullPath().toPath()
+            LocalCache.cachedFile(localPath).toPath()
         )
     }
 

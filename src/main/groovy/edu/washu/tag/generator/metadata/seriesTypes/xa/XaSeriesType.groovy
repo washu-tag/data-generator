@@ -2,8 +2,8 @@ package edu.washu.tag.generator.metadata.seriesTypes.xa
 
 import edu.washu.tag.generator.metadata.Instance
 import edu.washu.tag.generator.metadata.Series
-import edu.washu.tag.generator.metadata.pixels.PixelSource
-import edu.washu.tag.generator.metadata.pixels.ZippedPixelSource
+import edu.washu.tag.generator.metadata.pixels.CachedPixelSpec
+import edu.washu.tag.generator.metadata.pixels.ZippedCachedPixelSpec
 import org.dcm4che3.data.UID
 import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.metadata.ImageType
@@ -35,8 +35,8 @@ abstract class XaSeriesType extends SeriesType {
     }
 
     @Override
-    PixelSource pixelSourceFor(Series series, Instance instance) {
-        ZippedPixelSource.ofRsnaTestData('TOSHIBA/PAT00058/STD00059/SFS00060/OBJ00061') // TODO: this could probably be better
+    CachedPixelSpec pixelSpecFor(Series series, Instance instance) {
+        ZippedCachedPixelSpec.ofRsnaTestData('TOSHIBA/PAT00058/STD00059/SFS00060/OBJ00061') // TODO: this could probably be better
     }
 
     abstract XaImageType getXaImageType(XaScanner scanner)

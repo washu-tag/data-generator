@@ -9,7 +9,7 @@ import edu.washu.tag.generator.metadata.module.SeriesLevelModule
 import edu.washu.tag.generator.metadata.module.instance.ImagePixelModule
 import edu.washu.tag.generator.metadata.module.instance.SopCommonModule
 import edu.washu.tag.generator.metadata.module.series.GeneralSeriesModule
-import edu.washu.tag.generator.metadata.pixels.PixelSource
+import edu.washu.tag.generator.metadata.pixels.PixelSpecification
 import edu.washu.tag.generator.util.StringReplacements
 
 abstract class SeriesType {
@@ -36,10 +36,9 @@ abstract class SeriesType {
             (module as InstanceLevelModule).apply(specificationParameters, patient, study, equipment, series, instance)
         }
         if (specificationParameters.includePixelData) {
-            final PixelSource pixelSource = pixelSourceFor(series, instance)
-            if (pixelSource != null) {
-                pixelSource.cache()
-                instance.setSourcePixelsId(pixelSource.localPath)
+            final PixelSpecification pixelSpec = pixelSpecFor(series, instance)
+            if (pixelSpec != null) {
+                instance.setPixelSource(pixelSpec.generateSource())
             }
         }
         [instance]
@@ -73,7 +72,7 @@ abstract class SeriesType {
         null
     }
 
-    PixelSource pixelSourceFor(Series series, Instance instance) {
+    PixelSpecification pixelSpecFor(Series series, Instance instance) {
         null
     }
 

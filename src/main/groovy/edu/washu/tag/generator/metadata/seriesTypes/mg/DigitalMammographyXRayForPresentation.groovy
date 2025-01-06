@@ -1,8 +1,8 @@
 package edu.washu.tag.generator.metadata.seriesTypes.mg
 
 import edu.washu.tag.generator.metadata.Instance
-import edu.washu.tag.generator.metadata.pixels.NestedZipPixelSource
-import edu.washu.tag.generator.metadata.pixels.PixelSource
+import edu.washu.tag.generator.metadata.pixels.NestedZipCachedPixelSpec
+import edu.washu.tag.generator.metadata.pixels.CachedPixelSpec
 import org.dcm4che3.data.UID
 import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.metadata.ImageType
@@ -72,9 +72,9 @@ class DigitalMammographyXRayForPresentation extends SeriesType {
     }
 
     @Override
-    PixelSource pixelSourceFor(Series series, Instance instance) {
+    CachedPixelSpec pixelSpecFor(Series series, Instance instance) {
         final String lateralityAndView = laterality.dicomRepresentation + viewPosition.dicomRepresentation
-        new NestedZipPixelSource(
+        new NestedZipCachedPixelSpec(
             'https://download.nrg.wustl.edu/pub/data/xnat_populate/Mammo_MEG.zip',
             'Mammo_MEG.zip',
             'Mammo_MEG/001001_CUR.zip',

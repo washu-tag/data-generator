@@ -1,8 +1,8 @@
 package edu.washu.tag.generator.metadata.seriesTypes.nm
 
 import edu.washu.tag.generator.metadata.Instance
-import edu.washu.tag.generator.metadata.pixels.PixelSource
-import edu.washu.tag.generator.metadata.pixels.ZippedPixelSource
+import edu.washu.tag.generator.metadata.pixels.CachedPixelSpec
+import edu.washu.tag.generator.metadata.pixels.ZippedCachedPixelSpec
 import org.dcm4che3.data.UID
 import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.metadata.ImageType
@@ -50,8 +50,8 @@ abstract class NmSeriesType extends SeriesType {
     }
 
     @Override
-    PixelSource pixelSourceFor(Series series, Instance instance) {
-        ZippedPixelSource.ofRsnaTestData('GEMS/NM/IM261.dcma')
+    CachedPixelSpec pixelSpecFor(Series series, Instance instance) {
+        ZippedCachedPixelSpec.ofRsnaTestData('GEMS/NM/IM261.dcma')
     }
 
     @Override

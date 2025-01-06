@@ -1,8 +1,8 @@
 package edu.washu.tag.generator.metadata.pixels
 
-class DirectPixelSource extends PixelSource {
+class DirectCachedPixelSpec extends CachedPixelSpec {
 
-    DirectPixelSource(String url) {
+    DirectCachedPixelSpec(String url) {
         this.url = url
         localPath = url.split('/')[-1]
     }

@@ -133,7 +133,14 @@ abstract class Protocol implements Randomizeable {
             (module as StudyLevelModule).apply(specificationParameters, patient, study)
         }
         seriesTypes.eachWithIndex { seriesType, seriesIndex ->
-            study.series << seriesType.seriesClass().newInstance().randomize(specificationParameters, seriesType, study, seriesIndex)
+            study.series << seriesType
+                .seriesClass()
+                .getDeclaredConstructor()
+                .newInstance()
+                .randomize(specificationParameters, seriesType, study, seriesIndex)
+        }
+        study.series.each { series ->
+            series.generateInstances(study) // done after to allow series to see all other series in study
         }
         study
     }

@@ -1,9 +1,9 @@
 package edu.washu.tag.generator.metadata.seriesTypes.mr
 
 import edu.washu.tag.generator.metadata.Instance
-import edu.washu.tag.generator.metadata.pixels.PixelSource
+import edu.washu.tag.generator.metadata.pixels.CachedPixelSpec
 import edu.washu.tag.generator.metadata.Series
-import edu.washu.tag.generator.metadata.pixels.ZippedPixelSource
+import edu.washu.tag.generator.metadata.pixels.ZippedCachedPixelSpec
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.dcm4che3.data.UID
 import edu.washu.tag.generator.metadata.Equipment
@@ -60,16 +60,16 @@ abstract class MrSeriesType extends SeriesType {
     }
 
     @Override
-    PixelSource pixelSourceFor(Series series, Instance instance) {
+    CachedPixelSpec pixelSpecFor(Series series, Instance instance) {
         if (series.bodyPartExamined == BodyPart.PELVIS) {
-            new ZippedPixelSource(
+            new ZippedCachedPixelSpec(
                 'https://marketing.webassets.siemens-healthineers.com/43305318886d0d30/a99b2b60c493/4_Pelvis_Free-Max.zip',
                 'siemens-pelvis-sample.zip',
                 '4b_Pelvis_t2_tse_stir_cor_p4_DRB.dcm',
                 '4b_Pelvis_t2_tse_stir_cor_p4_DRB.dcm'
             )
         } else {
-            ZippedPixelSource.ofRsnaTestData(
+            ZippedCachedPixelSpec.ofRsnaTestData(
                 switch (series.bodyPartExamined) {
                     case BodyPart.ABDOMEN -> 'PICKER/MRIM50'
                     case BodyPart.BRAIN -> 'GEMS/MR/IM229'

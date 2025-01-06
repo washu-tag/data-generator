@@ -1,5 +1,9 @@
 package edu.washu.tag.generator.metadata.seriesTypes.ct
 
+import edu.washu.tag.generator.metadata.Instance
+import edu.washu.tag.generator.metadata.Series
+import edu.washu.tag.generator.metadata.pixels.DerivedCtDoseReport
+import edu.washu.tag.generator.metadata.pixels.PixelSpecification
 import org.dcm4che3.data.UID
 import edu.washu.tag.generator.metadata.scanners.CtScanner
 import edu.washu.tag.generator.metadata.Equipment
@@ -22,6 +26,11 @@ class PatientProtocol extends CtSeriesType {
     @Override
     ImageType resolveImageType(CtScanner equipment) {
         new ImageType().derived().secondary().addValue('OTHER').addValue('CT_SOM5 PROT')
+    }
+
+    @Override
+    PixelSpecification pixelSpecFor(Series series, Instance instance) {
+        DerivedCtDoseReport.INSTANCE
     }
 
     @Override

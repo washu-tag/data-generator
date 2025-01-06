@@ -53,7 +53,6 @@ class Series implements DicomEncoder, PrivateElementContainer {
         }
 
         imageType = seriesType.getImageType(scanner)?.resolve()
-        instances = seriesType.produceInstances(study.patient, study, scanner, this)
         this
     }
 
@@ -72,6 +71,10 @@ class Series implements DicomEncoder, PrivateElementContainer {
         setIfNonempty(attributes, Tag.OperatorsName, VR.PN, operatorsName)
         setIfNonempty(attributes, Tag.PerformingPhysicianName, VR.PN, performingPhysiciansName)
         encodePrivateElements(attributes)
+    }
+
+    void generateInstances(Study study) {
+        instances = seriesType.produceInstances(study.patient, study, scanner, this)
     }
 
     @Override

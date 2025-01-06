@@ -2,8 +2,8 @@ package edu.washu.tag.generator.metadata.seriesTypes.cr
 
 import edu.washu.tag.generator.metadata.Instance
 import edu.washu.tag.generator.metadata.Series
-import edu.washu.tag.generator.metadata.pixels.PixelSource
-import edu.washu.tag.generator.metadata.pixels.ZippedPixelSource
+import edu.washu.tag.generator.metadata.pixels.CachedPixelSpec
+import edu.washu.tag.generator.metadata.pixels.ZippedCachedPixelSpec
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.dcm4che3.data.UID
 import edu.washu.tag.generator.metadata.Equipment
@@ -61,8 +61,8 @@ class AnteroposteriorCrSeries extends CrSeriesType {
     }
 
     @Override
-    PixelSource pixelSourceFor(Series series, Instance instance) {
-        ZippedPixelSource.ofRsnaTestData('GEMS/CR/IM307')
+    CachedPixelSpec pixelSpecFor(Series series, Instance instance) {
+        ZippedCachedPixelSpec.ofRsnaTestData('GEMS/CR/IM307')
     }
 
 }

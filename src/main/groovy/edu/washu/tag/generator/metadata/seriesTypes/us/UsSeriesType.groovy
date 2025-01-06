@@ -2,8 +2,8 @@ package edu.washu.tag.generator.metadata.seriesTypes.us
 
 import edu.washu.tag.generator.metadata.Instance
 import edu.washu.tag.generator.metadata.Series
-import edu.washu.tag.generator.metadata.pixels.PixelSource
-import edu.washu.tag.generator.metadata.pixels.ZippedPixelSource
+import edu.washu.tag.generator.metadata.pixels.CachedPixelSpec
+import edu.washu.tag.generator.metadata.pixels.ZippedCachedPixelSpec
 import org.dcm4che3.data.UID
 import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.metadata.ImageType
@@ -42,8 +42,8 @@ class UsSeriesType extends SeriesType {
     }
 
     @Override
-    PixelSource pixelSourceFor(Series series, Instance instance) {
-        ZippedPixelSource.ofRsnaTestData('GEMS/US/IM13')
+    CachedPixelSpec pixelSpecFor(Series series, Instance instance) {
+        ZippedCachedPixelSpec.ofRsnaTestData('GEMS/US/IM13')
     }
 
     @Override
