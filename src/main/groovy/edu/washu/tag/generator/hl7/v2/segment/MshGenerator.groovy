@@ -16,7 +16,7 @@ class MshGenerator extends SegmentGenerator<MSH> {
         msh.getMsh4_SendingFacility().getHd1_NamespaceID().setValue('ABCHOSP')
         msh.getMsh5_ReceivingApplication().getHd1_NamespaceID().setValue('SOMEAPP')
         msh.getMsh6_ReceivingFacility().getHd1_NamespaceID().setValue('ABC_HOSP_DEPT_X')
-        msh.getMsh7_DateTimeOfMessage().setValue(TimeUtils.toHl7(LocalDateTime.now()))
+        msh.getMsh7_DateTimeOfMessage().setValue(TimeUtils.toHl7(radReport.reportDateTime))
         msh.getMsh8_Security().setValue('TBD')
         msh.getMsh9_MessageType().getMsg1_MessageCode().setValue('ORU')
         msh.getMsh9_MessageType().getMsg2_TriggerEvent().setValue('R01') // intentionally skipping MSH-9.3

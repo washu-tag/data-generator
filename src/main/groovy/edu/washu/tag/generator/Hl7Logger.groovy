@@ -1,7 +1,11 @@
 package edu.washu.tag.generator
 
+import edu.washu.tag.generator.util.TimeUtils
+import org.apache.commons.lang3.RandomUtils
+
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 class Hl7Logger {
 
@@ -45,16 +49,18 @@ class Hl7Logger {
 
     private class TimedMessage {
         String hl7
-        String reportTime
+        LocalDateTime reportTime
 
         TimedMessage(String hl7, String reportTime) {
             this.hl7 = hl7
-            this.reportTime = reportTime
+            this.reportTime = TimeUtils.HL7_FORMATTER_DATETIME
+                .parse(reportTime, LocalDateTime::from)
+                .plus(100 * RandomUtils.insecure().randomInt(0, 9999), ChronoUnit.MICROS)
         }
 
         String transform() {
             final List<String> lines = [
-                    "${timestampFormatter.format(LocalDateTime.now())}|INFO|Raw.Application.TcpServer.TcpServer|",
+                    "${timestampFormatter.format(reportTime)}|INFO|Raw.Application.TcpServer.TcpServer|",
                     '<SB>'
             ]
             hl7.split('\r').each {
