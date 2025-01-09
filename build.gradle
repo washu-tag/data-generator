@@ -57,8 +57,9 @@ tasks.register('generateSpecs', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'edu.washu.tag.generator.PopulationGenerator'
     args(
-            propertyWithDefault('config', 'default'),
-            propertyWithDefault('writeToFiles', false)
+        propertyWithDefault('config', 'default'),
+        propertyWithDefault('writeToFiles', false),
+        propertyWithDefault('generateTestQueries', false)
     )
 }
 
@@ -67,15 +68,17 @@ tasks.register('writeFiles', JavaExec) {
     mainClass = 'edu.washu.tag.generator.BatchProcessor'
     final String fullSpec = 'batchSpecs'
     final String shortcut = 'standardSpecs'
+    final List<Object> arguments = []
     if (project.hasProperty(fullSpec)) {
-        args(project.property(fullSpec))
+        arguments << project.property(fullSpec)
     } else if (project.hasProperty(shortcut)) {
-        args(
-                (0 .. Integer.parseInt(project.property(shortcut) as String)).collect {
-                    "batches/batch_${it}.yaml"
-                }.join(',')
-        )
+        arguments << (0 .. Integer.parseInt(project.property(shortcut) as String)).collect {
+            "batches/batch_${it}.yaml"
+        }.join(',')
     }
+    arguments << propertyWithDefault('writeFiles', true)
+    arguments << propertyWithDefault('generateTestQueries', false)
+    args(arguments.toArray())
 }
 
 Object propertyWithDefault(String propName, Object defaultVal) {

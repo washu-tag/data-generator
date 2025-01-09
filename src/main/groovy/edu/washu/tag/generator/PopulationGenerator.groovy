@@ -12,6 +12,7 @@ class PopulationGenerator {
 
     SpecificationParameters specificationParameters = new YamlObjectMapper().readValue(FileIOUtils.readResource('basicRequest.yaml'), SpecificationParameters)
     boolean writeDataToFiles = false
+    boolean generateTestQueries = false
     private static final EnumeratedDistribution<PatientRandomizer> patientRandomizers = RandomGenUtils.setupWeightedLottery([
             (new DefaultPatientRandomizer()) : 85,
             (new GreekPatientRandomizer()) : 5,
@@ -31,6 +32,7 @@ class PopulationGenerator {
                 )
         )
         generator.setWriteDataToFiles(args[1] == 'true')
+        generator.setGenerateTestQueries(args[2] == 'true')
         generator.generate()
     }
 
@@ -74,10 +76,12 @@ class PopulationGenerator {
         println("STAGE 1 COMPLETE: manifests for data of ${specificationParameters.numPatients} patients have been created.")
 
         if (writeDataToFiles) {
-            new BatchProcessor(batches:
+            new BatchProcessor(
+                batches:
                     (0 .. currentBatch.id).collect { id ->
                         new File(new BatchSpecification(id: id).relativeFilePath())
-                    }
+                    },
+                generateTests: generateTestQueries
             ).writeBatches()
         }
     }

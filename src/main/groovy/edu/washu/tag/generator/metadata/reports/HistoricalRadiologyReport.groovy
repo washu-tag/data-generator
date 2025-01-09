@@ -50,6 +50,11 @@ class HistoricalRadiologyReport extends CurrentRadiologyReport {
     }
 
     @Override
+    protected boolean includeZpfAndZds() {
+        false
+    }
+
+    @Override
     void postProcess() {
         super.postProcess()
         setParser(cachedParser)

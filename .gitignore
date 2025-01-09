@@ -10,3 +10,4 @@ hl7ish_logs/
 batches/
 .gradle/
 build/
+test_queries/
