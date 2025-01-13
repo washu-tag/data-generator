@@ -8,6 +8,7 @@ import ca.uhn.hl7v2.util.Terser
 import edu.washu.tag.generator.hl7.v2.model.ReportStatus
 import edu.washu.tag.generator.metadata.Person
 import edu.washu.tag.generator.metadata.reports.CurrentRadiologyReport
+import edu.washu.tag.generator.util.LineWrapper
 
 class ObxGeneratorHistorical extends ObxGenerator {
 
@@ -24,7 +25,7 @@ class ObxGeneratorHistorical extends ObxGenerator {
                     content
                             .replace('\n', '~')
                             .split('~')
-                            .collect {CurrentRadiologyReport.splitLongLines(it) }
+                            .collect { LineWrapper.splitLongLines(it) }
                             .collectMany { it }
                             .eachWithIndex { line, i ->
                                 Terser.set(baseSegment, 5, i, 1, 1, line)

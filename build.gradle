@@ -27,6 +27,7 @@ final String vSlf4j = '2.0.16'
 final String vLog4j2Bridge = '2.24.2'
 final String vCommonsMath3 = '3.6.1'
 final String vGpars = '1.2.1'
+final String vTestNg = '7.9.0'
 
 configurations {
     all*.exclude group: 'ch.qos.logback', module: 'logback-classic'
@@ -47,10 +48,17 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:${vLog4j2Bridge}")
     implementation("org.apache.commons:commons-math3:${vCommonsMath3}")
     implementation("org.codehaus.gpars:gpars:${vGpars}")
+    testImplementation("org.testng:testng:${vTestNg}")
 }
 
 java {
     sourceCompatibility = '21'
+}
+
+test {
+    useTestNG {
+
+    }
 }
 
 tasks.register('generateSpecs', JavaExec) {

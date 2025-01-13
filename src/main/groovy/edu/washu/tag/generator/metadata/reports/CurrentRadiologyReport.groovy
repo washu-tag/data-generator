@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import edu.washu.tag.generator.hl7.v2.segment.*
 import edu.washu.tag.generator.metadata.Person
 import edu.washu.tag.generator.metadata.RadiologyReport
+import edu.washu.tag.generator.util.LineWrapper
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -15,8 +16,6 @@ import edu.washu.tag.generator.metadata.RadiologyReport
         property = 'type'
 )
 class CurrentRadiologyReport extends RadiologyReport {
-
-    private static final int LINE_LENGTH_WRAP = 70
 
     @Override
     protected void createReport(HapiContext hapiContext, ORU_R01 radReport) {
@@ -85,7 +84,7 @@ class CurrentRadiologyReport extends RadiologyReport {
         ]
 
         final String report = "${generatedReport.impressions} ${generatedReport.findings}"
-        splitLongLines(report).each { line ->
+        LineWrapper.splitLongLines(report).each { line ->
             obxGenerators << ObxGenerator.forImpression(line)
         }
 
@@ -99,21 +98,6 @@ class CurrentRadiologyReport extends RadiologyReport {
                     .setId(String.valueOf(i + 2))
                     .generateSegment(this, radReport.PATIENT_RESULT.ORDER_OBSERVATION.getOBSERVATION(i).OBX)
         }
-    }
-
-
-    static List<String> splitLongLines(String line) {
-        splitLongLinesIntermediate([], line)
-    }
-
-    private static List<String> splitLongLinesIntermediate(List<String> split, String remainingString) {
-        if (remainingString.length() < LINE_LENGTH_WRAP) {
-            split << remainingString
-            return split
-        }
-        final int lastSpace = remainingString.substring(0, LINE_LENGTH_WRAP).lastIndexOf(' ')
-        split << remainingString.substring(0, lastSpace).trim()
-        splitLongLinesIntermediate(split, remainingString.substring(lastSpace + 1))
     }
 
 }
