@@ -81,7 +81,7 @@ class ObrGenerator extends SegmentGenerator<OBR> {
         baseSegment.getObr31_ReasonForStudy(0).getCwe2_Text().setValue(radiologyReport.reasonForStudy) // TODO: duplicate reason into component 3 sometimes
     }
 
-    protected String derivePrimaryImagingModality(Study study) {
+    static String derivePrimaryImagingModality(Study study) {
         final List<String> modalities = study.series*.modality.unique()
         if (modalities.size() == 1) {
             modalities[0]
@@ -142,6 +142,5 @@ class ObrGenerator extends SegmentGenerator<OBR> {
             encodeNdlElement(34, Collections.singletonList(person))
         }
     }
-
 
 }
