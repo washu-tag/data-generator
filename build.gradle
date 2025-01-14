@@ -27,6 +27,7 @@ final String vSlf4j = '2.0.16'
 final String vLog4j2Bridge = '2.24.2'
 final String vCommonsMath3 = '3.6.1'
 final String vGpars = '1.2.1'
+final String vSparkSql = '4.0.0-preview2'
 final String vTestNg = '7.9.0'
 
 configurations {
@@ -48,6 +49,9 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:${vLog4j2Bridge}")
     implementation("org.apache.commons:commons-math3:${vCommonsMath3}")
     implementation("org.codehaus.gpars:gpars:${vGpars}")
+    implementation("org.apache.spark:spark-sql_2.13:${vSparkSql}")
+    implementation("io.delta:delta-spark_2.12:3.1.0")
+    implementation("org.apache.hadoop:hadoop-aws:3.2.0")
     testImplementation("org.testng:testng:${vTestNg}")
 }
 
