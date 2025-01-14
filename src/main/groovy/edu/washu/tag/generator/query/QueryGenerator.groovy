@@ -40,12 +40,6 @@ class QueryGenerator {
                     radiologyReport.patient.sex == Sex.FEMALE && radiologyReport.race == Race.BLACK
                 }, "corresponds to a female patient with a pid_10_race value of 'B' or 'BLACK'"
             )),
-        new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE pid_8_administrative_sex='F' AND pid_10_race IN ('BLACK', 'B')")
-            .expecting(new ExactNumberDescriptionRadReportResult(
-                { RadiologyReport radiologyReport ->
-                    radiologyReport.patient.sex == Sex.FEMALE && radiologyReport.race == Race.BLACK
-                }, "corresponds to a female patient with a pid_10_race value of 'B' or 'BLACK'"
-            )),
         primaryModalityBySex()
     ]
     
