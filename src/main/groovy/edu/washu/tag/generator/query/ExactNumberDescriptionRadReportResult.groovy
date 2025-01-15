@@ -25,5 +25,5 @@ class ExactNumberDescriptionRadReportResult extends ExactNumberRadReportResult {
         super.validateResult(result)
         // TODO:
     }
-    
+
 }
