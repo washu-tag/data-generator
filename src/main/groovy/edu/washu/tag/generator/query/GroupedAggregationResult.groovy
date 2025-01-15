@@ -83,19 +83,6 @@ class GroupedAggregationResult extends ExpectedRadReportResult implements Serial
         result
     }
 
-    static ForeachFunction<Row> validationFunction() {
-        new ForeachFunction<Row>() {
-            @Override
-            void call(Row row) throws Exception {
-                final String primaryColumn = row.getString(0)
-                final Map<String, Integer> expectation = result.get(primaryColumn)
-                cases.eachWithIndex { caseVal, index ->
-                    assertEquals(expectation.get(caseVal.name), row.getInt(index + 1))
-                }
-            }
-        }
-    }
-
     static class Case implements Serializable {
         String name
         Function<RadiologyReport, Boolean> aggregationCriteria
