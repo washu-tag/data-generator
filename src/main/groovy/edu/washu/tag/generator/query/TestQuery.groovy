@@ -20,8 +20,4 @@ class TestQuery {
         this
     }
 
-    String pythonValidation() {
-        "result = spark.sql(\"${sql}\"); ${expectedQueryResult.pythonValidation()}"
-    }
-
 }

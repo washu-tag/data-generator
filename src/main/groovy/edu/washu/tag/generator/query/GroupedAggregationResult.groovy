@@ -1,8 +1,13 @@
 package edu.washu.tag.generator.query
 
 import edu.washu.tag.generator.metadata.RadiologyReport
+import org.apache.spark.api.java.function.ForeachFunction
+import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.Row
 
 import java.util.function.Function
+
+import static org.testng.AssertJUnit.assertEquals
 
 class GroupedAggregationResult extends ExpectedRadReportResult {
 
@@ -45,6 +50,29 @@ class GroupedAggregationResult extends ExpectedRadReportResult {
                 row.put(caseVal.name, row[caseVal.name] + 1)
             }
         }
+    }
+
+    @Override
+    void validateResult(Dataset<Row> queryResult) {
+        final List<String> expectedColumns = [(primaryColumnName)]
+        cases.each { caseVal ->
+            expectedColumns << caseVal.name
+        }
+        assertEquals(
+            expectedColumns,
+            queryResult.columns() as List<String>
+        )
+        assertEquals(result.size(), queryResult.count())
+        queryResult.foreach(new ForeachFunction<Row>() {
+            @Override
+            void call(Row row) throws Exception {
+                final String primaryColumn = row.getString(0)
+                final Map<String, Integer> expectation = result.get(primaryColumn)
+                cases.eachWithIndex { caseVal, index ->
+                    assertEquals(expectation.get(caseVal.name), row.getInt(index + 1))
+                }
+            }
+        })
     }
 
     String getDescription() {
