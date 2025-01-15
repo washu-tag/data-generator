@@ -11,7 +11,7 @@ import static org.testng.AssertJUnit.assertEquals
 
 class GroupedAggregationResult extends ExpectedRadReportResult implements Serializable {
 
-    private final Map<String, Map<String, Integer>> result = [:]
+    private final Map<String, Map<String, Long>> result = [:]
     private String primaryColumnName
     private Function<RadiologyReport, String> primaryColumnDerivation
     private List<Case> cases = []
@@ -38,7 +38,7 @@ class GroupedAggregationResult extends ExpectedRadReportResult implements Serial
     @Override
     void includeReport(RadiologyReport radiologyReport) {
         final String primaryColumnValue = primaryColumnDerivation.apply(radiologyReport)
-        final Map<String, Integer> row = result.computeIfAbsent(
+        final Map<String, Long> row = result.computeIfAbsent(
             primaryColumnValue,
             {
                 cases.collectEntries { caseVal ->
@@ -67,9 +67,9 @@ class GroupedAggregationResult extends ExpectedRadReportResult implements Serial
             @Override
             void call(Row row) throws Exception {
                 final String primaryColumn = row.getString(0)
-                final Map<String, Integer> expectation = result.get(primaryColumn)
+                final Map<String, Long> expectation = result.get(primaryColumn)
                 cases.eachWithIndex { caseVal, index ->
-                    assertEquals(expectation.get(caseVal.name), row.getInt(index + 1))
+                    assertEquals(expectation.get(caseVal.name), row.getLong(index + 1))
                 }
             }
         })
@@ -79,7 +79,7 @@ class GroupedAggregationResult extends ExpectedRadReportResult implements Serial
         "A table grouped on ${primaryColumnName}"
     }
 
-    Map<String, Map<String, Integer>> getExpectedData() {
+    Map<String, Map<String, Long>> getExpectedData() {
         result
     }
 
