@@ -9,22 +9,12 @@ import java.util.function.Function
 
 import static org.testng.AssertJUnit.assertEquals
 
-class GroupedAggregationResult extends ExpectedRadReportResult {
+class GroupedAggregationResult extends ExpectedRadReportResult implements Serializable {
 
     private final Map<String, Map<String, Integer>> result = [:]
     private String primaryColumnName
     private Function<RadiologyReport, String> primaryColumnDerivation
     private List<Case> cases = []
-    private static final ForeachFunction<Row> validationFunction = new ForeachFunction<Row>() {
-        @Override
-        void call(Row row) throws Exception {
-            final String primaryColumn = row.getString(0)
-            final Map<String, Integer> expectation = result.get(primaryColumn)
-            cases.eachWithIndex { caseVal, index ->
-                assertEquals(expectation.get(caseVal.name), row.getInt(index + 1))
-            }
-        }
-    }
     
     GroupedAggregationResult(Function<RadiologyReport, Boolean> inclusionCriteria) {
         this.inclusionCriteria = inclusionCriteria
@@ -73,7 +63,16 @@ class GroupedAggregationResult extends ExpectedRadReportResult {
             queryResult.columns() as List<String>
         )
         assertEquals(result.size(), queryResult.count())
-        queryResult.foreach(validationFunction)
+        queryResult.foreach(new ForeachFunction<Row>() {
+            @Override
+            void call(Row row) throws Exception {
+                final String primaryColumn = row.getString(0)
+                final Map<String, Integer> expectation = result.get(primaryColumn)
+                cases.eachWithIndex { caseVal, index ->
+                    assertEquals(expectation.get(caseVal.name), row.getInt(index + 1))
+                }
+            }
+        })
     }
 
     String getDescription() {
@@ -84,7 +83,20 @@ class GroupedAggregationResult extends ExpectedRadReportResult {
         result
     }
 
-    static class Case {
+    static ForeachFunction<Row> validationFunction() {
+        new ForeachFunction<Row>() {
+            @Override
+            void call(Row row) throws Exception {
+                final String primaryColumn = row.getString(0)
+                final Map<String, Integer> expectation = result.get(primaryColumn)
+                cases.eachWithIndex { caseVal, index ->
+                    assertEquals(expectation.get(caseVal.name), row.getInt(index + 1))
+                }
+            }
+        }
+    }
+
+    static class Case implements Serializable {
         String name
         Function<RadiologyReport, Boolean> aggregationCriteria
 
