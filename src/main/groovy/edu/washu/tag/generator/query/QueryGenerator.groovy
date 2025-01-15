@@ -16,7 +16,7 @@ class QueryGenerator {
     private static final String TABLE_NAME = 'syntheticdata'
 
     private final List<TestQuery> queries = [
-        new TestQuery("SELECT COUNT(*) FROM ${TABLE_NAME} WHERE pid_8_administrative_sex='F'")
+        new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE pid_8_administrative_sex='F'")
             .expecting(new ExactNumberRadReportResult(sexFilter(Sex.FEMALE))),
         new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE zds_1_study_instance_uid='None'") // TODO: 'None'? Huh?
             .expecting(new ExactNumberDescriptionRadReportResult(
