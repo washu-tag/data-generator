@@ -69,10 +69,25 @@ tasks.register('try', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'edu.washu.tag.generator.QueryTester'
 
-    doFirst {
-        def options = org.apache.spark.launcher.JavaModuleOptions.DEFAULT_MODULE_OPTIONS
-        jvmArgs = options.join(' ')
-    }
+    // TODO: from https://github.com/apache/spark/blob/master/launcher/src/main/java/org/apache/spark/launcher/JavaModuleOptions.java
+    // is there not a better way?
+    jvmArgs([
+        '--add-opens=java.base/java.lang=ALL-UNNAMED',
+        '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED',
+        '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED',
+        '--add-opens=java.base/java.io=ALL-UNNAMED',
+        '--add-opens=java.base/java.net=ALL-UNNAMED',
+        '--add-opens=java.base/java.nio=ALL-UNNAMED',
+        '--add-opens=java.base/java.util=ALL-UNNAMED',
+        '--add-opens=java.base/java.util.concurrent=ALL-UNNAMED',
+        '--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED',
+        '--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED',
+        '--add-opens=java.base/sun.nio.ch=ALL-UNNAMED',
+        '--add-opens=java.base/sun.nio.cs=ALL-UNNAMED',
+        '--add-opens=java.base/sun.security.action=ALL-UNNAMED',
+        '--add-opens=java.base/sun.util.calendar=ALL-UNNAMED',
+        '--add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED'
+    ])
 }
 
 tasks.register('generateSpecs', JavaExec) {
