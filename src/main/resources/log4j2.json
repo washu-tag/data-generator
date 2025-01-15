@@ -16,6 +16,15 @@
             "ref": "CONSOLE"
           }
         ]
+      },
+      "Spark": {
+        "name": "org.apache.spark",
+        "level": "WARN",
+        "AppenderRef": [
+          {
+            "ref": "CONSOLE"
+          }
+        ]
       }
     }
   }
