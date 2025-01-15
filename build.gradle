@@ -1,3 +1,5 @@
+import org.apache.spark.launcher.JavaModuleOptions
+
 plugins {
     id 'groovy'
     id 'java'
@@ -70,7 +72,7 @@ tasks.register('try', JavaExec) {
     mainClass = 'edu.washu.tag.generator.QueryTester'
 
     // thanks to https://stackoverflow.com/a/76805763
-    jvmArgs = org.apache.spark.launcher.defaultModuleOptions()
+    jvmArgs = JavaModuleOptions.defaultModuleOptions()
 }
 
 tasks.register('generateSpecs', JavaExec) {
