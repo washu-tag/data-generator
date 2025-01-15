@@ -15,6 +15,16 @@ class GroupedAggregationResult extends ExpectedRadReportResult {
     private String primaryColumnName
     private Function<RadiologyReport, String> primaryColumnDerivation
     private List<Case> cases = []
+    private static final ForeachFunction<Row> validationFunction = new ForeachFunction<Row>() {
+        @Override
+        void call(Row row) throws Exception {
+            final String primaryColumn = row.getString(0)
+            final Map<String, Integer> expectation = result.get(primaryColumn)
+            cases.eachWithIndex { caseVal, index ->
+                assertEquals(expectation.get(caseVal.name), row.getInt(index + 1))
+            }
+        }
+    }
     
     GroupedAggregationResult(Function<RadiologyReport, Boolean> inclusionCriteria) {
         this.inclusionCriteria = inclusionCriteria
@@ -63,16 +73,7 @@ class GroupedAggregationResult extends ExpectedRadReportResult {
             queryResult.columns() as List<String>
         )
         assertEquals(result.size(), queryResult.count())
-        queryResult.foreach(new ForeachFunction<Row>() {
-            @Override
-            void call(Row row) throws Exception {
-                final String primaryColumn = row.getString(0)
-                final Map<String, Integer> expectation = result.get(primaryColumn)
-                cases.eachWithIndex { caseVal, index ->
-                    assertEquals(expectation.get(caseVal.name), row.getInt(index + 1))
-                }
-            }
-        })
+        queryResult.foreach(validationFunction)
     }
 
     String getDescription() {
