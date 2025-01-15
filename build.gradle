@@ -70,9 +70,7 @@ tasks.register('try', JavaExec) {
     mainClass = 'edu.washu.tag.generator.QueryTester'
 
     // thanks to https://stackoverflow.com/a/76805763
-    jvmArgs = [
-        '--add-opens=java.base/sun.nio.ch=ALL-UNNAMED'
-    ]
+    jvmArgs = org.apache.spark.launcher.defaultModuleOptions()
 }
 
 tasks.register('generateSpecs', JavaExec) {
