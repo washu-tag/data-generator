@@ -9,6 +9,14 @@
       }
     },
     "Loggers": {
+      "Root": {
+        "level": "INFO",
+        "AppenderRef": [
+          {
+            "ref": "CONSOLE"
+          }
+        ]
+      },
       "Logger": [
         {
           "name": "org.apache.spark",
@@ -18,15 +26,8 @@
               "ref": "CONSOLE"
             }
           ]
-        },
-        {
-          "level": "INFO",
-          "AppenderRef": [
-            {
-              "ref": "CONSOLE"
-            }
-          ]
-        }]
+        }
+      ]
     }
   }
 }
