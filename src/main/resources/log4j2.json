@@ -9,17 +9,17 @@
       }
     },
     "Loggers": {
-      "Root": {
-        "level": "INFO",
+      "SparkLogger": {
+        "name": "org.apache.spark",
+        "level": "WARN",
         "AppenderRef": [
           {
             "ref": "CONSOLE"
           }
         ]
       },
-      "Spark": {
-        "name": "org.apache.spark",
-        "level": "WARN",
+      "Root": {
+        "level": "INFO",
         "AppenderRef": [
           {
             "ref": "CONSOLE"
