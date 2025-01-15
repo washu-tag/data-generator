@@ -26,7 +26,7 @@ class QueryTester {
             .load('s3a://synthetic/delta/hl7_v3')
             .createOrReplaceTempView('syntheticdata')
 
-        final BatchSpecification batchSpecification = new ObjectMapper().readValue(new File('batches/batch_0.yaml'), BatchSpecification)
+        final BatchSpecification batchSpecification = new YamlObjectMapper().readValue(new File('batches/batch_0.yaml'), BatchSpecification)
         final QueryGenerator queryGenerator = new QueryGenerator()
         queryGenerator.processData(batchSpecification)
         queryGenerator.getTestQueries().each { testQuery ->
