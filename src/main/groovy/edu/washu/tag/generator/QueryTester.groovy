@@ -1,5 +1,7 @@
 package edu.washu.tag.generator
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import edu.washu.tag.generator.query.QueryGenerator
 import io.delta.sql.DeltaSparkSessionExtension
 import org.apache.spark.sql.SparkSession
 
@@ -24,7 +26,14 @@ class QueryTester {
             .load('s3a://synthetic/delta/hl7_v3')
             .createOrReplaceTempView('syntheticdata')
 
-        spark.sql("SELECT * FROM syntheticdata WHERE pid_8_administrative_sex='F'").count()
+        final BatchSpecification batchSpecification = new ObjectMapper().readValue(new File('batches/batch_0.yaml'), BatchSpecification)
+        final QueryGenerator queryGenerator = new QueryGenerator()
+        queryGenerator.processData(batchSpecification)
+        queryGenerator.getTestQueries().each { testQuery ->
+            testQuery.expectedQueryResult.validateResult(
+                spark.sql(testQuery.sql)
+            )
+        }
     }
 
 }
