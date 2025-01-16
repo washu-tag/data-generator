@@ -20,9 +20,6 @@ class QueryGenerator {
         new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_SEX}='F'")
             .expecting(
                 new ExactNumberRadReportResult(sexFilter(Sex.FEMALE))
-                    .withAdditionalValidation({ row ->
-                        assertEquals('F', row.getString(row.fieldIndex(COLUMN_SEX)))
-                    })
             ),
         new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE zds_1_study_instance_uid='None'") // TODO: 'None'? Huh?
             .expecting(new ExactNumberDescriptionRadReportResult(

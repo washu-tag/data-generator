@@ -35,6 +35,9 @@ class ExactNumberRadReportResult extends ExpectedRadReportResult {
     @Override
     void validateResult(Dataset<Row> result) {
         //logger.info('Validating result...')
+        withAdditionalValidation({ row ->
+            assertEquals('F', row.getString(row.fieldIndex('pid_8_administrative_sex')))
+        })
         assertEquals(expectedNumResults, result.count())
         if (additionalValidation != null) {
             result.foreach(additionalValidation)
