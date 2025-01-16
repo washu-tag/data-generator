@@ -22,7 +22,7 @@ class ExactNumberRadReportResult extends ExpectedRadReportResult {
     int expectedNumResults = 0
     private LoggableValidation additionalValidation
 
-    ExactNumberRadReportResult withAdditionalValidation(ForeachFunction<Row> validation) {
+    ExactNumberRadReportResult withAdditionalValidation(LoggableValidation validation) {
         additionalValidation = validation
         this
     }
