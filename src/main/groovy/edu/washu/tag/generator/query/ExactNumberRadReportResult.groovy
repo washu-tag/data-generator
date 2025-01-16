@@ -4,8 +4,8 @@ import edu.washu.tag.generator.metadata.RadiologyReport
 import org.apache.spark.api.java.function.ForeachFunction
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Row
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+//import org.slf4j.Logger
+//import org.slf4j.LoggerFactory
 
 import java.util.function.Function
 
@@ -13,7 +13,7 @@ import static org.testng.AssertJUnit.assertEquals
 
 class ExactNumberRadReportResult extends ExpectedRadReportResult {
 
-    private static final Logger logger = LoggerFactory.getLogger(ExactNumberRadReportResult)
+    //private static final Logger logger = LoggerFactory.getLogger(ExactNumberRadReportResult)
 
     ExactNumberRadReportResult(Function<RadiologyReport, Boolean> inclusionCriteria) {
         this.inclusionCriteria = inclusionCriteria
@@ -34,7 +34,7 @@ class ExactNumberRadReportResult extends ExpectedRadReportResult {
 
     @Override
     void validateResult(Dataset<Row> result) {
-        logger.info('Validating result...')
+        //logger.info('Validating result...')
         assertEquals(expectedNumResults, result.count())
         if (additionalValidation != null) {
             result.foreach(additionalValidation)
