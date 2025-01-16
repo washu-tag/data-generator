@@ -25,7 +25,7 @@ class FixedColumnsValidator implements LoggableValidation {
     void log() {
         logger.info(
             'Validating that each row satisfies: ' + fixedColumns.collect { column, fixedValues ->
-                "Column ${column} has value " + fixedValues.size() > 1 ? "from choices: ${fixedValues}" : "'${fixedValues[0]}'"
+                "Column ${column} has value " + (fixedValues.size() > 1 ? "from choices: ${fixedValues}" : "'${fixedValues[0]}'")
             }.join(', ')
         )
     }
