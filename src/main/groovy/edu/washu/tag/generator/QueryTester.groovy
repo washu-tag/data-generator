@@ -3,6 +3,7 @@ package edu.washu.tag.generator
 import com.fasterxml.jackson.databind.ObjectMapper
 import edu.washu.tag.generator.query.QueryGenerator
 import io.delta.sql.DeltaSparkSessionExtension
+import org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider
 import org.apache.spark.sql.SparkSession
 
 class QueryTester {
@@ -17,6 +18,7 @@ class QueryTester {
             .config('spark.hadoop.fs.s3a.secret.key', 'password')
             .config('spark.hadoop.fs.s3a.endpoint', 'http://10.27.107.3:9000')
             .config('spark.hadoop.fs.s3a.endpoint.region', 'us-east-1')
+            .config('spark.hadoop.fs.s3a.aws.credentials.provider', SimpleAWSCredentialsProvider.NAME)
             .getOrCreate()
 
         spark
