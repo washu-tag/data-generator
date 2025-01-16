@@ -31,6 +31,10 @@ class QueryGenerator {
             assertTrue(Integer.parseInt(row.getString(row.fieldIndex(COLUMN_DOB)).substring(0, 8)) > 19901231)
         }
     )
+    private static final String COLUMN_ORC_PLACER_ORDER_NUM = 'orc_2_placer_order_number'
+    private static final LoggableValidation VALIDATION_ORC_PLACER_ORDER_NUM = new FixedColumnsValidator()
+        .validating(COLUMN_ORC_PLACER_ORDER_NUM, 'None')
+        .validating(COLUMN_HL7_VERSION, '2.4')
 
     private final List<TestQuery> queries = [
         new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_SEX}='F'")
@@ -49,11 +53,11 @@ class QueryGenerator {
                     radiologyReport.patient.dateOfBirth.isAfter(LocalDate.of(1990, 12, 31))
                 }, 'corresponds to a patient born after 1990-12-31'
             ).withAdditionalValidation(VALIDATION_DOB)),
-        new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE orc_2_placer_order_number='None'") // TODO: 'None'? Huh?
+        new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_ORC_PLACER_ORDER_NUM}='None'") // TODO: 'None'? Huh?
             .expecting(new ExactNumberDescriptionRadReportResult(
                 matchesHl7Version('2.4'),
                 'has a null orc_2_placer_order_number column'
-            )),
+            ).withAdditionalValidation(VALIDATION_ORC_PLACER_ORDER_NUM)),
         new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE pid_8_administrative_sex='F' AND pid_10_race IN ('BLACK', 'B')")
             .expecting(new ExactNumberDescriptionRadReportResult(
                 { RadiologyReport radiologyReport ->
