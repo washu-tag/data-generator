@@ -26,6 +26,33 @@
               "ref": "CONSOLE"
             }
           ]
+        },
+        {
+          "name": "org.sparkproject",
+          "level": "WARN",
+          "AppenderRef": [
+            {
+              "ref": "CONSOLE"
+            }
+          ]
+        },
+        {
+          "name": "org.apache.hadoop",
+          "level": "WARN",
+          "AppenderRef": [
+            {
+              "ref": "CONSOLE"
+            }
+          ]
+        },
+        {
+          "name": "org.apache.parquet",
+          "level": "WARN",
+          "AppenderRef": [
+            {
+              "ref": "CONSOLE"
+            }
+          ]
         }
       ]
     }
