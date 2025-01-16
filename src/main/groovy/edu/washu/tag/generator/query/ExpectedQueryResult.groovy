@@ -4,7 +4,7 @@ import edu.washu.tag.generator.BatchSpecification
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Row
 
-interface ExpectedQueryResult {
+interface ExpectedQueryResult extends Serializable {
 
     void update(BatchSpecification batchSpecification)
 
