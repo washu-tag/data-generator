@@ -7,23 +7,15 @@ import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.enums.Race
 import edu.washu.tag.generator.metadata.enums.Sex
 import edu.washu.tag.generator.util.FileIOUtils
-import org.apache.spark.api.java.function.ForeachFunction
-import org.apache.spark.sql.Row
 
 import java.time.LocalDate
 import java.util.function.Function
-
-import static org.testng.AssertJUnit.assertEquals
 
 class QueryGenerator {
 
     private static final String TABLE_NAME = 'syntheticdata'
     private static final String COLUMN_SEX = 'pid_8_administrative_sex'
     private static final LoggableValidation VALIDATION_SEX = new FixedColumnsValidator(COLUMN_SEX, 'F')
-
-        { row ->
-        assertEquals('F', row.getString(row.fieldIndex(COLUMN_SEX)))
-    }
 
     private final List<TestQuery> queries = [
         new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_SEX}='F'")
