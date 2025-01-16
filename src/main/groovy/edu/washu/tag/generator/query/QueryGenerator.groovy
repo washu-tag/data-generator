@@ -14,10 +14,16 @@ import java.util.function.Function
 class QueryGenerator {
 
     private static final String TABLE_NAME = 'syntheticdata'
+    private static final String COLUMN_SEX = 'pid_8_administrative_sex'
 
     private final List<TestQuery> queries = [
-        new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE pid_8_administrative_sex='F'")
-            .expecting(new ExactNumberRadReportResult(sexFilter(Sex.FEMALE))),
+        new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_SEX}='F'")
+            .expecting(
+                new ExactNumberRadReportResult(sexFilter(Sex.FEMALE))
+                    .withAdditionalValidation({ row ->
+                        assertEquals('F', row.getString(row.fieldIndex(COLUMN_SEX)))
+                    })
+            ),
         new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE zds_1_study_instance_uid='None'") // TODO: 'None'? Huh?
             .expecting(new ExactNumberDescriptionRadReportResult(
                 matchesHl7Version('2.4'),

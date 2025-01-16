@@ -14,10 +14,9 @@ class QueryTester {
             .withExtensions({ new DeltaSparkSessionExtension() })
             .config('spark.sql.catalog.spark_catalog', 'org.apache.spark.sql.delta.catalog.DeltaCatalog')
             .config('spark.hadoop.fs.s3a.access.key', 'admin')
-            .config('spark.hadoop.fs.s3a.secret.key', 'password') \
-            .config('spark.hadoop.fs.s3a.endpoint', 'http://10.27.107.3:9000') \
-            .config('spark.hadoop.fs.s3a.endpoint.region', 'us-east-1') \
-            .config('spark.hadoop.fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider') \
+            .config('spark.hadoop.fs.s3a.secret.key', 'password')
+            .config('spark.hadoop.fs.s3a.endpoint', 'http://10.27.107.3:9000')
+            .config('spark.hadoop.fs.s3a.endpoint.region', 'us-east-1')
             .getOrCreate()
 
         spark
