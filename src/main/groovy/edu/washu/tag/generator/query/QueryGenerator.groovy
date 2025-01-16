@@ -35,6 +35,10 @@ class QueryGenerator {
     private static final LoggableValidation VALIDATION_ORC_PLACER_ORDER_NUM = new FixedColumnsValidator()
         .validating(COLUMN_ORC_PLACER_ORDER_NUM, 'None')
         .validating(COLUMN_HL7_VERSION, '2.4')
+    private static final String COLUMN_RACE = 'pid_10_race'
+    private static final LoggableValidation VALIDATION_RACE = new FixedColumnsValidator()
+        .validating(COLUMN_SEX, 'F')
+        .validating(COLUMN_RACE, ['B', 'BLACK'])
 
     private final List<TestQuery> queries = [
         new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_SEX}='F'")
@@ -58,12 +62,12 @@ class QueryGenerator {
                 matchesHl7Version('2.4'),
                 'has a null orc_2_placer_order_number column'
             ).withAdditionalValidation(VALIDATION_ORC_PLACER_ORDER_NUM)),
-        new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE pid_8_administrative_sex='F' AND pid_10_race IN ('BLACK', 'B')")
+        new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_SEX}='F' AND ${COLUMN_RACE} IN ('BLACK', 'B')")
             .expecting(new ExactNumberDescriptionRadReportResult(
                 { RadiologyReport radiologyReport ->
                     radiologyReport.patient.sex == Sex.FEMALE && radiologyReport.race == Race.BLACK
                 }, "corresponds to a female patient with a pid_10_race value of 'B' or 'BLACK'"
-            )),
+            ).withAdditionalValidation(VALIDATION_RACE)),
         primaryModalityBySex()
     ]
     
