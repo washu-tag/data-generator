@@ -5,8 +5,12 @@ import edu.washu.tag.generator.query.QueryGenerator
 import io.delta.sql.DeltaSparkSessionExtension
 import org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider
 import org.apache.spark.sql.SparkSession
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class QueryTester {
+
+    private static final Logger logger = LoggerFactory.getLogger(QueryTester)
 
     static void main(String[] args) {
         final SparkSession spark = SparkSession.builder()
@@ -31,6 +35,7 @@ class QueryTester {
         final QueryGenerator queryGenerator = new QueryGenerator()
         queryGenerator.processData(batchSpecification)
         queryGenerator.getTestQueries().each { testQuery ->
+            logger.info("Performing query with spark: ${testQuery.sql}")
             testQuery.expectedQueryResult.validateResult(
                 spark.sql(testQuery.sql)
             )
