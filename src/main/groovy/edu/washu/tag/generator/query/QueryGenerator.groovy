@@ -14,8 +14,13 @@ import java.util.function.Function
 class QueryGenerator {
 
     private static final String TABLE_NAME = 'syntheticdata'
+    private static final String COLUMN_HL7_VERSION = 'msh_12_version_id'
     private static final String COLUMN_SEX = 'pid_8_administrative_sex'
     private static final LoggableValidation VALIDATION_SEX = new FixedColumnsValidator(COLUMN_SEX, 'F')
+    private static final String COLUMN_STUDY_INSTANCE_UID = 'zds_1_study_instance_uid'
+    private static final LoggableValidation VALIDATION_STUDY_INSTANCE_UID = new FixedColumnsValidator()
+        .validating(COLUMN_STUDY_INSTANCE_UID, 'None')
+        .validating(COLUMN_HL7_VERSION, '2.4')
 
     private final List<TestQuery> queries = [
         new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_SEX}='F'")
@@ -27,7 +32,7 @@ class QueryGenerator {
             .expecting(new ExactNumberDescriptionRadReportResult(
                 matchesHl7Version('2.4'),
                 'has a null zds_1_study_instance_uid column'
-            )),
+            ).withAdditionalValidation(VALIDATION_STUDY_INSTANCE_UID)),
         new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE SUBSTRING(pid_7_date_time_of_birth, 1, 8) > '19901231'")
             .expecting(new ExactNumberDescriptionRadReportResult(
                 { RadiologyReport radiologyReport ->

@@ -21,6 +21,19 @@ class FixedColumnsValidator implements LoggableValidation {
         fixedColumns.put(columnName, permittedValues)
     }
 
+    FixedColumnsValidator() {
+
+    }
+
+    FixedColumnsValidator validating(String columnName, String fixedValue) {
+        validating(columnName, [fixedValue])
+    }
+
+    FixedColumnsValidator validating(String columnName, List<String> permittedValues) {
+        fixedColumns.put(columnName, permittedValues)
+        this
+    }
+
     @Override
     void log() {
         logger.info(
@@ -43,4 +56,5 @@ class FixedColumnsValidator implements LoggableValidation {
             }
         }
     }
+
 }
