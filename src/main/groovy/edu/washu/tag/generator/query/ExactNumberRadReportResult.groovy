@@ -11,7 +11,7 @@ import java.util.function.Function
 
 import static org.testng.AssertJUnit.assertEquals
 
-class ExactNumberRadReportResult extends ExpectedRadReportResult {
+class ExactNumberRadReportResult extends ExpectedRadReportResult implements Serializable {
 
     private static final Logger logger = LoggerFactory.getLogger(ExactNumberRadReportResult)
 
