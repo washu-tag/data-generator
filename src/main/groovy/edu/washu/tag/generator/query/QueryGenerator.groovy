@@ -7,6 +7,8 @@ import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.enums.Race
 import edu.washu.tag.generator.metadata.enums.Sex
 import edu.washu.tag.generator.util.FileIOUtils
+import org.apache.spark.api.java.function.ForeachFunction
+import org.apache.spark.sql.Row
 
 import java.time.LocalDate
 import java.util.function.Function
@@ -15,11 +17,15 @@ class QueryGenerator {
 
     private static final String TABLE_NAME = 'syntheticdata'
     private static final String COLUMN_SEX = 'pid_8_administrative_sex'
+    private static final ForeachFunction<Row> VALIDATION_SEX = { row ->
+        assertEquals('F', row.getString(row.fieldIndex(COLUMN_SEX)))
+    }
 
     private final List<TestQuery> queries = [
         new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_SEX}='F'")
             .expecting(
                 new ExactNumberRadReportResult(sexFilter(Sex.FEMALE))
+                    .withAdditionalValidation(VALIDATION_SEX)
             ),
         new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE zds_1_study_instance_uid='None'") // TODO: 'None'? Huh?
             .expecting(new ExactNumberDescriptionRadReportResult(
