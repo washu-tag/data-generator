@@ -19,7 +19,9 @@ class QueryGenerator {
 
     private static final String TABLE_NAME = 'syntheticdata'
     private static final String COLUMN_SEX = 'pid_8_administrative_sex'
-    private static final ForeachFunction<Row> VALIDATION_SEX = { row ->
+    private static final LoggableValidation VALIDATION_SEX = new FixedColumnsValidator(COLUMN_SEX, 'F')
+
+        { row ->
         assertEquals('F', row.getString(row.fieldIndex(COLUMN_SEX)))
     }
 

@@ -20,7 +20,7 @@ class ExactNumberRadReportResult extends ExpectedRadReportResult {
     }
 
     int expectedNumResults = 0
-    private ForeachFunction<Row> additionalValidation
+    private LoggableValidation additionalValidation
 
     ExactNumberRadReportResult withAdditionalValidation(ForeachFunction<Row> validation) {
         additionalValidation = validation
@@ -34,10 +34,11 @@ class ExactNumberRadReportResult extends ExpectedRadReportResult {
 
     @Override
     void validateResult(Dataset<Row> result) {
-        logger.info('Validating result...')
+        logger.info("Validating count of result to be ${expectedNumResults}")
         assertEquals(expectedNumResults, result.count())
         if (additionalValidation != null) {
-            result.foreach(additionalValidation)
+            additionalValidation.log()
+            result.foreach(additionalValidation.validation())
         }
     }
 
