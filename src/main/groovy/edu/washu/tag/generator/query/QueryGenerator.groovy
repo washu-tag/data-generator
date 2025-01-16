@@ -13,6 +13,8 @@ import org.apache.spark.sql.Row
 import java.time.LocalDate
 import java.util.function.Function
 
+import static org.testng.AssertJUnit.assertEquals
+
 class QueryGenerator {
 
     private static final String TABLE_NAME = 'syntheticdata'
