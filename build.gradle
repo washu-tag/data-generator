@@ -22,26 +22,6 @@ repositories {
     }
 }
 
-// TODO: from https://github.com/apache/spark/blob/master/launcher/src/main/java/org/apache/spark/launcher/JavaModuleOptions.java
-// is there not a better way?
-final sparkJvmArgs = [
-    '--add-opens=java.base/java.lang=ALL-UNNAMED',
-    '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED',
-    '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED',
-    '--add-opens=java.base/java.io=ALL-UNNAMED',
-    '--add-opens=java.base/java.net=ALL-UNNAMED',
-    '--add-opens=java.base/java.nio=ALL-UNNAMED',
-    '--add-opens=java.base/java.util=ALL-UNNAMED',
-    '--add-opens=java.base/java.util.concurrent=ALL-UNNAMED',
-    '--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED',
-    '--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED',
-    '--add-opens=java.base/sun.nio.ch=ALL-UNNAMED',
-    '--add-opens=java.base/sun.nio.cs=ALL-UNNAMED',
-    '--add-opens=java.base/sun.security.action=ALL-UNNAMED',
-    '--add-opens=java.base/sun.util.calendar=ALL-UNNAMED',
-    '--add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED'
-]
-
 final String vGroovy = '5.0.0-alpha-11'
 final String vQuerySpec = '1.0-SNAPSHOT'
 final String vJackson = '2.18.0'
@@ -52,6 +32,7 @@ final String vDcm4che = '5.33.0'
 final String vAzureOpenai = '1.0.0-beta.12'
 final String vCommonsMath3 = '3.6.1'
 final String vGpars = '1.2.1'
+final String vTestNg = '7.9.0'
 
 configurations {
     all*.exclude group: 'ch.qos.logback', module: 'logback-classic'
@@ -70,6 +51,7 @@ dependencies {
     implementation("com.azure:azure-ai-openai:${vAzureOpenai}")
     implementation("org.apache.commons:commons-math3:${vCommonsMath3}")
     implementation("org.codehaus.gpars:gpars:${vGpars}")
+    implementation("org.testng:testng:${vTestNg}")
 }
 
 java {
@@ -100,13 +82,6 @@ tasks.register('writeFiles', JavaExec) {
         propertyWithDefault('writeFiles', true),
         propertyWithDefault('generateTestQueries', false)
     )
-}
-
-tasks.register('queryTest', JavaExec) {
-    classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'edu.washu.tag.generator.QueryTester'
-
-    jvmArgs(sparkJvmArgs)
 }
 
 tasks.register('queryExport', JavaExec) {
