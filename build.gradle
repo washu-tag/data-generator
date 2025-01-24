@@ -7,13 +7,18 @@ group = 'edu.washu.tag'
 version = '1.0-SNAPSHOT'
 
 repositories {
-    mavenLocal()
     mavenCentral()
     maven {
         url 'https://maven.dcm4che.org/'
     }
     maven {
         url 'https://raw.github.com/nroduit/mvn-repo/master/' // needed for dcm4che
+    }
+    maven {
+        url 'https://nrgxnat.jfrog.io/nrgxnat/libs-release'
+    }
+    maven {
+        url 'https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot'
     }
 }
 

@@ -20,4 +20,5 @@ jobs:
       - name: Publish package
         run: cd query_test_spec && ./gradlew publish
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_USERNAME: ${{ secrets.XNAT_JFROG_USER }}
+          MAVEN_PASSWORD: ${{ secrets.XNAT_JFROG_TOKEN }}
