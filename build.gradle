@@ -7,6 +7,7 @@ group = 'edu.washu.tag'
 version = '1.0-SNAPSHOT'
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven {
         url 'https://maven.dcm4che.org/'
@@ -16,19 +17,36 @@ repositories {
     }
 }
 
+// TODO: from https://github.com/apache/spark/blob/master/launcher/src/main/java/org/apache/spark/launcher/JavaModuleOptions.java
+// is there not a better way?
+final sparkJvmArgs = [
+    '--add-opens=java.base/java.lang=ALL-UNNAMED',
+    '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED',
+    '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED',
+    '--add-opens=java.base/java.io=ALL-UNNAMED',
+    '--add-opens=java.base/java.net=ALL-UNNAMED',
+    '--add-opens=java.base/java.nio=ALL-UNNAMED',
+    '--add-opens=java.base/java.util=ALL-UNNAMED',
+    '--add-opens=java.base/java.util.concurrent=ALL-UNNAMED',
+    '--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED',
+    '--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED',
+    '--add-opens=java.base/sun.nio.ch=ALL-UNNAMED',
+    '--add-opens=java.base/sun.nio.cs=ALL-UNNAMED',
+    '--add-opens=java.base/sun.security.action=ALL-UNNAMED',
+    '--add-opens=java.base/sun.util.calendar=ALL-UNNAMED',
+    '--add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED'
+]
+
 final String vGroovy = '5.0.0-alpha-11'
+final String vQuerySpec = '1.0-SNAPSHOT'
 final String vJackson = '2.18.0'
 final String vHapiHl7V2 = '2.5.1'
 final String vCommonsIo = '2.17.0'
 final String vCommonsLang3 = '3.17.0'
 final String vDcm4che = '5.33.0'
 final String vAzureOpenai = '1.0.0-beta.12'
-final String vSlf4j = '2.0.16'
-final String vLog4j2Bridge = '2.24.2'
 final String vCommonsMath3 = '3.6.1'
 final String vGpars = '1.2.1'
-final String vSparkSql = '3.5.4'
-final String vTestNg = '7.9.0'
 
 configurations {
     all*.exclude group: 'ch.qos.logback', module: 'logback-classic'
@@ -37,7 +55,7 @@ configurations {
 
 dependencies {
     implementation("org.apache.groovy:groovy:${vGroovy}")
-    implementation("com.fasterxml.jackson.core:jackson-databind:${vJackson}")
+    implementation("edu.washu.tag:query-spec:${vQuerySpec}")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${vJackson}")
     implementation("ca.uhn.hapi:hapi-base:${vHapiHl7V2}")
     implementation("ca.uhn.hapi:hapi-structures-v281:${vHapiHl7V2}")
@@ -45,14 +63,8 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:${vCommonsLang3}")
     implementation("org.dcm4che.tool:dcm4che-tool-storescu:${vDcm4che}")
     implementation("com.azure:azure-ai-openai:${vAzureOpenai}")
-    implementation("org.slf4j:slf4j-api:${vSlf4j}")
-    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:${vLog4j2Bridge}")
     implementation("org.apache.commons:commons-math3:${vCommonsMath3}")
     implementation("org.codehaus.gpars:gpars:${vGpars}")
-    implementation("org.apache.spark:spark-sql_2.12:${vSparkSql}")
-    implementation("io.delta:delta-spark_2.12:3.1.0")
-    implementation("org.apache.hadoop:hadoop-aws:3.2.0")
-    implementation("org.testng:testng:${vTestNg}")
 }
 
 java {
@@ -63,31 +75,6 @@ test {
     useTestNG {
 
     }
-}
-
-tasks.register('try', JavaExec) {
-    classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'edu.washu.tag.generator.QueryTester'
-
-    // TODO: from https://github.com/apache/spark/blob/master/launcher/src/main/java/org/apache/spark/launcher/JavaModuleOptions.java
-    // is there not a better way?
-    jvmArgs([
-        '--add-opens=java.base/java.lang=ALL-UNNAMED',
-        '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED',
-        '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED',
-        '--add-opens=java.base/java.io=ALL-UNNAMED',
-        '--add-opens=java.base/java.net=ALL-UNNAMED',
-        '--add-opens=java.base/java.nio=ALL-UNNAMED',
-        '--add-opens=java.base/java.util=ALL-UNNAMED',
-        '--add-opens=java.base/java.util.concurrent=ALL-UNNAMED',
-        '--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED',
-        '--add-opens=java.base/jdk.internal.ref=ALL-UNNAMED',
-        '--add-opens=java.base/sun.nio.ch=ALL-UNNAMED',
-        '--add-opens=java.base/sun.nio.cs=ALL-UNNAMED',
-        '--add-opens=java.base/sun.security.action=ALL-UNNAMED',
-        '--add-opens=java.base/sun.util.calendar=ALL-UNNAMED',
-        '--add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED'
-    ])
 }
 
 tasks.register('generateSpecs', JavaExec) {
@@ -103,21 +90,41 @@ tasks.register('generateSpecs', JavaExec) {
 tasks.register('writeFiles', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'edu.washu.tag.generator.BatchProcessor'
-    final String fullSpec = 'batchSpecs'
-    final String shortcut = 'standardSpecs'
-    final List<Object> arguments = []
-    if (project.hasProperty(fullSpec)) {
-        arguments << project.property(fullSpec)
-    } else if (project.hasProperty(shortcut)) {
-        arguments << (0 .. Integer.parseInt(project.property(shortcut) as String)).collect {
-            "batches/batch_${it}.yaml"
-        }.join(',')
-    }
-    arguments << propertyWithDefault('writeFiles', true)
-    arguments << propertyWithDefault('generateTestQueries', false)
-    args(arguments.toArray())
+    args(
+        resolveBatchArg(),
+        propertyWithDefault('writeFiles', true),
+        propertyWithDefault('generateTestQueries', false)
+    )
+}
+
+tasks.register('queryTest', JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'edu.washu.tag.generator.QueryTester'
+
+    jvmArgs(sparkJvmArgs)
+}
+
+tasks.register('queryExport', JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'edu.washu.tag.generator.QueryExporter'
+
+    args(resolveBatchArg())
 }
 
 Object propertyWithDefault(String propName, Object defaultVal) {
     project.hasProperty(propName) ? project.property(propName) : defaultVal
+}
+
+String resolveBatchArg() {
+    final String fullSpec = 'batchSpecs'
+    final String shortcut = 'standardSpecs'
+    if (project.hasProperty(fullSpec)) {
+        project.property(fullSpec)
+    } else if (project.hasProperty(shortcut)) {
+        (0 .. Integer.parseInt(project.property(shortcut) as String)).collect {
+            "batches/batch_${it}.yaml"
+        }.join(',')
+    } else {
+        throw new RuntimeException("-P${fullSpec} or -P${shortcut} must be specified")
+    }
 }

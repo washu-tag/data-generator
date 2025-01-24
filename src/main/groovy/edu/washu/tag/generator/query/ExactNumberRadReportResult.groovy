@@ -1,29 +1,27 @@
 package edu.washu.tag.generator.query
 
 import edu.washu.tag.generator.metadata.RadiologyReport
-import org.apache.spark.api.java.function.ForeachFunction
-import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.Row
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import edu.washu.tag.validation.ExactNumberObjectsResult
+import edu.washu.tag.validation.ExpectedQueryResult
+import edu.washu.tag.validation.LoggableValidation
 
 import java.util.function.Function
 
-import static org.testng.AssertJUnit.assertEquals
+class ExactNumberRadReportResult extends ExpectedRadReportQueryProcessor {
 
-class ExactNumberRadReportResult extends ExpectedRadReportResult {
-
-    private static final Logger logger = LoggerFactory.getLogger(ExactNumberRadReportResult)
+    int expectedNumResults = 0
+    LoggableValidation additionalValidation
 
     ExactNumberRadReportResult(Function<RadiologyReport, Boolean> inclusionCriteria) {
         this.inclusionCriteria = inclusionCriteria
     }
 
-    int expectedNumResults = 0
-    private LoggableValidation additionalValidation
+    ExactNumberRadReportResult() {
 
-    ExactNumberRadReportResult withAdditionalValidation(LoggableValidation validation) {
-        additionalValidation = validation
+    }
+
+    ExactNumberRadReportResult withAdditionalValidation(LoggableValidation additionalValidation) {
+        this.additionalValidation = additionalValidation
         this
     }
 
@@ -33,13 +31,11 @@ class ExactNumberRadReportResult extends ExpectedRadReportResult {
     }
 
     @Override
-    void validateResult(Dataset<Row> result) {
-        logger.info("Validating count of result to be ${expectedNumResults}")
-        assertEquals(expectedNumResults, result.count())
-        if (additionalValidation != null) {
-            additionalValidation.log()
-            result.foreach(additionalValidation.validation())
-        }
+    ExpectedQueryResult outputExpectation() {
+        new ExactNumberObjectsResult(
+            expectedNumResults: expectedNumResults,
+            additionalValidation: additionalValidation
+        )
     }
 
 }

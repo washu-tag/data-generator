@@ -1,6 +1,7 @@
 package edu.washu.tag.generator
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import edu.washu.tag.QuerySourceData
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.util.TimeUtils
@@ -9,7 +10,7 @@ import groovyx.gpars.GParsPool
 import java.nio.file.Path
 import java.time.LocalDateTime
 
-class BatchSpecification {
+class BatchSpecification implements QuerySourceData {
 
     int id
     List<Patient> patients = []

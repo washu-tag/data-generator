@@ -26,8 +26,7 @@ class BatchProcessor {
         final YamlObjectMapper objectMapper = new YamlObjectMapper()
         final File dicomOutput = new File('dicom_output')
         final File hl7Output = new File('hl7')
-        final File testQueryOutput = new File('test_queries')
-        [dicomOutput, hl7Output, testQueryOutput].each { outputDir ->
+        [dicomOutput, hl7Output].each { outputDir ->
             if (!outputDir.exists()) {
                 outputDir.mkdir()
             }
@@ -56,7 +55,7 @@ class BatchProcessor {
         }
 
         if (generateTests) {
-            queryGenerator.writeQueries(testQueryOutput)
+            queryGenerator.writeQueries()
         }
     }
 

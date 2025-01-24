@@ -1,4 +1,4 @@
-package edu.washu.tag.generator.query
+package edu.washu.tag.validation
 
 import org.apache.spark.api.java.function.ForeachFunction
 import org.apache.spark.sql.Row
@@ -10,7 +10,7 @@ import static org.testng.AssertJUnit.assertTrue
 
 class FixedColumnsValidator implements LoggableValidation {
 
-    private Map<String, List<String>> fixedColumns = [:]
+    Map<String, List<String>> fixedColumns = [:]
     private static final Logger logger = LoggerFactory.getLogger(FixedColumnsValidator)
 
     FixedColumnsValidator(String columnName, String fixedValue) {
