@@ -1,6 +1,7 @@
 plugins {
     id 'groovy'
     id 'java'
+    id 'java-library'
     id 'maven-publish'
 }
 
@@ -36,12 +37,12 @@ configurations {
 }
 
 dependencies {
-    implementation("org.apache.groovy:groovy:${vGroovy}")
-    implementation("com.fasterxml.jackson.core:jackson-databind:${vJackson}")
-    implementation("org.slf4j:slf4j-api:${vSlf4j}")
+    api("org.apache.groovy:groovy:${vGroovy}")
+    api("com.fasterxml.jackson.core:jackson-databind:${vJackson}")
+    api("org.slf4j:slf4j-api:${vSlf4j}")
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:${vLog4j2Bridge}")
     implementation("org.apache.spark:spark-sql_2.12:${vSparkSql}")
-    implementation("org.testng:testng:${vTestNg}")
+    api("org.testng:testng:${vTestNg}")
 }
 
 java {
