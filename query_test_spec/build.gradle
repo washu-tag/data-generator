@@ -27,7 +27,6 @@ repositories {
 final String vGroovy = '5.0.0-alpha-11'
 final String vJackson = '2.18.0'
 final String vSlf4j = '2.0.16'
-final String vLog4j2Bridge = '2.24.2'
 final String vSparkSql = '3.5.4'
 final String vTestNg = '7.9.0'
 
@@ -40,7 +39,6 @@ dependencies {
     api("org.apache.groovy:groovy:${vGroovy}")
     api("com.fasterxml.jackson.core:jackson-databind:${vJackson}")
     api("org.slf4j:slf4j-api:${vSlf4j}")
-    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:${vLog4j2Bridge}")
     implementation("org.apache.spark:spark-sql_2.12:${vSparkSql}")
     api("org.testng:testng:${vTestNg}")
 }
