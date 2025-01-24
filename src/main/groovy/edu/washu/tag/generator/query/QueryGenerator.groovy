@@ -7,7 +7,7 @@ import edu.washu.tag.generator.hl7.v2.segment.ObrGenerator
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.enums.Race
 import edu.washu.tag.generator.metadata.enums.Sex
-import edu.washu.tag.generator.util.FileIOUtils
+import edu.washu.tag.util.FileIOUtils
 import edu.washu.tag.generator.util.TimeUtils
 import edu.washu.tag.validation.DateComparisonValidation
 import edu.washu.tag.validation.FixedColumnsValidator

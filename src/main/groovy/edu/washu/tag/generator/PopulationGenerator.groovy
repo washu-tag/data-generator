@@ -2,7 +2,7 @@ package edu.washu.tag.generator
 
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.patient.*
-import edu.washu.tag.generator.util.FileIOUtils
+import edu.washu.tag.util.FileIOUtils
 import edu.washu.tag.generator.util.RandomGenUtils
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 

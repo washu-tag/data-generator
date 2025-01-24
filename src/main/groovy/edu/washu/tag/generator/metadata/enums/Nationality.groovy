@@ -1,6 +1,6 @@
 package edu.washu.tag.generator.metadata.enums
 
-import edu.washu.tag.generator.util.FileIOUtils
+import edu.washu.tag.util.FileIOUtils
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import edu.washu.tag.generator.metadata.Person
 import edu.washu.tag.generator.util.RandomGenUtils
