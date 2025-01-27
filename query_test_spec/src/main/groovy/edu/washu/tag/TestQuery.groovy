@@ -10,7 +10,8 @@ class TestQuery<X extends QuerySourceData> {
     String id
     @JsonIgnore QuerySourceDataProcessor<X> querySourceDataProcessor
 
-    TestQuery(String sql) {
+    TestQuery(String id, String sql) {
+        this.id = id
         this.sql = sql
     }
 
