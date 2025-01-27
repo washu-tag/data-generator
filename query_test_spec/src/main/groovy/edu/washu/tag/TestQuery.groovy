@@ -7,6 +7,7 @@ class TestQuery<X extends QuerySourceData> {
 
     ExpectedQueryResult expectedQueryResult
     String sql
+    String id
     @JsonIgnore QuerySourceDataProcessor<X> querySourceDataProcessor
 
     TestQuery(String sql) {

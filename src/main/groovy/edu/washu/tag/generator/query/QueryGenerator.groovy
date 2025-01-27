@@ -2,6 +2,7 @@ package edu.washu.tag.generator.query
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import edu.washu.tag.TestQuery
+import edu.washu.tag.TestQuerySuite
 import edu.washu.tag.generator.BatchSpecification
 import edu.washu.tag.generator.hl7.v2.segment.ObrGenerator
 import edu.washu.tag.generator.metadata.RadiologyReport
@@ -98,7 +99,10 @@ class QueryGenerator {
             .writerWithDefaultPrettyPrinter()
             .writeValue(
                 new File(testQueryOutput, "queries_${TimeUtils.HL7_FORMATTER_DATETIME.format(LocalDateTime.now())}.json"),
-                queries
+                new TestQuerySuite(
+                    viewName: TABLE_NAME,
+                    testQueries: queries
+                )
             )
     }
 
