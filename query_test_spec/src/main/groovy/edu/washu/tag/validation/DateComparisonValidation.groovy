@@ -6,10 +6,10 @@ import org.apache.spark.api.java.function.ForeachFunction
 import org.apache.spark.sql.Row
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
-import java.util.function.BiFunction
-
-import static org.testng.AssertJUnit.assertTrue
+import static org.assertj.core.api.Assertions.assertThat
 
 @Builder(builderStrategy = SimpleStrategy, prefix = '')
 class DateComparisonValidation implements LoggableValidation {
@@ -29,25 +29,55 @@ class DateComparisonValidation implements LoggableValidation {
     @Override
     ForeachFunction<Row> validation() {
         { Row row ->
-            final String actualVal = row.getString(row.fieldIndex(columnName))
-            final String transformed = truncation > 0 ? actualVal.substring(0, truncation) : actualVal
-            assertTrue(comparisonOperator.compare.apply(Integer.parseInt(transformed), comparisonValue))
+            final String rawActualVal = row.getString(row.fieldIndex(columnName))
+            final String transformed = truncation > 0 ? rawActualVal.substring(0, truncation) : rawActualVal
+            comparisonOperator.compare(parse(transformed), parse(String.valueOf(comparisonValue)))
         }
     }
 
-    static enum ComparisonOperator {
-        EQ ({ a, b -> a == b }),
-        NEQ ({ a, b -> a != b }),
-        GT ({ a, b -> a > b }),
-        GTE ({ a, b -> a >= b }),
-        LT ({ a, b -> a < b }),
-        LTE ({ a, b -> a <= b })
-
-        BiFunction<Integer, Integer, Boolean> compare
-
-        ComparisonOperator(BiFunction<Integer, Integer, Boolean> compare) {
-            this.compare = compare
+    enum ComparisonOperator {
+        EQ {
+            @Override
+            void compare(LocalDate actualDate, LocalDate anchorDate) {
+                assertThat(actualDate).isEqualTo(anchorDate)
+            }
+        },
+        NEQ {
+            @Override
+            void compare(LocalDate actualDate, LocalDate anchorDate) {
+                assertThat(actualDate).isNotEqualTo(anchorDate)
+            }
+        },
+        GT {
+            @Override
+            void compare(LocalDate actualDate, LocalDate anchorDate) {
+                assertThat(actualDate).isAfter(anchorDate)
+            }
+        },
+        GTE {
+            @Override
+            void compare(LocalDate actualDate, LocalDate anchorDate) {
+                assertThat(actualDate).isAfterOrEqualTo(anchorDate)
+            }
+        },
+        LT {
+            @Override
+            void compare(LocalDate actualDate, LocalDate anchorDate) {
+                assertThat(actualDate).isBefore(anchorDate)
+            }
+        },
+        LTE {
+            @Override
+            void compare(LocalDate actualDate, LocalDate anchorDate) {
+                assertThat(actualDate).isBeforeOrEqualTo(anchorDate)
+            }
         }
+
+        abstract void compare(LocalDate actualDate, LocalDate anchorDate)
+    }
+
+    private static LocalDate parse(String date) {
+        LocalDate.parse(date, DateTimeFormatter.BASIC_ISO_DATE)
     }
 
 }

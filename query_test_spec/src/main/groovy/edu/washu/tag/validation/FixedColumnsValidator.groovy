@@ -5,8 +5,7 @@ import org.apache.spark.sql.Row
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import static org.testng.AssertJUnit.assertEquals
-import static org.testng.AssertJUnit.assertTrue
+import static org.assertj.core.api.Assertions.assertThat
 
 class FixedColumnsValidator implements LoggableValidation {
 
@@ -47,12 +46,7 @@ class FixedColumnsValidator implements LoggableValidation {
     ForeachFunction<Row> validation() {
         { Row row ->
             fixedColumns.each { columnName, expectedValues ->
-                final String actualValue = row.getString(row.fieldIndex(columnName))
-                if (expectedValues.size() > 1) {
-                    assertTrue(actualValue in expectedValues)
-                } else {
-                    assertEquals(expectedValues[0], actualValue)
-                }
+                assertThat(row.getString(row.fieldIndex(columnName))).isIn(expectedValues)
             }
         }
     }

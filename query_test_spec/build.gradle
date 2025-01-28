@@ -29,6 +29,7 @@ final String vJackson = '2.18.0'
 final String vSlf4j = '2.0.16'
 final String vSparkSql = '3.5.4'
 final String vTestNg = '7.9.0'
+final String vAssertJ = '3.27.3'
 
 configurations {
     all*.exclude group: 'ch.qos.logback', module: 'logback-classic'
@@ -41,6 +42,7 @@ dependencies {
     api("org.slf4j:slf4j-api:${vSlf4j}")
     implementation("org.apache.spark:spark-sql_2.12:${vSparkSql}")
     api("org.testng:testng:${vTestNg}")
+    api("org.assertj:assertj-core:${vAssertJ}")
 }
 
 java {

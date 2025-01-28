@@ -5,7 +5,7 @@ import org.apache.spark.sql.Row
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import static org.testng.AssertJUnit.assertEquals
+import static org.assertj.core.api.Assertions.assertThat
 
 class ExactNumberObjectsResult implements ExpectedQueryResult {
 
@@ -22,7 +22,7 @@ class ExactNumberObjectsResult implements ExpectedQueryResult {
     @Override
     void validateResult(Dataset<Row> result) {
         logger.info("Validating count of result to be ${expectedNumResults}")
-        assertEquals(expectedNumResults, result.count())
+        assertThat(result.count()).as('result count').isEqualTo(expectedNumResults)
         if (additionalValidation != null) {
             additionalValidation.log()
             result.foreach(additionalValidation.validation())

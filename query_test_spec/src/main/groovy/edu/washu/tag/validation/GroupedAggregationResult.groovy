@@ -6,7 +6,7 @@ import org.apache.spark.sql.Row
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import static org.testng.AssertJUnit.assertEquals
+import static org.assertj.core.api.Assertions.assertThat
 
 class GroupedAggregationResult implements ExpectedQueryResult {
 
@@ -34,12 +34,9 @@ class GroupedAggregationResult implements ExpectedQueryResult {
     void validateResult(Dataset<Row> queryResult) {
         final List<String> expectedColumns = [(primaryColumnName)] + secondaryColumns
         logger.info("Validating that the query result columns are: ${expectedColumns}...")
-        assertEquals(
-            expectedColumns,
-            queryResult.columns() as List<String>
-        )
+        assertThat(queryResult.columns() as List<String>).isEqualTo(expectedColumns)
         logger.info("Validating that the result has ${result.size()} rows...")
-        assertEquals(result.size(), queryResult.count())
+        assertThat(queryResult.count()).as("query result size").isEqualTo(result.size())
         queryResult.foreach(new ForeachFunction<Row>() {
             @Override
             void call(Row row) throws Exception {
@@ -47,7 +44,9 @@ class GroupedAggregationResult implements ExpectedQueryResult {
                 final Map<String, Integer> expectation = result.get(primaryColumn)
                 logger.info("Validating counts for ${primaryColumn}")
                 secondaryColumns.eachWithIndex { columnName, index ->
-                    assertEquals(expectation.get(columnName), row.getLong(index + 1).intValue())
+                    assertThat(row.getLong(index + 1).intValue())
+                            .as("count for ${primaryColumn} with column ${columnName}")
+                            .isEqualTo(expectation.get(columnName))
                 }
             }
         })
