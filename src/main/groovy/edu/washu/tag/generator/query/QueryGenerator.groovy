@@ -52,29 +52,29 @@ class QueryGenerator {
     }
 
     private final List<TestQuery<BatchSpecification>> queries = [
-        new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_SEX}='F'")
+        new TestQuery('sex_equals', "SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_SEX}='F'")
             .withDataProcessor(
                 new ExactNumberRadReportResult(sexFilter(Sex.FEMALE))
                     .withAdditionalValidation(VALIDATION_SEX)
             ),
-        new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_STUDY_INSTANCE_UID}='None'") // TODO: 'None'? Huh?
+        new TestQuery('uid_missing', "SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_STUDY_INSTANCE_UID}='None'") // TODO: 'None'? Huh?
             .withDataProcessor(
                 new ExactNumberRadReportResult(matchesHl7Version('2.4'))
                     .withAdditionalValidation(VALIDATION_STUDY_INSTANCE_UID)
             ),
-        new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE SUBSTRING(${COLUMN_DOB}, 1, 8) > '19901231'")
+        new TestQuery('dob_greater', "SELECT * FROM ${TABLE_NAME} WHERE SUBSTRING(${COLUMN_DOB}, 1, 8) > '19901231'")
             .withDataProcessor(
                 new ExactNumberRadReportResult(
                     { RadiologyReport radiologyReport ->
                         radiologyReport.patient.dateOfBirth.isAfter(LocalDate.of(1990, 12, 31))
                     }
             ).withAdditionalValidation(VALIDATION_DOB)),
-        new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_ORC_PLACER_ORDER_NUM}='None'") // TODO: 'None'? Huh?
+        new TestQuery('placer_order_missing', "SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_ORC_PLACER_ORDER_NUM}='None'") // TODO: 'None'? Huh?
             .withDataProcessor(
                 new ExactNumberRadReportResult(matchesHl7Version('2.4'))
                     .withAdditionalValidation(VALIDATION_ORC_PLACER_ORDER_NUM)
             ),
-        new TestQuery("SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_SEX}='F' AND ${COLUMN_RACE} IN ('BLACK', 'B')")
+        new TestQuery('sex_and_race_list_inclusion', "SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_SEX}='F' AND ${COLUMN_RACE} IN ('BLACK', 'B')")
             .withDataProcessor(
                 new ExactNumberRadReportResult(
                     { RadiologyReport radiologyReport ->
@@ -107,7 +107,7 @@ class QueryGenerator {
     }
 
     private static TestQuery primaryModalityBySex() {
-        new TestQuery(FileIOUtils.readResource('modality_query.sql'))
+        new TestQuery('modality_grouping', FileIOUtils.readResource('modality_query.sql'))
             .withDataProcessor(
                 new GroupedAggregationRadReportResult(matchesHl7Version('2.7'))
                     .primaryColumn('primary_modality')
