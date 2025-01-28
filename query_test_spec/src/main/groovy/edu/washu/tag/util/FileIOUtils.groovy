@@ -1,7 +1,8 @@
-package edu.washu.tag.generator.util
+package edu.washu.tag.util
+
+import org.apache.commons.io.IOUtils
 
 import java.nio.charset.StandardCharsets
-import org.apache.commons.io.IOUtils
 
 class FileIOUtils {
 

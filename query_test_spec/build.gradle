@@ -1,0 +1,67 @@
+plugins {
+    id 'groovy'
+    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group = 'edu.washu.tag'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://maven.dcm4che.org/'
+    }
+    maven {
+        url 'https://raw.github.com/nroduit/mvn-repo/master/' // needed for dcm4che
+    }
+    maven {
+        url 'https://nrgxnat.jfrog.io/nrgxnat/libs-release'
+    }
+    maven {
+        url 'https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot'
+    }
+}
+
+final String vGroovy = '5.0.0-alpha-11'
+final String vJackson = '2.18.0'
+final String vSlf4j = '2.0.16'
+final String vSparkSql = '3.5.4'
+final String vTestNg = '7.9.0'
+
+configurations {
+    all*.exclude group: 'ch.qos.logback', module: 'logback-classic'
+    all*.exclude group: 'ch.qos.logback', module: 'logback-core'
+}
+
+dependencies {
+    api("org.apache.groovy:groovy:${vGroovy}")
+    api("com.fasterxml.jackson.core:jackson-databind:${vJackson}")
+    api("org.slf4j:slf4j-api:${vSlf4j}")
+    implementation("org.apache.spark:spark-sql_2.12:${vSparkSql}")
+    api("org.testng:testng:${vTestNg}")
+}
+
+java {
+    sourceCompatibility = '21'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            url "https://nrgxnat.jfrog.io/nrgxnat/libs-${project.version.endsWith("-SNAPSHOT") ? "snapshot" : "release"}-local"
+            name = 'XNAT_Artifactory'
+            credentials {
+                username = System.getenv('MAVEN_USERNAME')
+                password = System.getenv('MAVEN_PASSWORD')
+            }
+        }
+    }
+}

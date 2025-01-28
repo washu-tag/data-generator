@@ -1,31 +1,37 @@
 package edu.washu.tag.generator.query
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import edu.washu.tag.generator.metadata.RadiologyReport
-
+import edu.washu.tag.validation.ExpectedQueryResult
+import edu.washu.tag.validation.GroupedAggregationResult
 import java.util.function.Function
 
-class GroupedAggregationResult extends ExpectedRadReportResult {
+class GroupedAggregationRadReportResult extends ExpectedRadReportQueryProcessor {
 
-    private final Map<String, Map<String, Integer>> result = [:]
-    private String primaryColumnName
+    Map<String, Map<String, Integer>> result = [:]
+    String primaryColumnName
+    List<Case> cases = []
     private Function<RadiologyReport, String> primaryColumnDerivation
-    private List<Case> cases = []
-    
-    GroupedAggregationResult(Function<RadiologyReport, Boolean> inclusionCriteria) {
+
+    GroupedAggregationRadReportResult(Function<RadiologyReport, Boolean> inclusionCriteria) {
         this.inclusionCriteria = inclusionCriteria
     }
 
-    GroupedAggregationResult primaryColumn(String name) {
+    GroupedAggregationRadReportResult() {
+
+    }
+
+    GroupedAggregationRadReportResult primaryColumn(String name) {
         primaryColumnName = name
         this
     }
 
-    GroupedAggregationResult primaryColumnDerivation(Function<RadiologyReport, String> primaryColumnDerivation) {
+    GroupedAggregationRadReportResult primaryColumnDerivation(Function<RadiologyReport, String> primaryColumnDerivation) {
         this.primaryColumnDerivation = primaryColumnDerivation
         this
     }
 
-    GroupedAggregationResult addCase(Case caseVal) {
+    GroupedAggregationRadReportResult addCase(Case caseVal) {
         cases << caseVal
         this
     }
@@ -47,21 +53,25 @@ class GroupedAggregationResult extends ExpectedRadReportResult {
         }
     }
 
-    String getDescription() {
-        "A table grouped on ${primaryColumnName}"
+    @Override
+    ExpectedQueryResult outputExpectation() {
+        new GroupedAggregationResult()
+            .primaryColumn(primaryColumnName)
+            .secondaryColumns(cases*.name as List<String>)
+            .expectingResult(result)
     }
 
-    Map<String, Map<String, Integer>> getExpectedData() {
-        result
-    }
-
-    static class Case {
+    static class Case implements Serializable {
         String name
-        Function<RadiologyReport, Boolean> aggregationCriteria
+        @JsonIgnore Function<RadiologyReport, Boolean> aggregationCriteria
 
         Case(String name, Function<RadiologyReport, Boolean> aggregationCriteria) {
             this.name = name
             this.aggregationCriteria = aggregationCriteria
+        }
+
+        Case() {
+
         }
     }
 

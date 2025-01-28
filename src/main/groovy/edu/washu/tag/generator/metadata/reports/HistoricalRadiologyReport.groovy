@@ -13,7 +13,7 @@ import edu.washu.tag.generator.hl7.v2.segment.PidGeneratorHistorical
 import edu.washu.tag.generator.hl7.v2.segment.Pv1Generator
 import edu.washu.tag.generator.hl7.v2.segment.Pv1GeneratorHistorical
 import edu.washu.tag.generator.metadata.Person
-import edu.washu.tag.generator.util.FileIOUtils
+import edu.washu.tag.util.FileIOUtils
 import edu.washu.tag.generator.util.RandomGenUtils
 import edu.washu.tag.generator.util.StringReplacements
 import java.time.format.DateTimeFormatter

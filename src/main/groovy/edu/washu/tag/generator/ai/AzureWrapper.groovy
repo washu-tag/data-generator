@@ -8,7 +8,7 @@ import com.azure.core.http.netty.NettyAsyncHttpClientBuilder
 import com.azure.core.util.BinaryData
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.Study
-import edu.washu.tag.generator.util.FileIOUtils
+import edu.washu.tag.util.FileIOUtils
 import edu.washu.tag.generator.util.TimeUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

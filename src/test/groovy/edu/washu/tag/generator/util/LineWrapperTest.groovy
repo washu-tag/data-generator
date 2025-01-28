@@ -1,5 +1,6 @@
 package edu.washu.tag.generator.util
 
+import edu.washu.tag.util.FileIOUtils
 import org.testng.annotations.Test
 
 import static org.testng.AssertJUnit.assertEquals
