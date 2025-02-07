@@ -1,6 +1,8 @@
 package edu.washu.tag.generator.metadata.protocols
 
-import edu.washu.tag.generator.metadata.CodedTriplet
+import edu.washu.tag.generator.metadata.ProcedureCode
+import edu.washu.tag.generator.metadata.Study
+import org.apache.commons.lang3.RandomUtils
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.metadata.SeriesType
@@ -12,13 +14,14 @@ import edu.washu.tag.generator.util.RandomGenUtils
 
 class MammogramFourView extends Mammogram {
 
+    private static final String DIAG_ID = 'mammogram bilat diag'
+    private static final String SCREEN_ID = 'mammogram bilat screen'
     private static final EnumeratedDistribution<String> studyDescriptionRandomizer = RandomGenUtils.setupWeightedLottery([
             'Screening Mamm Bilat' : 46,
             'SCREEN MAM-DIGITAL BILATERAL' : 30,
             'SCREENING MAMM BI' : 29,
             'Screening Mamm Bi' : 26,
             'DIGITAL SCREENING MAMM BILATERAL' : 11,
-            'Diag Mammogram Bilateral' : 10,
             'DIGITAL MAMMOGRAM,BILATERAL' : 10
     ])
 
@@ -33,8 +36,12 @@ class MammogramFourView extends Mammogram {
     }
 
     @Override
-    String getStudyDescription(Equipment scanner, BodyPart bodyPart) {
-        studyDescriptionRandomizer.sample()
+    String getStudyDescription(Equipment scanner, Study study) {
+        if (study.procedureCodeId == SCREEN_ID) {
+            studyDescriptionRandomizer.sample()
+        } else {
+            'Diag Mammogram Bilateral'
+        }
     }
 
     @Override
@@ -43,13 +50,8 @@ class MammogramFourView extends Mammogram {
     }
 
     @Override
-    CodedTriplet getProcedureCode(BodyPart bodyPart) {
-        new CodedTriplet(
-                'ZIV70047',
-                'UNKDEV',
-                'SCREENING MAMM BILAT',
-                'Screening Mammogram Bilateral'
-        )
+    ProcedureCode getProcedureCode(BodyPart bodyPart) {
+        ProcedureCode.lookup(RandomUtils.insecure().randomInt(0, 100) < 93 ? SCREEN_ID : DIAG_ID)
     }
 
 }

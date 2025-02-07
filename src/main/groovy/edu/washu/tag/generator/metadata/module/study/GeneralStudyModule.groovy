@@ -67,7 +67,7 @@ class GeneralStudyModule implements StudyLevelModule {
             }
         }
 
-        study.setStudyDescription(protocol.getStudyDescription(scanner, study.bodyPartExamined))
+        study.setStudyDescription(protocol.getStudyDescription(scanner, study))
     }
 
 }

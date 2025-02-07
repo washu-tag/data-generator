@@ -1,8 +1,8 @@
 package edu.washu.tag.generator.metadata.protocols
 
-import edu.washu.tag.generator.metadata.CodedTriplet
 import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.metadata.Patient
+import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.SeriesType
 import edu.washu.tag.generator.metadata.enums.AnatomicalPlane
 import edu.washu.tag.generator.metadata.enums.BodyPart
@@ -41,13 +41,8 @@ class GreekMri extends MriMinimalProtocol {
     }
 
     @Override
-    CodedTriplet getProcedureCode(BodyPart bodyPart) {
-        new CodedTriplet(
-                'WAGH949938',
-                '99WAGH',
-                'GEN MRI DIAG',
-                'MRI generic'
-        )
+    ProcedureCode getProcedureCode(BodyPart bodyPart) {
+        ProcedureCode.lookup('greek outside brain mri')
     }
 
     @Override

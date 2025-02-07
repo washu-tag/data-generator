@@ -1,6 +1,7 @@
 package edu.washu.tag.generator.metadata.protocols
 
-import edu.washu.tag.generator.metadata.CodedTriplet
+import edu.washu.tag.generator.metadata.ProcedureCode
+import edu.washu.tag.generator.metadata.Study
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.metadata.Protocol
@@ -34,18 +35,17 @@ class AnteroposteriorCr extends Protocol {
     }
 
     @Override
-    CodedTriplet getProcedureCode(BodyPart bodyPart) {
-        new CodedTriplet(
-                "ZIV${bodyPart.offsetProcedureCode(37095)}",
-                'UNKDEV',
-                "XR ${bodyPart.dicomRepresentation} 1 VIEW",
-                "${bodyPart.codeMeaning} 1 View Xray"
-        )
+    ProcedureCode getProcedureCode(BodyPart bodyPart) {
+        switch (bodyPart) {
+            case BodyPart.CHEST -> ProcedureCode.lookup('chest xray 1 view')
+            case BodyPart.ABDOMEN -> ProcedureCode.lookup('abdomen xray 1 view')
+            default -> throw new UnsupportedOperationException("Unsupported body part: ${bodyPart}")
+        }
     }
 
     @Override
-    String getStudyDescription(Equipment scanner, BodyPart bodyPart) {
-        randomizeWithBodyPart(randomizer, bodyPart)
+    String getStudyDescription(Equipment scanner, Study study) {
+        randomizeWithBodyPart(randomizer, study.bodyPartExamined)
     }
 
 }

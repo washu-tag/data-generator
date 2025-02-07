@@ -1,0 +1,335 @@
+{
+  "chest xray 1 view": {
+    "impliedModality": "XR",
+    "codedTriplet": {
+      "codeValue": "IMG1259",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "XR CHEST 1 VIEW",
+      "alternateText": "Chest 1 View Xray"
+    }
+  },
+  "abdomen xray 1 view": {
+    "impliedModality": "XR",
+    "codedTriplet": {
+      "codeValue": "IMG154",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "XR ABDOMEN AP 1 VIEW",
+      "alternateText": "Abdomen 1 View Xray"
+    }
+  },
+  "brain mri with contrast": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "IMG2361",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "MRI BRAIN W CONTRAST",
+      "alternateText": "Brain MRI"
+    }
+  },
+  "greek outside brain mri": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "IMG1021",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "MRI TRANSFER OF OUTSIDE FILMS",
+      "alternateText": "MRI generic"
+    }
+  },
+  "outside transfer xray": {
+    "impliedModality": "XR",
+    "codedTriplet": {
+      "codeValue": "IMG1017",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "XR TRANSFER OF OUTSIDE FILMS",
+      "alternateText": "Xr Sing View"
+    }
+  },
+  "mammogram unilat diag": {
+    "impliedModality": "MG",
+    "codedTriplet": {
+      "codeValue": "BHC77055",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "77055 Diag Mammogram Unilateral",
+      "alternateText": "Diagnostic Mammogram Unilateral"
+    }
+  },
+  "mammogram bilat diag": {
+    "impliedModality": "MG",
+    "codedTriplet": {
+      "codeValue": "BHC77056",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "77056 Diag Mammogram Bilateral",
+      "alternateText": "Diagnostic Mammogram Bilateral"
+    }
+  },
+  "mammogram unilat screen": {
+    "impliedModality": "MG",
+    "codedTriplet": {
+      "codeValue": "BMV77057A",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "77057A Screen unilateral",
+      "alternateText": "Screening Mammogram Unilateral"
+    }
+  },
+  "mammogram bilat screen": {
+    "impliedModality": "MG",
+    "codedTriplet": {
+      "codeValue": "BHC77057",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "77057 Screening Mamm Bilat",
+      "alternateText": "Screening Mammogram Bilateral"
+    }
+  },
+  "mri abdomen w/wo": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "MRI1133",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "MRI W WO ABDOMEN",
+      "alternateText": "ABDOMEN MRI"
+    }
+  },
+  "mri brain w/wo": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "IMG2370",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "MRI BRAIN W WO CONTRAST",
+      "alternateText": "BRAIN MRI"
+    }
+  },
+  "mri chest w/wo": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "IMG2403",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "MRI CHEST W WO CONTRAST",
+      "alternateText": "CHEST MRI"
+    }
+  },
+  "mri head w/wo": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "OMHEADWWO",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "MRI BRAIN W W/O CONTRAST",
+      "alternateText": "HEAD MRI"
+    }
+  },
+  "mri heart w/wo": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "M755612",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "MR CARDIAC MRPH FUNC WWO",
+      "alternateText": "HEART MRI"
+    }
+  },
+  "mri brain wo": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "IMG2347",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "MRI BRAIN WO CONTRAST",
+      "alternateText": "BRAIN MRI Expedited"
+    }
+  },
+  "mri chest wo": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "IMG2400",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "MRI CHEST WO CONTRAST",
+      "alternateText": "CHEST MRI Expedited"
+    }
+  },
+  "mri head wo": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "OMHEADWO",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "MRI BRAIN WITHOUT CONTRAST",
+      "alternateText": "HEAD MRI Expedited"
+    }
+  },
+  "mri heart wo": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "M755570",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "MR CARDIAC MRPH FUNC W/O",
+      "alternateText": "HEART MRI Expedited"
+    }
+  },
+  "mri brain perf wwo": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "CMR70553P",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "70553P MR HEAD PERFUSION WWO",
+      "alternateText": "Brain dMRI"
+    }
+  },
+  "myocardial perf": {
+    "impliedModality": "NM",
+    "codedTriplet": {
+      "codeValue": "H8452",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "78452 MPI SPECT Multiple",
+      "alternateText": "NM MPI SPECT"
+    }
+  },
+  "petct abdomen": {
+    "impliedModality": "CT",
+    "codedTriplet": {
+      "codeValue": "CTABD",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "PETCT AC+NAC ABDOMEN",
+      "alternateText": "Abdomen Petct AC NAC"
+    }
+  },
+  "petct brain": {
+    "impliedModality": "PET",
+    "codedTriplet": {
+      "codeValue": "IMG5021",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "PET/CT FDG BRAIN TUMOR METABOLIC EVALUATION",
+      "alternateText": "Brain Petct AC NAC"
+    }
+  },
+  "petct thorax": {
+    "impliedModality": "CT",
+    "codedTriplet": {
+      "codeValue": "CTCHEST",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "CT THORAX",
+      "alternateText": "Thorax Petct AC NAC"
+    }
+  },
+  "petct wholebody": {
+    "impliedModality": "PET",
+    "codedTriplet": {
+      "codeValue": "IMG5017",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "PET/CT FDG WHOLE BODY",
+      "alternateText": "Wholebody Petct AC NAC"
+    }
+  },
+  "petmr abdomen": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "MABDOMENWO",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "MR ABD WO",
+      "alternateText": "Abdomen PtMr"
+    }
+  },
+  "petmr chest": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "SM71550CH0",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "MR CHEST WO",
+      "alternateText": "Chest PtMr"
+    }
+  },
+  "petmr head": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "JPT78699C",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "Brain PET: MR Fusion 78699",
+      "alternateText": "Brain PtMr"
+    }
+  },
+  "petmr pelvis": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "M72195PEL0",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "MR PELVIS WO",
+      "alternateText": "Pelvis PtMr"
+    }
+  },
+  "outside mg": {
+    "impliedModality": "MG",
+    "codedTriplet": {
+      "codeValue": "BHC76140",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "76140 Outside Exam",
+      "alternateText": "Outside Mammogram"
+    }
+  },
+  "xray abdomen": {
+    "impliedModality": "XR",
+    "codedTriplet": {
+      "codeValue": "BED74000",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "74000 Abdomen single view AP",
+      "alternateText": "Abdomen 1 View Dx Xray"
+    }
+  },
+  "xray cervical spine": {
+    "impliedModality": "XR",
+    "codedTriplet": {
+      "codeValue": "BED72040",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "72040 Spine Cerv 3views or less",
+      "alternateText": "Cervical spine 1 View Dx Xray"
+    }
+  },
+  "xray chest": {
+    "impliedModality": "XR",
+    "codedTriplet": {
+      "codeValue": "BED71010",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "71010 Chest 1 view Frontal",
+      "alternateText": "Chest 1 View Dx Xray"
+    }
+  },
+  "xray skull": {
+    "impliedModality": "XR",
+    "codedTriplet": {
+      "codeValue": "BED70250",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "70250 Skull < 4 views",
+      "alternateText": "Skull 1 View Dx Xray"
+    }
+  },
+  "xray spine": {
+    "impliedModality": "XR",
+    "codedTriplet": {
+      "codeValue": "BED72020",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "72020 Spine Single View",
+      "alternateText": "Spine 1 View Dx Xray"
+    }
+  },
+  "xray thoracic spine": {
+    "impliedModality": "XR",
+    "codedTriplet": {
+      "codeValue": "EDXETSP1V",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "XR Thoracic Spine 1 View",
+      "alternateText": "Thoracic spine 1 View Dx Xray"
+    }
+  },
+  "ultrasound": {
+    "impliedModality": "XR",
+    "codedTriplet": {
+      "codeValue": "IMG2816",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "US ABDOMEN LIMITED",
+      "alternateText": "Ultrasound"
+    }
+  },
+  "xray angio": {
+    "impliedModality": "IR",
+    "codedTriplet": {
+      "codeValue": "IMG4185",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "IR INTRO CATHETER AORTA BILATERAL",
+      "alternateText": "XRay Angiography"
+    }
+  }
+}

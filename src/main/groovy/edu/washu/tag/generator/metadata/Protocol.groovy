@@ -69,11 +69,11 @@ abstract class Protocol implements Randomizeable {
 
     abstract List<BodyPart> getApplicableBodyParts()
 
-    abstract String getStudyDescription(Equipment scanner, BodyPart bodyPart)
+    abstract String getStudyDescription(Equipment scanner, Study study)
 
     abstract String getSimpleDescription(BodyPart bodyPart)
 
-    abstract CodedTriplet getProcedureCode(BodyPart bodyPart)
+    abstract ProcedureCode getProcedureCode(BodyPart bodyPart)
 
     boolean isApplicableFor(Patient patient) {
         true
@@ -101,7 +101,7 @@ abstract class Protocol implements Randomizeable {
         resample(patient)
         final BodyPart bodyPartExamined = bodyParts ? RandomGenUtils.randomListEntry(bodyParts) : null
         study.setSimpleDescription(getSimpleDescription(bodyPartExamined))
-        study.setProcedureCode(getProcedureCode(bodyPartExamined))
+        study.setProcedureCodeId(getProcedureCode(bodyPartExamined)?.id)
         Equipment primaryScanner = null
         seriesTypes*.seriesBundling().unique().each { bundling ->
             final List<SeriesType> seriesTypesForBundle = seriesTypes.findAll { seriesType ->

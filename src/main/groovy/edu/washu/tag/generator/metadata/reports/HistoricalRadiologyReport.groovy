@@ -12,7 +12,9 @@ import edu.washu.tag.generator.hl7.v2.segment.PidGenerator
 import edu.washu.tag.generator.hl7.v2.segment.PidGeneratorHistorical
 import edu.washu.tag.generator.hl7.v2.segment.Pv1Generator
 import edu.washu.tag.generator.hl7.v2.segment.Pv1GeneratorHistorical
+import edu.washu.tag.generator.metadata.CodedTriplet
 import edu.washu.tag.generator.metadata.Person
+import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.util.FileIOUtils
 import edu.washu.tag.generator.util.RandomGenUtils
 import edu.washu.tag.generator.util.StringReplacements
@@ -72,12 +74,13 @@ class HistoricalRadiologyReport extends CurrentRadiologyReport {
                 "${principalInterpreter.formatFirstLast().toUpperCase()}, M.D.~~~~********${orcStatus.randomizeTitle()}********~~~ "
         ).setId('1')
 
+        final CodedTriplet procedureCode = ProcedureCode.lookup(study.procedureCodeId).codedTriplet
         obxGenerators.add(
                 new ObxGeneratorHistorical(
                         BASE_REPORT_SKELETON
                                 .replace(StringReplacements.ACCESSION_NUMBER_PLACEHOLDER, accessionNumber)
                                 .replace(StringReplacements.DATE_TIME_PLACEHOLDER, DATE_TIME_FORMATTER.format(reportDateTime))
-                                .replace(StringReplacements.PROCEDURE, "${study.procedureCode.codeValue.replace('\\D', '')} ${study.procedureCode.codeMeaning}")
+                                .replace(StringReplacements.PROCEDURE, "${procedureCode.codeValue.replace('\\D', '')} ${procedureCode.codeMeaning}")
                                 .replace(StringReplacements.EXAMINATION_PLACEHOLDER, generatedReport.examination)
                                 .replace(StringReplacements.FINDINGS_PLACEHOLDER, generatedReport.findings)
                                 .replace(StringReplacements.IMPRESSIONS_PLACEHOLDER, generatedReport.impressions)

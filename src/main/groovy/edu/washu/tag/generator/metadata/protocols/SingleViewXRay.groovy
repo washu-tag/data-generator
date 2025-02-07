@@ -1,6 +1,8 @@
 package edu.washu.tag.generator.metadata.protocols
 
 import edu.washu.tag.generator.metadata.CodedTriplet
+import edu.washu.tag.generator.metadata.ProcedureCode
+import edu.washu.tag.generator.metadata.Study
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.metadata.Protocol
@@ -36,13 +38,8 @@ class SingleViewXRay extends Protocol {
     }
 
     @Override
-    CodedTriplet getProcedureCode(BodyPart bodyPart) {
-        new CodedTriplet(
-                "ZIV0${bodyPart.offsetProcedureCode(4343)}",
-                'UNKDEV',
-                "XR ${bodyPart.dicomRepresentation} 1V DX",
-                "${bodyPart.codeMeaning} 1 View Dx Xray"
-        )
+    ProcedureCode getProcedureCode(BodyPart bodyPart) {
+        ProcedureCode.lookup("xray ${bodyPart.codeMeaning.toLowerCase()}")
     }
 
     @Override
@@ -51,8 +48,8 @@ class SingleViewXRay extends Protocol {
     }
 
     @Override
-    String getStudyDescription(Equipment scanner, BodyPart bodyPart) {
-        randomizeWithBodyPart(randomizer, bodyPart)
+    String getStudyDescription(Equipment scanner, Study study) {
+        randomizeWithBodyPart(randomizer, study.bodyPartExamined)
     }
 
 }

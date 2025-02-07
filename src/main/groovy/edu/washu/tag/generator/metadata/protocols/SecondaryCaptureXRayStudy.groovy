@@ -1,6 +1,8 @@
 package edu.washu.tag.generator.metadata.protocols
 
 import edu.washu.tag.generator.metadata.CodedTriplet
+import edu.washu.tag.generator.metadata.ProcedureCode
+import edu.washu.tag.generator.metadata.Study
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.metadata.SeriesType
@@ -22,17 +24,12 @@ class SecondaryCaptureXRayStudy extends SecondaryCaptureStudy {
     }
 
     @Override
-    CodedTriplet getProcedureCode(BodyPart bodyPart) {
-        new CodedTriplet(
-                'SC54513',
-                'UNKDEV',
-                'OUTSIDE XRAY',
-                'Outside Xray'
-        )
+    ProcedureCode getProcedureCode(BodyPart bodyPart) {
+        ProcedureCode.lookup('outside transfer xray')
     }
 
     @Override
-    String getStudyDescription(Equipment scanner, BodyPart bodyPart) {
+    String getStudyDescription(Equipment scanner, Study study) {
         studyDescriptionRandomizer.sample()
     }
 

@@ -7,6 +7,7 @@ import ca.uhn.hl7v2.util.DeepCopy
 import ca.uhn.hl7v2.util.Terser
 import edu.washu.tag.generator.metadata.CodedTriplet
 import edu.washu.tag.generator.metadata.Person
+import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.Study
 import edu.washu.tag.generator.util.GenerationConstants
@@ -21,7 +22,7 @@ class ObrGenerator extends SegmentGenerator<OBR> {
     @Override
     void generateSegment(RadiologyReport radReport, OBR baseSegment) {
         final Study study = radReport.study
-        final CodedTriplet procedureCode = study.procedureCode
+        final CodedTriplet procedureCode = ProcedureCode.lookup(study.procedureCodeId).codedTriplet
 
         baseSegment.getObr1_SetIDOBR().setValue('1')
         DeepCopy.copy(radReport.placerOrderNumber, baseSegment.getObr2_PlacerOrderNumber())

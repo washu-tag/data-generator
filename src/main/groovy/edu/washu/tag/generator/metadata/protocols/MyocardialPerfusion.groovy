@@ -1,6 +1,8 @@
 package edu.washu.tag.generator.metadata.protocols
 
 import edu.washu.tag.generator.metadata.CodedTriplet
+import edu.washu.tag.generator.metadata.ProcedureCode
+import edu.washu.tag.generator.metadata.Study
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.metadata.Protocol
@@ -36,18 +38,13 @@ class MyocardialPerfusion extends Protocol {
     }
 
     @Override
-    String getStudyDescription(Equipment scanner, BodyPart bodyPart) {
+    String getStudyDescription(Equipment scanner, Study study) {
         randomizer.sample()
     }
 
     @Override
-    CodedTriplet getProcedureCode(BodyPart bodyPart) {
-        new CodedTriplet(
-                'ZIV44943',
-                'UNKDEV',
-                'MYOCARDIAL PERFUSION',
-                'NM MPI SPECT'
-        )
+    ProcedureCode getProcedureCode(BodyPart bodyPart) {
+        ProcedureCode.lookup('myocardial perf')
     }
 
     @Override

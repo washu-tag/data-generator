@@ -42,13 +42,4 @@ class OutsideMyocardialPerfusion extends MyocardialPerfusion {
         ]
     }
 
-    @Override
-    CodedTriplet getProcedureCode(BodyPart bodyPart) {
-        new CodedTriplet(
-                '14555P',
-                '9I',
-                'MPI',
-                'NM MPI'
-        )
-    }
 }

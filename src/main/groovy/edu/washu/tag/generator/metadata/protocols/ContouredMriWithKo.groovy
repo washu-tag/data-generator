@@ -1,6 +1,7 @@
 package edu.washu.tag.generator.metadata.protocols
 
-import edu.washu.tag.generator.metadata.CodedTriplet
+import edu.washu.tag.generator.metadata.ProcedureCode
+import edu.washu.tag.generator.metadata.Study
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.metadata.Protocol
@@ -47,17 +48,12 @@ class ContouredMriWithKo extends Protocol {
     }
 
     @Override
-    CodedTriplet getProcedureCode(BodyPart bodyPart) {
-        new CodedTriplet(
-                'BOS09044',
-                'UNKDEV',
-                'MRI BRAIN DIAGNOSTIC',
-                'Brain MRI'
-        )
+    ProcedureCode getProcedureCode(BodyPart bodyPart) {
+        ProcedureCode.lookup('brain mri with contrast')
     }
 
     @Override
-    String getStudyDescription(Equipment scanner, BodyPart bodyPart) {
+    String getStudyDescription(Equipment scanner, Study study) {
         studyDescriptionRandomizer.sample()
     }
 

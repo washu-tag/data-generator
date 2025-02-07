@@ -1,6 +1,7 @@
 package edu.washu.tag.generator.metadata.protocols
 
-import edu.washu.tag.generator.metadata.CodedTriplet
+import edu.washu.tag.generator.metadata.ProcedureCode
+import edu.washu.tag.generator.metadata.Study
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import edu.washu.tag.generator.metadata.enums.AnatomicalPlane
 import edu.washu.tag.generator.metadata.enums.BodyPart
@@ -60,18 +61,13 @@ class MriComplexProtocol extends Protocol {
     }
 
     @Override
-    CodedTriplet getProcedureCode(BodyPart bodyPart) {
-        new CodedTriplet(
-                'ZIV' + bodyPart.offsetProcedureCode(30190),
-                'UNKDEV',
-                "MRI ${bodyPart.dicomRepresentation} DIAGNOSTIC",
-                "${bodyPart.codeMeaning} MRI"
-        )
+    ProcedureCode getProcedureCode(BodyPart bodyPart) {
+        ProcedureCode.lookup("mri ${bodyPart.codeMeaning.toLowerCase()} w/wo")
     }
 
     @Override
-    String getStudyDescription(Equipment scanner, BodyPart bodyPart) {
-        randomizeWithBodyPart(studyDescriptionRandomizer, bodyPart)
+    String getStudyDescription(Equipment scanner, Study study) {
+        randomizeWithBodyPart(studyDescriptionRandomizer, study.bodyPartExamined)
     }
 
 }

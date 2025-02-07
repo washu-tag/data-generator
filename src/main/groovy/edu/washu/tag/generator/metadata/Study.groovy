@@ -34,7 +34,7 @@ class Study implements DicomEncoder, PrivateElementContainer {
     List<Series> series = []
     RadiologyReport radReport
     String simpleDescription
-    CodedTriplet procedureCode
+    String procedureCodeId
     BodyPart bodyPartExamined // TODO: this is a simplifying assumption. This is really a series-level field
     @JsonIgnore Patient patient
     @JsonIgnore String ethnicGroup // Yes, this is a patient field, but we want the value to be inconsistently encoded *across studies*, but consistent within a study
@@ -74,8 +74,9 @@ class Study implements DicomEncoder, PrivateElementContainer {
         attributes.setString(Tag.ReferringPhysicianName, VR.PN, referringPhysicianName)
         setIfNonnull(attributes, Tag.StudyID, VR.SH, studyId)
         setIfNonnull(attributes, Tag.StudyDescription, VR.LO, studyDescription)
-        if (procedureCode != null) {
-            attributes.newSequence(Tag.ProcedureCodeSequence, 1) << procedureCode.toSequenceItem()
+        if (procedureCodeId != null) {
+            attributes.newSequence(Tag.ProcedureCodeSequence, 1)
+                << ProcedureCode.lookup(procedureCodeId).codedTriplet.toSequenceItem()
         }
         setIfNonnull(attributes, Tag.AccessionNumber, VR.SH, accessionNumber)
         setIfNonnull(attributes, Tag.EthnicGroup, VR.SH, ethnicGroup)

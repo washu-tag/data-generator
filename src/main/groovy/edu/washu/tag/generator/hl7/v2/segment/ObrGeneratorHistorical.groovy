@@ -6,6 +6,7 @@ import ca.uhn.hl7v2.util.DeepCopy
 import ca.uhn.hl7v2.util.Terser
 import edu.washu.tag.generator.metadata.CodedTriplet
 import edu.washu.tag.generator.metadata.Person
+import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.util.TimeUtils
 
@@ -18,7 +19,7 @@ class ObrGeneratorHistorical extends ObrGenerator {
     @Override
     void generateSegment(RadiologyReport radReport, OBR baseSegment) {
         final LocalDateTime reportTime = radReport.reportDateTime
-        final CodedTriplet procedureCode = radReport.study.procedureCode
+        final CodedTriplet procedureCode = ProcedureCode.lookup(radReport.study.procedureCodeId).codedTriplet
         final String numericProcedureCode = procedureCode.codeValue.replaceAll('\\D', '')
         final String procedureText = "${numericProcedureCode} ${procedureCode.codeMeaning}"
 

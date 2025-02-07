@@ -1,9 +1,9 @@
 package edu.washu.tag.generator.metadata.protocols
 
-import edu.washu.tag.generator.metadata.CodedTriplet
-import org.apache.commons.math3.distribution.EnumeratedDistribution
 import edu.washu.tag.generator.metadata.Equipment
+import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.SeriesType
+import edu.washu.tag.generator.metadata.Study
 import edu.washu.tag.generator.metadata.enums.BodyPart
 import edu.washu.tag.generator.metadata.seriesTypes.ct.CtWithAttenuationCorrection
 import edu.washu.tag.generator.metadata.seriesTypes.ct.PatientProtocol
@@ -12,6 +12,7 @@ import edu.washu.tag.generator.metadata.seriesTypes.ot.SiemensProprietaryCtFusio
 import edu.washu.tag.generator.metadata.seriesTypes.pt.PtNonAttenuationCorrected
 import edu.washu.tag.generator.metadata.seriesTypes.pt.PtWithAttenuationCorrection
 import edu.washu.tag.generator.util.RandomGenUtils
+import org.apache.commons.math3.distribution.EnumeratedDistribution
 
 import static edu.washu.tag.generator.util.StringReplacements.BODYPART
 
@@ -49,18 +50,19 @@ class PetCt extends PetStudy {
     }
 
     @Override
-    CodedTriplet getProcedureCode(BodyPart bodyPart) {
-        new CodedTriplet(
-                "ZIV${bodyPart.offsetProcedureCode(12331)}",
-                'UNKDEV',
-                "PETCT AC+NAC ${bodyPart.dicomRepresentation}",
-                "${bodyPart.codeMeaning} Petct AC NAC"
-        )
+    ProcedureCode getProcedureCode(BodyPart bodyPart) {
+        switch (bodyPart) {
+            case BodyPart.ABDOMEN -> ProcedureCode.lookup('petct abdomen') // this doesnt match very well, but I don't see anything better
+            case [BodyPart.BRAIN, BodyPart.HEAD] -> ProcedureCode.lookup('petct brain')
+            case BodyPart.THORAX -> ProcedureCode.lookup('petct thorax') // this doesnt match very well, but I don't see anything better
+            case BodyPart.WHOLEBODY -> ProcedureCode.lookup('petct wholebody')
+            default -> throw new UnsupportedOperationException("Unsupported body part ${bodyPart}")
+        }
     }
 
     @Override
-    String getStudyDescription(Equipment scanner, BodyPart bodyPart) {
-        randomizeWithBodyPart(randomizer, bodyPart)
+    String getStudyDescription(Equipment scanner, Study study) {
+        randomizeWithBodyPart(randomizer, study.bodyPartExamined)
     }
 
     @Override

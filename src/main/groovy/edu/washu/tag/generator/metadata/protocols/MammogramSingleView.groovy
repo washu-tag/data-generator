@@ -1,6 +1,9 @@
 package edu.washu.tag.generator.metadata.protocols
 
-import edu.washu.tag.generator.metadata.CodedTriplet
+
+import edu.washu.tag.generator.metadata.ProcedureCode
+import edu.washu.tag.generator.metadata.Study
+import org.apache.commons.lang3.RandomUtils
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.metadata.Patient
@@ -13,11 +16,12 @@ import edu.washu.tag.generator.util.RandomGenUtils
 
 class MammogramSingleView extends Mammogram {
 
+    private static final String DIAG_ID = 'mammogram unilat diag'
+    private static final String SCREEN_ID = 'mammogram unilat screen'
     private static final List<SeriesType> possibleSeriesTypes = cacheSeries()
     private static final EnumeratedDistribution<String> studyDescriptionRandomizer = RandomGenUtils.setupWeightedLottery([
             'Diag Mammogram Unilateral' : 15,
             'LIMITED MAMMOGRAM, UNILATERAL' : 5,
-            'Screen unilateral' : 3,
             'DIGITAL MAMMOGRAM,UNILATERAL' : 3
     ])
 
@@ -32,8 +36,12 @@ class MammogramSingleView extends Mammogram {
     }
 
     @Override
-    String getStudyDescription(Equipment scanner, BodyPart bodyPart) {
-        studyDescriptionRandomizer.sample()
+    String getStudyDescription(Equipment scanner, Study study) {
+        if (study.procedureCodeId == SCREEN_ID) {
+            'Screen unilateral'
+        } else {
+            studyDescriptionRandomizer.sample()
+        }
     }
 
     @Override
@@ -42,13 +50,8 @@ class MammogramSingleView extends Mammogram {
     }
 
     @Override
-    CodedTriplet getProcedureCode(BodyPart bodyPart) {
-        new CodedTriplet(
-                'ZIV70046',
-                'UNKDEV',
-                'DIAG MAMM UNILATERAL',
-                'Diagnostic Mammogram Unilateral'
-        )
+    ProcedureCode getProcedureCode(BodyPart bodyPart) {
+        ProcedureCode.lookup(RandomUtils.insecure().randomInt(0, 100) < 96 ? DIAG_ID : SCREEN_ID)
     }
 
     private static List<SeriesType> cacheSeries() {

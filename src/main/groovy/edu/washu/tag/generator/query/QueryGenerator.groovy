@@ -5,6 +5,7 @@ import edu.washu.tag.TestQuery
 import edu.washu.tag.TestQuerySuite
 import edu.washu.tag.generator.BatchSpecification
 import edu.washu.tag.generator.hl7.v2.segment.ObrGenerator
+import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.enums.Race
 import edu.washu.tag.generator.metadata.enums.Sex
@@ -95,6 +96,10 @@ class QueryGenerator {
     }
 
     void writeQueries() {
+        queries.each { TestQuery<BatchSpecification> testQuery ->
+            testQuery.setExpectedQueryResult(testQuery.querySourceDataProcessor.outputExpectation())
+        }
+
         new ObjectMapper()
             .writerWithDefaultPrettyPrinter()
             .writeValue(
@@ -112,7 +117,7 @@ class QueryGenerator {
                 new GroupedAggregationRadReportResult(matchesHl7Version('2.7'))
                     .primaryColumn('primary_modality')
                     .primaryColumnDerivation({ report ->
-                        ObrGenerator.derivePrimaryImagingModality(report.study)
+                        ProcedureCode.lookup(report.study.procedureCodeId).impliedModality
                     }).addCase(
                         new GroupedAggregationRadReportResult.Case(
                             'male_count',

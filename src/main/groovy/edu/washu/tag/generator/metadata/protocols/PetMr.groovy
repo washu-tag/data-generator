@@ -1,23 +1,14 @@
 package edu.washu.tag.generator.metadata.protocols
 
-import edu.washu.tag.generator.metadata.CodedTriplet
-import org.apache.commons.math3.distribution.EnumeratedDistribution
-import edu.washu.tag.generator.metadata.Equipment
-import edu.washu.tag.generator.metadata.Patient
-import edu.washu.tag.generator.metadata.SeriesType
+import edu.washu.tag.generator.metadata.*
 import edu.washu.tag.generator.metadata.enums.AnatomicalPlane
 import edu.washu.tag.generator.metadata.enums.BodyPart
-import edu.washu.tag.generator.metadata.seriesTypes.mr.DiffusionTensorImage
-import edu.washu.tag.generator.metadata.seriesTypes.mr.FluidAttenuatedInversionRecovery
-import edu.washu.tag.generator.metadata.seriesTypes.mr.Localizer
-import edu.washu.tag.generator.metadata.seriesTypes.mr.SusceptibilityWeightedImage
-import edu.washu.tag.generator.metadata.seriesTypes.mr.T1Weighted
-import edu.washu.tag.generator.metadata.seriesTypes.mr.ThreePlaneLocalizer
-import edu.washu.tag.generator.metadata.seriesTypes.mr.UltrashortEchoTimeMrac
+import edu.washu.tag.generator.metadata.seriesTypes.mr.*
 import edu.washu.tag.generator.metadata.seriesTypes.pt.MracPetNonAttenuationCorrection
 import edu.washu.tag.generator.metadata.seriesTypes.pt.MracPetWithAttenuationCorrection
 import edu.washu.tag.generator.metadata.seriesTypes.sr.PhoenixZIPReport
 import edu.washu.tag.generator.util.RandomGenUtils
+import org.apache.commons.math3.distribution.EnumeratedDistribution
 
 import java.util.concurrent.ThreadLocalRandom
 
@@ -60,18 +51,13 @@ class PetMr extends PetStudy {
     }
 
     @Override
-    String getStudyDescription(Equipment scanner, BodyPart bodyPart) {
-        randomizeWithBodyPart(studyDescriptionRandomizer, bodyPart)
+    String getStudyDescription(Equipment scanner, Study study) {
+        randomizeWithBodyPart(studyDescriptionRandomizer, study.bodyPartExamined)
     }
 
     @Override
-    CodedTriplet getProcedureCode(BodyPart bodyPart) {
-        new CodedTriplet(
-                "ZIV${bodyPart.offsetProcedureCode(50143)}",
-                'UNKDEV',
-                "PET-MR ${bodyPart.dicomRepresentation}",
-                "${bodyPart.codeMeaning} PtMr"
-        )
+    ProcedureCode getProcedureCode(BodyPart bodyPart) {
+        ProcedureCode.lookup("petmr ${bodyPart.codeMeaning.toLowerCase()}")
     }
 
     @Override
