@@ -38,7 +38,7 @@ class GroupedAggregationRadReportResult extends ExpectedRadReportQueryProcessor 
 
     @Override
     void includeReport(RadiologyReport radiologyReport) {
-        final String primaryColumnValue = primaryColumnDerivation.apply(radiologyReport)
+        final String primaryColumnValue = primaryColumnDerivation.apply(radiologyReport) ?: ''
         final Map<String, Integer> row = result.computeIfAbsent(
             primaryColumnValue,
             {

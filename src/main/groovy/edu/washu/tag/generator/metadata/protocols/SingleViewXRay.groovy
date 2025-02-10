@@ -1,15 +1,10 @@
 package edu.washu.tag.generator.metadata.protocols
 
-import edu.washu.tag.generator.metadata.CodedTriplet
-import edu.washu.tag.generator.metadata.ProcedureCode
-import edu.washu.tag.generator.metadata.Study
-import org.apache.commons.math3.distribution.EnumeratedDistribution
-import edu.washu.tag.generator.metadata.Equipment
-import edu.washu.tag.generator.metadata.Protocol
-import edu.washu.tag.generator.metadata.SeriesType
+import edu.washu.tag.generator.metadata.*
 import edu.washu.tag.generator.metadata.enums.BodyPart
 import edu.washu.tag.generator.metadata.seriesTypes.dx.DigitalXRayForPresentation
 import edu.washu.tag.generator.util.RandomGenUtils
+import org.apache.commons.math3.distribution.EnumeratedDistribution
 
 import static edu.washu.tag.generator.util.StringReplacements.BODYPART
 

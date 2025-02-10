@@ -36,11 +36,11 @@
     }
   },
   "outside transfer xray": {
-    "impliedModality": "XR",
+    "impliedModality": null,
     "codedTriplet": {
-      "codeValue": "IMG1017",
+      "codeValue": "MDXREVNT",
       "codingSchemeDesignator": "UNKDEV",
-      "codeMeaning": "XR TRANSFER OF OUTSIDE FILMS",
+      "codeMeaning": "Radiology Event",
       "alternateText": "Xr Sing View"
     }
   },
