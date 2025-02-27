@@ -36,7 +36,7 @@ class BatchSpecification implements QuerySourceData {
         if (specificationParameters.generateRadiologyReports) {
             GParsPool.withPool {
                 patients.eachParallel { Patient patient ->
-                    patient.generateReports()
+                    specificationParameters.reportGeneratorImplementation.generateReportsForPatient(patient)
                 }
             }
         }

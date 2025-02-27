@@ -1,8 +1,6 @@
 package edu.washu.tag.generator.metadata
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import edu.washu.tag.generator.hl7.v2.CyclicVariedGptGenerator
-import edu.washu.tag.generator.hl7.v2.ReportGenerator
 import edu.washu.tag.generator.metadata.patient.EpicId
 import edu.washu.tag.generator.metadata.patient.MainId
 import edu.washu.tag.generator.metadata.patient.PatientId
@@ -39,7 +37,6 @@ class Patient implements DicomEncoder {
     @JsonIgnore Nationality nationality
     @JsonIgnore double personalHeightMod
     @JsonIgnore double personalWeightMod
-    private static final ReportGenerator reportGenerator = new CyclicVariedGptGenerator() // TODO: how to allow other implementation?
 
     Patient randomize(SpecificationParameters specificationParameters, double currentAverageStudiesPerPatient, long previouslyGeneratedSeries, long previouslyGeneratedStudies) {
         long numSeries = previouslyGeneratedSeries
@@ -56,10 +53,6 @@ class Patient implements DicomEncoder {
             numSeries += study.series.size()
         }
         this
-    }
-
-    void generateReports() {
-        reportGenerator.generateReportsForPatient(this)
     }
 
     void encode(Attributes attributes) {

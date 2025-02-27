@@ -5,7 +5,7 @@ out/
 local_cache/
 local.yaml
 dicom_output/
-hl7/
+/hl7/
 hl7ish_logs/
 batches/
 .gradle/

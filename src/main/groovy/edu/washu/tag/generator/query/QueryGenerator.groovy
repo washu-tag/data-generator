@@ -27,7 +27,7 @@ class QueryGenerator {
     private static final LoggableValidation VALIDATION_SEX = new FixedColumnsValidator(COLUMN_SEX, 'F')
     private static final String COLUMN_STUDY_INSTANCE_UID = 'zds_1_study_instance_uid'
     private static final LoggableValidation VALIDATION_STUDY_INSTANCE_UID = new FixedColumnsValidator()
-        .validating(COLUMN_STUDY_INSTANCE_UID, 'None')
+        .validating(COLUMN_STUDY_INSTANCE_UID, [null])
         .validating(COLUMN_HL7_VERSION, '2.4')
     private static final String COLUMN_DOB = 'pid_7_date_time_of_birth'
     private static final LoggableValidation VALIDATION_DOB = new DateComparisonValidation()
@@ -38,7 +38,7 @@ class QueryGenerator {
         .comparisonOperator(DateComparisonValidation.ComparisonOperator.GT)
     private static final String COLUMN_ORC_PLACER_ORDER_NUM = 'orc_2_placer_order_number'
     private static final LoggableValidation VALIDATION_ORC_PLACER_ORDER_NUM = new FixedColumnsValidator()
-        .validating(COLUMN_ORC_PLACER_ORDER_NUM, 'None')
+        .validating(COLUMN_ORC_PLACER_ORDER_NUM, [null])
         .validating(COLUMN_HL7_VERSION, '2.4')
     private static final String COLUMN_RACE = 'pid_10_race'
     private static final LoggableValidation VALIDATION_RACE = new FixedColumnsValidator()
@@ -58,7 +58,7 @@ class QueryGenerator {
                 new ExactNumberRadReportResult(sexFilter(Sex.FEMALE))
                     .withAdditionalValidation(VALIDATION_SEX)
             ),
-        new TestQuery('uid_missing', "SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_STUDY_INSTANCE_UID}='None'") // TODO: 'None'? Huh?
+        new TestQuery('uid_missing', "SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_STUDY_INSTANCE_UID} IS NULL")
             .withDataProcessor(
                 new ExactNumberRadReportResult(matchesHl7Version('2.4'))
                     .withAdditionalValidation(VALIDATION_STUDY_INSTANCE_UID)
@@ -70,7 +70,7 @@ class QueryGenerator {
                         radiologyReport.patient.dateOfBirth.isAfter(LocalDate.of(1990, 12, 31))
                     }
             ).withAdditionalValidation(VALIDATION_DOB)),
-        new TestQuery('placer_order_missing', "SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_ORC_PLACER_ORDER_NUM}='None'") // TODO: 'None'? Huh?
+        new TestQuery('placer_order_missing', "SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_ORC_PLACER_ORDER_NUM} IS NULL")
             .withDataProcessor(
                 new ExactNumberRadReportResult(matchesHl7Version('2.4'))
                     .withAdditionalValidation(VALIDATION_ORC_PLACER_ORDER_NUM)
@@ -82,7 +82,10 @@ class QueryGenerator {
                         radiologyReport.patient.sex == Sex.FEMALE && radiologyReport.race == Race.BLACK
                     }
             ).withAdditionalValidation(VALIDATION_RACE)),
-        primaryModalityBySex()
+        new TestQuery('all', "SELECT * FROM ${TABLE_NAME}")
+            .withDataProcessor(
+                new ExactNumberRadReportResult(Function.identity() as Function<RadiologyReport, Boolean>)
+            )
     ]
     
     void processData(BatchSpecification batchSpecification) {

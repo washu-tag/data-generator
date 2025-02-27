@@ -1,5 +1,7 @@
 package edu.washu.tag.generator
 
+import edu.washu.tag.generator.hl7.v2.FixedSampleReportGenerator
+import edu.washu.tag.generator.hl7.v2.ReportGenerator
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.Protocol
 import edu.washu.tag.generator.util.RandomGenUtils
@@ -24,6 +26,7 @@ class SpecificationParameters {
     boolean includePixelData
     boolean includeBinariesInPrivateElements
     boolean generateRadiologyReports = false
+    ReportGenerator reportGeneratorImplementation = new FixedSampleReportGenerator()
 
     void postprocess() {
         averageStudiesPerPatient = numStudies / numPatients
