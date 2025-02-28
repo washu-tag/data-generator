@@ -81,7 +81,7 @@ tasks.register('writeFiles', JavaExec) {
     mainClass = 'edu.washu.tag.generator.BatchProcessor'
     args(
         resolveBatchArg(),
-        propertyWithDefault('writeFiles', true),
+        propertyWithDefault('outputFiles', true),
         propertyWithDefault('generateTestQueries', false),
         propertyWithDefault('suppressDicom', false)
     )

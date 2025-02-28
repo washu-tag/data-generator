@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 class BatchProcessor {
 
     List<File> batches
-    boolean writeFiles = true // DICOM & HL7 [if generated]
+    boolean outputFiles = true // DICOM & HL7 [if generated]
     boolean generateTests = false
     boolean suppressDicom = false
     private static final Logger logger = LoggerFactory.getLogger(BatchProcessor)
@@ -19,8 +19,8 @@ class BatchProcessor {
             new File(it)
         })
         if (args.length > 1) {
-            batchProcessor.setWriteFiles(Boolean.parseBoolean(args[1]))
-            logger.info("writeFiles set to ${batchProcessor.writeFiles}")
+            batchProcessor.setOutputFiles(Boolean.parseBoolean(args[1]))
+            logger.info("outputFiles set to ${batchProcessor.outputFiles}")
         }
         if (args.length > 2) {
             batchProcessor.setGenerateTests(Boolean.parseBoolean(args[2]))
@@ -51,7 +51,7 @@ class BatchProcessor {
         batches.eachWithIndex { batchFile, index ->
             final BatchSpecification batch = objectMapper.readValue(batchFile, BatchSpecification)
             logger.info("Read batch from file into memory.")
-            if (writeFiles) {
+            if (outputFiles) {
                 if (!suppressDicom) {
                     batch.generateDicom(index, batches.size(), dicomOutput)
                 }
