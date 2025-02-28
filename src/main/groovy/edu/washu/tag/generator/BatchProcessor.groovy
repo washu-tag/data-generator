@@ -1,12 +1,15 @@
 package edu.washu.tag.generator
 
 import edu.washu.tag.generator.query.QueryGenerator
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class BatchProcessor {
 
     List<File> batches
     boolean writeFiles = true // DICOM & HL7 [if generated]
     boolean generateTests = false
+    private static final Logger logger = LoggerFactory.getLogger(BatchProcessor)
 
     static void main(String[] args) {
         final BatchProcessor batchProcessor = new BatchProcessor(batches: args[0].split(',').collect {
@@ -38,6 +41,7 @@ class BatchProcessor {
 
         batches.eachWithIndex { batchFile, index ->
             final BatchSpecification batch = objectMapper.readValue(batchFile, BatchSpecification)
+            logger.info("Read batch from file into memory.")
             if (writeFiles) {
                 batch.generateDicom(index, batches.size(), dicomOutput)
                 if (batch.containsRadiologyReport()) {

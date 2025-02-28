@@ -40,7 +40,7 @@ class YamlObjectMapper extends ObjectMapper {
 
     private static YAMLFactory constructYamlFactory() {
         final LoaderOptions loaderOptions = new LoaderOptions()
-        loaderOptions.setCodePointLimit(100 * 1024 * 1024)
+        loaderOptions.setCodePointLimit(300 * 1024 * 1024)
         YAMLFactory.builder()
                 .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
                 .disable(YAMLGenerator.Feature.SPLIT_LINES)
