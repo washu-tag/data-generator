@@ -20,15 +20,15 @@ class BatchProcessor {
         })
         if (args.length > 1) {
             batchProcessor.setWriteFiles(Boolean.parseBoolean(args[1]))
-            logger.info("writeFiles set to ${writeFiles}")
+            logger.info("writeFiles set to ${batchProcessor.writeFiles}")
         }
         if (args.length > 2) {
             batchProcessor.setGenerateTests(Boolean.parseBoolean(args[2]))
-            logger.info("generateTests set to ${generateTests}")
+            logger.info("generateTests set to ${batchProcessor.generateTests}")
         }
         if (args.length > 3) {
             batchProcessor.setSuppressDicom(Boolean.parseBoolean(args[3]))
-            logger.info("suppressDicom set to ${suppressDicom}")
+            logger.info("suppressDicom set to ${batchProcessor.suppressDicom}")
         }
 
         batchProcessor.writeBatches()
