@@ -82,7 +82,8 @@ tasks.register('writeFiles', JavaExec) {
     args(
         resolveBatchArg(),
         propertyWithDefault('writeFiles', true),
-        propertyWithDefault('generateTestQueries', false)
+        propertyWithDefault('generateTestQueries', false),
+        propertyWithDefault('suppressDicom', false)
     )
 }
 

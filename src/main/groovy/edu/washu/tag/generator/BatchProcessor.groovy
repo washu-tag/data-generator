@@ -9,17 +9,26 @@ class BatchProcessor {
     List<File> batches
     boolean writeFiles = true // DICOM & HL7 [if generated]
     boolean generateTests = false
+    boolean suppressDicom = false
     private static final Logger logger = LoggerFactory.getLogger(BatchProcessor)
 
     static void main(String[] args) {
-        final BatchProcessor batchProcessor = new BatchProcessor(batches: args[0].split(',').collect {
+        final List<String> batches = args[0].split(',')
+        logger.info("Attempting to process batches: ${batches}")
+        final BatchProcessor batchProcessor = new BatchProcessor(batches: batches.collect {
             new File(it)
         })
         if (args.length > 1) {
             batchProcessor.setWriteFiles(Boolean.parseBoolean(args[1]))
+            logger.info("writeFiles set to ${writeFiles}")
         }
         if (args.length > 2) {
             batchProcessor.setGenerateTests(Boolean.parseBoolean(args[2]))
+            logger.info("generateTests set to ${generateTests}")
+        }
+        if (args.length > 3) {
+            batchProcessor.setSuppressDicom(Boolean.parseBoolean(args[3]))
+            logger.info("suppressDicom set to ${suppressDicom}")
         }
 
         batchProcessor.writeBatches()
@@ -43,7 +52,9 @@ class BatchProcessor {
             final BatchSpecification batch = objectMapper.readValue(batchFile, BatchSpecification)
             logger.info("Read batch from file into memory.")
             if (writeFiles) {
-                batch.generateDicom(index, batches.size(), dicomOutput)
+                if (!suppressDicom) {
+                    batch.generateDicom(index, batches.size(), dicomOutput)
+                }
                 if (batch.containsRadiologyReport()) {
                     batch.generateHl7(index, batches.size(), hl7Output)
                     radReportWritten = true
