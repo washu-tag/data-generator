@@ -22,14 +22,14 @@ import java.util.function.Function
 class QueryGenerator {
 
     public static final String TABLE_NAME = 'syntheticdata'
-    private static final String COLUMN_HL7_VERSION = 'msh_12_version_id'
-    private static final String COLUMN_SEX = 'pid_8_administrative_sex'
+    private static final String COLUMN_HL7_VERSION = 'version_id'
+    private static final String COLUMN_SEX = 'sex'
     private static final LoggableValidation VALIDATION_SEX = new FixedColumnsValidator(COLUMN_SEX, 'F')
-    private static final String COLUMN_STUDY_INSTANCE_UID = 'zds_1_study_instance_uid'
+    private static final String COLUMN_STUDY_INSTANCE_UID = 'study_instance_uid'
     private static final LoggableValidation VALIDATION_STUDY_INSTANCE_UID = new FixedColumnsValidator()
         .validating(COLUMN_STUDY_INSTANCE_UID, [null])
         .validating(COLUMN_HL7_VERSION, '2.4')
-    private static final String COLUMN_DOB = 'pid_7_date_time_of_birth'
+    private static final String COLUMN_DOB = 'birth_date'
     private static final LoggableValidation VALIDATION_DOB = new DateComparisonValidation()
         .description('patient born after 1990-12-31')
         .columnName(COLUMN_DOB)
@@ -40,7 +40,7 @@ class QueryGenerator {
     private static final LoggableValidation VALIDATION_ORC_PLACER_ORDER_NUM = new FixedColumnsValidator()
         .validating(COLUMN_ORC_PLACER_ORDER_NUM, [null])
         .validating(COLUMN_HL7_VERSION, '2.4')
-    private static final String COLUMN_RACE = 'pid_10_race'
+    private static final String COLUMN_RACE = 'race'
     private static final LoggableValidation VALIDATION_RACE = new FixedColumnsValidator()
         .validating(COLUMN_SEX, 'F')
         .validating(COLUMN_RACE, ['B', 'BLACK'])
@@ -82,6 +82,7 @@ class QueryGenerator {
                         radiologyReport.patient.sex == Sex.FEMALE && radiologyReport.race == Race.BLACK
                     }
             ).withAdditionalValidation(VALIDATION_RACE)),
+        primaryModalityBySex(),
         new TestQuery('all', "SELECT * FROM ${TABLE_NAME}")
             .withDataProcessor(
                 new ExactNumberRadReportResult(Function.identity() as Function<RadiologyReport, Boolean>)

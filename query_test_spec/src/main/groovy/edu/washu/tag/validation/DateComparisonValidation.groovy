@@ -16,7 +16,6 @@ class DateComparisonValidation implements LoggableValidation {
 
     String description
     String columnName
-    Integer truncation
     Integer comparisonValue
     ComparisonOperator comparisonOperator
     private static final Logger logger = LoggerFactory.getLogger(DateComparisonValidation)
@@ -29,9 +28,10 @@ class DateComparisonValidation implements LoggableValidation {
     @Override
     ForeachFunction<Row> validation() {
         { Row row ->
-            final String rawActualVal = row.getString(row.fieldIndex(columnName))
-            final String transformed = truncation > 0 ? rawActualVal.substring(0, truncation) : rawActualVal
-            comparisonOperator.compare(parse(transformed), parse(String.valueOf(comparisonValue)))
+            comparisonOperator.compare(
+                row.getLocalDate(row.fieldIndex(columnName)),
+                parse(String.valueOf(comparisonValue))
+            )
         }
     }
 
