@@ -29,7 +29,7 @@ class DateComparisonValidation implements LoggableValidation {
     ForeachFunction<Row> validation() {
         { Row row ->
             comparisonOperator.compare(
-                row.getLocalDate(row.fieldIndex(columnName)),
+                row.getDate(row.fieldIndex(columnName)).toLocalDate(),
                 parse(String.valueOf(comparisonValue))
             )
         }
