@@ -41,7 +41,7 @@ class GroupedAggregationResult implements ExpectedQueryResult {
             @Override
             void call(Row row) throws Exception {
                 final String primaryColumn = row.getString(0)
-                final Map<String, Integer> expectation = result.get(primaryColumn)
+                final Map<String, Integer> expectation = result.get(primaryColumn ?: '')
                 logger.info("Validating counts for ${primaryColumn}")
                 secondaryColumns.eachWithIndex { columnName, index ->
                     assertThat(row.getLong(index + 1).intValue())
