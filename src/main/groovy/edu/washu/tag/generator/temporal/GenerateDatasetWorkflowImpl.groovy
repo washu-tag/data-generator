@@ -20,9 +20,9 @@ import org.slf4j.Logger
 import java.time.Duration
 
 @WorkflowImpl(taskQueues = TemporalApplication.TASK_QUEUE)
-class GenerateDatasetActivityImpl implements GenerateDatasetActivity {
+class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
 
-    private static final Logger logger = Workflow.getLogger(GenerateDatasetActivityImpl)
+    private static final Logger logger = Workflow.getLogger(GenerateDatasetWorkflowImpl)
     private final GenerateBatchActivity generateProcessorActivity =
         Workflow.newActivityStub(
             GenerateBatchActivity,
@@ -47,7 +47,8 @@ class GenerateDatasetActivityImpl implements GenerateDatasetActivity {
         )
 
     @Override
-    void generateDataset(String specificationParametersPath) {
+    void generateDataset(GenerateDatasetInput input) {
+        final String specificationParametersPath = input.specificationParametersPath
         final WorkflowInfo workflowInfo = Workflow.getInfo()
         final String workflowLoggingInfo = "[workflowId: ${workflowInfo.workflowId}]"
         logger.info("${workflowLoggingInfo} Beginning workflow ${this.class.simpleName}")

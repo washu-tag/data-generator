@@ -4,9 +4,9 @@ import io.temporal.workflow.WorkflowInterface
 import io.temporal.workflow.WorkflowMethod
 
 @WorkflowInterface
-interface GenerateDatasetActivity {
+interface GenerateDatasetWorkflow {
 
     @WorkflowMethod
-    void generateDataset(String specificationParametersPath)
+    void generateDataset(GenerateDatasetInput input)
 
 }
