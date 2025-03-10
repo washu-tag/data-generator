@@ -8,4 +8,5 @@ spring:
     start-workers: true
     workers-auto-discovery:
       packages:
-        - edu.washu.tag.generator.temporal
+        - edu.washu.tag.generator.temporal.activity
+        - edu.washu.tag.generator.temporal.workflow

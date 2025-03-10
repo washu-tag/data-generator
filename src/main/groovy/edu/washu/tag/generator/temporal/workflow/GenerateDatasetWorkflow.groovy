@@ -1,5 +1,6 @@
-package edu.washu.tag.generator.temporal
+package edu.washu.tag.generator.temporal.workflow
 
+import edu.washu.tag.generator.temporal.GenerateDatasetInput
 import io.temporal.workflow.WorkflowInterface
 import io.temporal.workflow.WorkflowMethod
 

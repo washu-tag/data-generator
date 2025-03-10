@@ -1,17 +1,19 @@
-package edu.washu.tag.generator.temporal
+package edu.washu.tag.generator.temporal.workflow
 
 import edu.washu.tag.generator.BatchProcessor
 import edu.washu.tag.generator.BatchRequest
 import edu.washu.tag.generator.Hl7Logger
 import edu.washu.tag.generator.IdOffsets
 import edu.washu.tag.generator.PopulationGenerator
-import edu.washu.tag.generator.SpecificationParameters
-import edu.washu.tag.generator.YamlObjectMapper
 import edu.washu.tag.generator.metadata.NameCache
+import edu.washu.tag.generator.temporal.activity.FormHl7LogActivity
+import edu.washu.tag.generator.temporal.GenerateDatasetInput
+import edu.washu.tag.generator.temporal.TemporalApplication
 import io.temporal.activity.ActivityOptions
 import io.temporal.common.RetryOptions
 import io.temporal.spring.boot.WorkflowImpl
 import io.temporal.workflow.Async
+import io.temporal.workflow.ChildWorkflowOptions
 import io.temporal.workflow.Promise
 import io.temporal.workflow.Workflow
 import io.temporal.workflow.WorkflowInfo
@@ -19,26 +21,23 @@ import org.slf4j.Logger
 
 import java.time.Duration
 
-@WorkflowImpl(taskQueues = TemporalApplication.TASK_QUEUE)
+@WorkflowImpl(taskQueues = TemporalApplication.PARENT_QUEUE)
 class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
 
     private static final Logger logger = Workflow.getLogger(GenerateDatasetWorkflowImpl)
-    private final GenerateBatchActivity generateProcessorActivity =
-        Workflow.newActivityStub(
-            GenerateBatchActivity,
-            ActivityOptions.newBuilder()
-                .setStartToCloseTimeout(Duration.ofMinutes(60))
-                .setRetryOptions(RetryOptions.newBuilder()
-                    .setMaximumInterval(Duration.ofSeconds(1))
-                    .setMaximumAttempts(3)
-                    .build())
-                .build()
-        )
+
+    private final GenerateBatchWorkflow generateBatchWorkflow = Workflow.newChildWorkflowStub(
+        GenerateBatchWorkflow,
+        ChildWorkflowOptions.newBuilder()
+            .setTaskQueue(TemporalApplication.CHILD_QUEUE)
+            .build()
+    )
+
     private final FormHl7LogActivity formHl7LogActivity =
         Workflow.newActivityStub(
             FormHl7LogActivity,
             ActivityOptions.newBuilder()
-                .setStartToCloseTimeout(Duration.ofMinutes(5))
+                .setStartToCloseTimeout(Duration.ofMinutes(15))
                 .setRetryOptions(RetryOptions.newBuilder()
                     .setMaximumInterval(Duration.ofSeconds(1))
                     .setMaximumAttempts(3)
@@ -58,24 +57,22 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
 
         final NameCache nameCache = NameCache.initInstance()
         final IdOffsets idOffsets = new IdOffsets()
-        final SpecificationParameters specificationParameters = new YamlObjectMapper().readValue(
-            new File(specificationParametersPath),
-            SpecificationParameters
-        )
 
         final List<BatchRequest> batchRequests = generator.chunkRequest()
         logger.info("${workflowLoggingInfo} Request has been split into ${batchRequests.size()} batches")
 
+        // Launch child workflow for each batch to fulfill
         Promise.allOf(batchRequests.collect { batchRequest ->
-            Async.function(generateProcessorActivity.&generateBatch, specificationParametersPath, nameCache, idOffsets, batchRequest)
+            Async.function(generateBatchWorkflow.&generateBatch, specificationParametersPath, nameCache, idOffsets, batchRequest)
         }).get()
 
         logger.info("${workflowLoggingInfo} all batches have been written")
 
-        final Hl7Logger hl7Logger = new Hl7Logger()
-        Promise.allOf(hl7Logger.identifyHl7LogFiles(BatchProcessor.hl7Output).collect { hl7LogFile ->
-            Async.function(formHl7LogActivity.&formLogFile, hl7LogFile)
-        }).get()
+        // Output combined HL7(-ish) log files now that all results are prepared
+        Async.function(
+            formHl7LogActivity.&formLogFiles,
+            new Hl7Logger().identifyHl7LogFiles(BatchProcessor.hl7Output)
+        ).get()
     }
 
 }
