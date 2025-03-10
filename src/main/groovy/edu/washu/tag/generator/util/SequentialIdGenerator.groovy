@@ -8,7 +8,7 @@ import java.util.function.Supplier
 @Builder(builderStrategy = SimpleStrategy, prefix = '')
 class SequentialIdGenerator implements Supplier<String> {
 
-    private int currentId
+    int currentId
     String prefix = ''
     String suffix = ''
 
@@ -18,7 +18,7 @@ class SequentialIdGenerator implements Supplier<String> {
 
     @Override
     String get() {
-        prefix + (currentId++) + suffix
+        prefix + (++currentId) + suffix
     }
 
 }

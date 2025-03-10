@@ -1,6 +1,7 @@
 package edu.washu.tag.generator.metadata
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import edu.washu.tag.generator.util.SequentialIdGenerator
 import org.dcm4che3.data.Attributes
 import org.dcm4che3.data.Tag
 import org.dcm4che3.data.VR
@@ -47,7 +48,9 @@ class Study implements DicomEncoder, PrivateElementContainer {
     @JsonIgnore List<Person> primaryOperators
     @JsonIgnore List<String> performingPhysiciansName // Series level field, but in most cases it's going to be fixed across a study
 
-    Study randomize(SpecificationParameters specificationParameters, Protocol protocol) {
+    Study randomize(SpecificationParameters specificationParameters, SequentialIdGenerator studyIdGenerator, Protocol protocol) {
+        studyId = studyIdGenerator.get()
+        accessionNumber = studyId
         protocol.setFieldsFor(specificationParameters, patient, this)
         if (specificationParameters.includeBinariesInPrivateElements) {
             studyLevelPrivateBlocks << new PrivateBlock(

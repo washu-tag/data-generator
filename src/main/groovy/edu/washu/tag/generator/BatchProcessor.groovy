@@ -7,8 +7,12 @@ class BatchProcessor {
     List<File> batches
     boolean writeFiles = true // DICOM & HL7 [if generated]
     boolean generateTests = false
+    boolean radReportWritten = false
+    static final File hl7Output = new File('hl7')
+    private static final File dicomOutput = new File('dicom_output')
 
     static void main(String[] args) {
+        initDirs()
         final BatchProcessor batchProcessor = new BatchProcessor(batches: args[0].split(',').collect {
             new File(it)
         })
@@ -19,43 +23,58 @@ class BatchProcessor {
             batchProcessor.setGenerateTests(Boolean.parseBoolean(args[2]))
         }
 
-        batchProcessor.writeBatches()
+        batchProcessor.writeAndCombineBatches()
     }
 
-    void writeBatches() {
-        final YamlObjectMapper objectMapper = new YamlObjectMapper()
-        final File dicomOutput = new File('dicom_output')
-        final File hl7Output = new File('hl7')
+    static void initDirs() {
         [dicomOutput, hl7Output].each { outputDir ->
             if (!outputDir.exists()) {
                 outputDir.mkdir()
             }
         }
+    }
+
+    void writeBatches() {
+        final YamlObjectMapper objectMapper = new YamlObjectMapper()
 
         println("STAGE 2: ${batches.size()} batch file${batches.size() > 1 ? 's' : ''} will be written to files and/or used to create test queries.")
-        boolean radReportWritten = false
         final QueryGenerator queryGenerator = new QueryGenerator()
 
         batches.eachWithIndex { batchFile, index ->
             final BatchSpecification batch = objectMapper.readValue(batchFile, BatchSpecification)
-            if (writeFiles) {
-                batch.generateDicom(index, batches.size(), dicomOutput)
-                if (batch.containsRadiologyReport()) {
-                    batch.generateHl7(index, batches.size(), hl7Output)
-                    radReportWritten = true
-                }
-            }
+            writeSpec(batch, index)
             if (generateTests) {
                 queryGenerator.processData(batch)
             }
         }
 
-        if (radReportWritten) {
-            new Hl7Logger().writeToHl7ishLogFiles(hl7Output)
-        }
-
         if (generateTests) {
             queryGenerator.writeQueries()
+        }
+        println("STAGE 2 complete: (DICOM/HL7/test queries)")
+    }
+
+    void writeSpec(BatchSpecification batch, int index, Integer numBatches = batches.size()) {
+        if (writeFiles) {
+            batch.generateDicom(index, numBatches, dicomOutput)
+            if (batch.containsRadiologyReport()) {
+                batch.generateHl7(index, numBatches, hl7Output)
+                radReportWritten = true
+            }
+        }
+    }
+
+    void writeAndCombineBatches() {
+        writeBatches()
+
+        if (radReportWritten) {
+            println("STAGE 3: starting to combine separate HL7 files into pseudo-HL7 log format")
+            final Hl7Logger hl7Logger = new Hl7Logger()
+            hl7Logger.identifyHl7LogFiles(hl7Output).each { hl7LogFile ->
+                hl7Logger.writeToHl7ishLogFile(hl7LogFile)
+                println("Wrote log file: ${hl7LogFile.asFile.name}")
+            }
+            println("STAGE 3 complete (HL7-ish logs)")
         }
     }
 

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import edu.washu.tag.TestQuery
 import edu.washu.tag.TestQuerySuite
 import edu.washu.tag.generator.BatchSpecification
-import edu.washu.tag.generator.hl7.v2.segment.ObrGenerator
 import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.enums.Race
@@ -33,7 +32,6 @@ class QueryGenerator {
     private static final LoggableValidation VALIDATION_DOB = new DateComparisonValidation()
         .description('patient born after 1990-12-31')
         .columnName(COLUMN_DOB)
-        .truncation(8)
         .comparisonValue(19901231)
         .comparisonOperator(DateComparisonValidation.ComparisonOperator.GT)
     private static final String COLUMN_ORC_PLACER_ORDER_NUM = 'orc_2_placer_order_number'
@@ -63,7 +61,7 @@ class QueryGenerator {
                 new ExactNumberRadReportResult(matchesHl7Version('2.4'))
                     .withAdditionalValidation(VALIDATION_STUDY_INSTANCE_UID)
             ),
-        new TestQuery('dob_greater', "SELECT * FROM ${TABLE_NAME} WHERE SUBSTRING(${COLUMN_DOB}, 1, 8) > '19901231'")
+        new TestQuery('dob_greater', "SELECT * FROM ${TABLE_NAME} WHERE YEAR(${COLUMN_DOB}) > 1990")
             .withDataProcessor(
                 new ExactNumberRadReportResult(
                     { RadiologyReport radiologyReport ->
@@ -118,7 +116,7 @@ class QueryGenerator {
     private static TestQuery primaryModalityBySex() {
         new TestQuery('modality_grouping', FileIOUtils.readResource('modality_query.sql'))
             .withDataProcessor(
-                new GroupedAggregationRadReportResult(matchesHl7Version('2.7'))
+                new GroupedAggregationRadReportResult({ true })
                     .primaryColumn('primary_modality')
                     .primaryColumnDerivation({ report ->
                         ProcedureCode.lookup(report.study.procedureCodeId).impliedModality

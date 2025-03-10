@@ -8,9 +8,9 @@ import edu.washu.tag.generator.util.RandomGenUtils
 
 class SpecificationParameters {
 
-    long numPatients
-    long numStudies
-    long numSeries
+    int numPatients
+    int numStudies
+    int numSeries
     List<Protocol> protocols
     List<Protocol> protocolsBelowNumSeriesExpectedAverage = []
     List<Protocol> protocolsAboveNumSeriesExpectedAverage = []

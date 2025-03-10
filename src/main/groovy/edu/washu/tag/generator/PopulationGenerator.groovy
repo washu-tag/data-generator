@@ -1,18 +1,22 @@
 package edu.washu.tag.generator
 
+import edu.washu.tag.generator.metadata.NameCache
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.patient.*
-import edu.washu.tag.util.FileIOUtils
 import edu.washu.tag.generator.util.RandomGenUtils
+import edu.washu.tag.generator.util.SequentialIdGenerator
+import edu.washu.tag.util.FileIOUtils
+import groovyx.gpars.GParsPool
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 
-import java.util.concurrent.ThreadLocalRandom
+import static java.lang.Math.round
 
 class PopulationGenerator {
 
     SpecificationParameters specificationParameters = new YamlObjectMapper().readValue(FileIOUtils.readResource('basicRequest.yaml'), SpecificationParameters)
     boolean writeDataToFiles = false
     boolean generateTestQueries = false
+
     private static final EnumeratedDistribution<PatientRandomizer> patientRandomizers = RandomGenUtils.setupWeightedLottery([
             (new DefaultPatientRandomizer()) : 85,
             (new GreekPatientRandomizer()) : 5,
@@ -33,57 +37,98 @@ class PopulationGenerator {
         )
         generator.setWriteDataToFiles(args[1] == 'true')
         generator.setGenerateTestQueries(args[2] == 'true')
-        generator.generate()
+
+        final NameCache nameCache = NameCache.initInstance()
+        final IdOffsets idOffsets = new IdOffsets()
+
+        final List<BatchRequest> batchRequests = generator.chunkRequest()
+        final String batchFulfillment = batchRequests.size() > 1 ? "split into ${batchRequests.size()} batches" : 'fulfilled in a single batch'
+        println("STAGE 1: request will be ${batchFulfillment}")
+
+        final List<File> batchSpecifications = batchRequests.collect { batchRequest ->
+            final File batchFile = generator
+                .generateBatch(nameCache, idOffsets, batchRequest)
+                .asFile()
+            println("Specification for batch #${batchRequest.id} (out of ${batchRequests.size()}) has been created")
+            batchFile
+        }
+        println("STAGE 1 complete, batches have been generated")
+
+        BatchProcessor.initDirs()
+        if (generator.writeDataToFiles) {
+            new BatchProcessor(
+                batches: batchSpecifications,
+                generateTests: generator.generateTestQueries
+            ).writeAndCombineBatches()
+        }
     }
 
-    void generate() {
-        long generatedPatients = 0
-        long generatedStudies = 0
-        long generatedSeries = 0
-        long nextAccessionNumber = 2000000000 + ThreadLocalRandom.current().nextLong(7000000000)
+    List<BatchRequest> chunkRequest() {
+        new File('batches').mkdir() // while we're still in a single process
+        final int totalNumPatients = specificationParameters.numPatients
+        final int totalNumStudies = specificationParameters.numStudies
+        final int totalNumSeries = specificationParameters.numSeries
+        final int patientsPerFullBatch = BatchSpecification.MAX_PATIENTS
+        final int patientsInIncompleteBatch = totalNumPatients % patientsPerFullBatch
+        final boolean hasIncompleteBatch = patientsInIncompleteBatch != 0
+        final int studiesPerFullBatch = round((patientsPerFullBatch * totalNumStudies) / totalNumPatients).intValue()
+        final int studiesInIncompleteBatch = totalNumStudies % studiesPerFullBatch
+        final int seriesPerFullBatch = round((patientsPerFullBatch * totalNumSeries) / totalNumPatients).intValue()
+        final int seriesInIncompleteBatch = totalNumSeries % seriesPerFullBatch
+        final int totalNumBatches = Math.ceil(specificationParameters.numPatients / BatchSpecification.MAX_PATIENTS).intValue()
+        (0 ..< totalNumBatches).collect { batchId ->
+            final boolean isPartialBatch = hasIncompleteBatch && batchId == totalNumBatches - 1
+            new BatchRequest(
+                id: batchId,
+                numPatients: isPartialBatch ? patientsInIncompleteBatch : patientsPerFullBatch,
+                numStudies: isPartialBatch ? studiesInIncompleteBatch : studiesPerFullBatch,
+                numSeries:  isPartialBatch ? seriesInIncompleteBatch : seriesPerFullBatch,
+                patientOffset: patientsPerFullBatch * batchId,
+                studyOffset: studiesPerFullBatch * batchId
+            )
+        }
+    }
 
+    BatchSpecification generateBatch(NameCache nameCache, IdOffsets idOffsets, BatchRequest batchRequest) {
         specificationParameters.postprocess()
-        BatchSpecification currentBatch = new BatchSpecification(id : 0)
+        NameCache.cache(nameCache)
 
-        new File('batches').mkdir()
-        final int expectedNumBatches = Math.ceil(specificationParameters.numPatients / BatchSpecification.MAX_PATIENTS).intValue()
+        final BatchSpecification batchSpecification = new BatchSpecification(id: batchRequest.id)
+        final GenerationContext generationContext = new GenerationContext(
+            specificationParameters: specificationParameters,
+            patientIdEncoders: idOffsets.getPatientIdEncodersFromOffset(batchRequest.patientOffset),
+            studyCountOverride: 0
+        )
+        int generatedStudies = 0
+        int generatedSeries = 0
+        final SequentialIdGenerator studyIdGenerator = idOffsets.getStudyIdEncoderFromOffset(batchRequest.studyOffset)
 
-        println("STAGE 1: you requested data for ${specificationParameters.numPatients} patients. Manifests for creating the DICOM will first be generated in about ${expectedNumBatches} batch${expectedNumBatches > 1 ? 'es' : ''}")
-
-        while (generatedPatients < specificationParameters.numPatients || generatedStudies < specificationParameters.numStudies || generatedSeries < specificationParameters.numSeries) {
-            final int currentAverageStudiesPerPatient = generatedPatients == 0 ? 0 : generatedStudies / generatedPatients
+        batchRequest.numPatients.times { generatedPatients ->
+            generationContext.setCurrentAverageStudiesPerPatient(generatedPatients == 0 ? 0.0 : generatedStudies / generatedPatients)
+            generationContext.setPreviouslyGeneratedSeries(generatedSeries)
+            generationContext.setPreviouslyGeneratedStudies(generatedStudies)
+            if (generatedPatients == batchRequest.numPatients - 1) { // for last patient in batch, we need to ensure exact number of studies
+                generationContext.setStudyCountOverride(batchRequest.numStudies - generatedStudies)
+            }
             final Patient patient = patientRandomizers.sample().createPatient(specificationParameters)
-            patient.randomize(specificationParameters, currentAverageStudiesPerPatient, generatedSeries, generatedStudies)
-            currentBatch.patients << patient
-            generatedPatients++
+            patient.randomize(generationContext, studyIdGenerator)
+            batchSpecification.patients << patient
             patient.studies.each { study ->
-                study.setAccessionNumber(nextAccessionNumber.toString())
-                study.setStudyId(study.accessionNumber)
-                nextAccessionNumber++
                 generatedStudies++
                 generatedSeries += study.series.size()
             }
-            if (currentBatch.isFull()) {
-                currentBatch.writeToFileAndLog(expectedNumBatches, specificationParameters)
-                currentBatch = new BatchSpecification(id : currentBatch.id + 1)
+        }
+
+        if (specificationParameters.generateRadiologyReports) {
+            GParsPool.withPool {
+                batchSpecification.patients.eachParallel { Patient patient ->
+                    specificationParameters.reportGeneratorImplementation.generateReportsForPatient(patient)
+                }
             }
         }
 
-        if (!currentBatch.written && currentBatch.patients.size() > 0) {
-            currentBatch.writeToFileAndLog(expectedNumBatches, specificationParameters)
-        }
-
-        println("STAGE 1 COMPLETE: manifests for data of ${specificationParameters.numPatients} patients have been created.")
-
-        if (writeDataToFiles) {
-            new BatchProcessor(
-                batches:
-                    (0 .. currentBatch.id).collect { id ->
-                        new File(new BatchSpecification(id: id).relativeFilePath())
-                    },
-                generateTests: generateTestQueries
-            ).writeBatches()
-        }
+        batchSpecification.writeToFile()
+        batchSpecification
     }
 
 }

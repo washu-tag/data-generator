@@ -5,7 +5,6 @@ import edu.washu.tag.QuerySourceData
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.util.TimeUtils
-import groovyx.gpars.GParsPool
 
 import java.nio.file.Path
 import java.time.LocalDateTime
@@ -15,7 +14,7 @@ class BatchSpecification implements QuerySourceData {
     int id
     List<Patient> patients = []
     @JsonIgnore written = false
-    public static final int MAX_PATIENTS = 10000
+    public static final int MAX_PATIENTS = 2000
     public static final int MAX_PATIENTS_PER_LAYER = 100
 
     @JsonIgnore
@@ -27,25 +26,17 @@ class BatchSpecification implements QuerySourceData {
         "batches/batch_${id}.yaml"
     }
 
+    File asFile() {
+        new File(relativeFilePath())
+    }
+
     void writeToFile() {
-        new YamlObjectMapper().writeValue(new File(relativeFilePath()), this)
+        new YamlObjectMapper().writeValue(asFile(), this)
         written = true
     }
 
-    void writeToFileAndLog(int expectedNumBatches, SpecificationParameters specificationParameters) {
-        if (specificationParameters.generateRadiologyReports) {
-            GParsPool.withPool {
-                patients.eachParallel { Patient patient ->
-                    specificationParameters.reportGeneratorImplementation.generateReportsForPatient(patient)
-                }
-            }
-        }
-        writeToFile()
-        println("  Specification for batch #${id} (out of roughly ${expectedNumBatches}) has been created in ${relativeFilePath()}")
-    }
-
     void generateDicom(int index, int totalNumBatches, File outputDir) {
-        println("  Writing batch with id ${id} to DICOM...")
+        println("Writing batch with id ${id} to DICOM...")
         final Path batchDirectory = outputDir.toPath().resolve("batch_${id}")
         batchDirectory.toFile().mkdir()
         int layerId = -1
@@ -75,11 +66,11 @@ class BatchSpecification implements QuerySourceData {
             }
             patientsWritten++
         }
-        println("  Successfully wrote batch with id ${id} to DICOM [${index + 1}/${totalNumBatches}]")
+        println("Successfully wrote batch with id ${id} to DICOM [${index + 1}/${totalNumBatches}]")
     }
 
     void generateHl7(int index, int totalNumBatches, File outputDir) {
-        println("  Writing batch with id ${id} to HL7 v2...")
+        println("Writing batch with id ${id} to HL7 v2...")
 
         patients.each { patient ->
             patient.studies.each { study ->
@@ -99,7 +90,7 @@ class BatchSpecification implements QuerySourceData {
             }
         }
 
-        println("  Successfully wrote batch with id ${id} to HL7 [${index + 1}/${totalNumBatches}]")
+        println("Successfully wrote batch with id ${id} to HL7 [${index + 1}/${totalNumBatches}]")
     }
 
     boolean containsRadiologyReport() {
