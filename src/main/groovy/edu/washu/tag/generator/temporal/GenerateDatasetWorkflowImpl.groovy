@@ -67,7 +67,7 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
         logger.info("${workflowLoggingInfo} Request has been split into ${batchRequests.size()} batches")
 
         Promise.allOf(batchRequests.collect { batchRequest ->
-            Async.function(generateProcessorActivity.&generateBatch, specificationParameters, nameCache, idOffsets, batchRequest)
+            Async.function(generateProcessorActivity.&generateBatch, specificationParametersPath, nameCache, idOffsets, batchRequest)
         }).get()
 
         logger.info("${workflowLoggingInfo} all batches have been written")
