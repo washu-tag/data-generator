@@ -7,12 +7,12 @@ import edu.washu.tag.generator.IdOffsets
 import edu.washu.tag.generator.PopulationGenerator
 import edu.washu.tag.generator.SpecificationParameters
 import edu.washu.tag.generator.metadata.NameCache
-import io.temporal.spring.boot.WorkflowImpl
+import io.temporal.spring.boot.ActivityImpl
 import io.temporal.workflow.Workflow
 import io.temporal.workflow.WorkflowMethod
 import org.slf4j.Logger
 
-@WorkflowImpl(taskQueues = 'data-generator')
+@ActivityImpl(taskQueues = TemporalApplication.TASK_QUEUE)
 class GenerateBatchActivityImpl implements GenerateBatchActivity {
 
     private static final Logger logger = Workflow.getLogger(GenerateBatchActivityImpl)

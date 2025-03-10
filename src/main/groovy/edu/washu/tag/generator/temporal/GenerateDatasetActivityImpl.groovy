@@ -10,7 +10,6 @@ import edu.washu.tag.generator.YamlObjectMapper
 import edu.washu.tag.generator.metadata.NameCache
 import io.temporal.activity.ActivityOptions
 import io.temporal.common.RetryOptions
-import io.temporal.internal.sync.AllOfPromise
 import io.temporal.spring.boot.WorkflowImpl
 import io.temporal.workflow.Async
 import io.temporal.workflow.Promise
@@ -20,7 +19,7 @@ import org.slf4j.Logger
 
 import java.time.Duration
 
-@WorkflowImpl(taskQueues = 'data-generator')
+@WorkflowImpl(taskQueues = TemporalApplication.TASK_QUEUE)
 class GenerateDatasetActivityImpl implements GenerateDatasetActivity {
 
     private static final Logger logger = Workflow.getLogger(GenerateDatasetActivityImpl)

@@ -1,13 +1,13 @@
 package edu.washu.tag.generator.temporal
 
 import edu.washu.tag.generator.Hl7LogFile
-import io.temporal.workflow.WorkflowInterface
-import io.temporal.workflow.WorkflowMethod
+import io.temporal.activity.ActivityInterface
+import io.temporal.activity.ActivityMethod
 
-@WorkflowInterface
+@ActivityInterface
 interface FormHl7LogActivity {
 
-    @WorkflowMethod
+    @ActivityMethod
     void formLogFile(Hl7LogFile hl7LogFile)
 
 }

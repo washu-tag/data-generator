@@ -4,13 +4,13 @@ import edu.washu.tag.generator.BatchRequest
 import edu.washu.tag.generator.IdOffsets
 import edu.washu.tag.generator.SpecificationParameters
 import edu.washu.tag.generator.metadata.NameCache
-import io.temporal.workflow.WorkflowInterface
-import io.temporal.workflow.WorkflowMethod
+import io.temporal.activity.ActivityInterface
+import io.temporal.activity.ActivityMethod
 
-@WorkflowInterface
+@ActivityInterface
 interface GenerateBatchActivity {
 
-    @WorkflowMethod
+    @ActivityMethod
     void generateBatch(SpecificationParameters specificationParameters, NameCache nameCache, IdOffsets idOffsets, BatchRequest batchRequest)
 
 }
