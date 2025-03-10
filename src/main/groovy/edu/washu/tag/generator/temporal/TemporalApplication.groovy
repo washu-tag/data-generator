@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 class TemporalApplication {
 
     static final String PARENT_QUEUE = 'data-generator'
-    static final String CHILD_QUEUE = 'data-generator-delegate'
+    static final String CHILD_QUEUE = 'data-generator'
 
     static void main(String[] args) {
         SpringApplication.run(TemporalApplication, args)
