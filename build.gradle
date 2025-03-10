@@ -1,5 +1,7 @@
 plugins {
     id 'groovy'
+    id 'org.springframework.boot' version '3.4.1'
+    id 'io.spring.dependency-management' version '1.1.7'
     id 'java'
 }
 
@@ -39,6 +41,10 @@ final String vTemporal = '1.28.0'
 configurations {
     all*.exclude group: 'ch.qos.logback', module: 'logback-classic'
     all*.exclude group: 'ch.qos.logback', module: 'logback-core'
+
+    all {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
 }
 
 dependencies {
