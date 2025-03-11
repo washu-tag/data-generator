@@ -1,12 +1,8 @@
 package edu.washu.tag.generator.temporal.workflow
 
-import edu.washu.tag.generator.*
-import edu.washu.tag.generator.metadata.NameCache
-import edu.washu.tag.generator.temporal.activity.BatchHandlerActivity
-import edu.washu.tag.generator.temporal.activity.FormHl7LogActivity
-import edu.washu.tag.generator.temporal.model.GenerateBatchInput
-import edu.washu.tag.generator.temporal.model.GenerateBatchOutput
 import edu.washu.tag.generator.temporal.TemporalApplication
+import edu.washu.tag.generator.temporal.activity.BatchHandlerActivity
+import edu.washu.tag.generator.temporal.model.GenerateBatchInput
 import io.temporal.activity.ActivityOptions
 import io.temporal.common.RetryOptions
 import io.temporal.spring.boot.WorkflowImpl
@@ -30,9 +26,8 @@ class GenerateBatchWorkflowImpl implements GenerateBatchWorkflow {
         )
 
     @Override
-    GenerateBatchOutput generateBatch(GenerateBatchInput generateBatchInput) {
+    void generateBatch(GenerateBatchInput generateBatchInput) {
         batchHandlerActivity.formAndWriteBatch(generateBatchInput)
-        new GenerateBatchOutput()
     }
 
 }

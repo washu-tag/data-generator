@@ -1,8 +1,6 @@
 package edu.washu.tag.generator.temporal.workflow
 
-
 import edu.washu.tag.generator.temporal.model.GenerateBatchInput
-import edu.washu.tag.generator.temporal.model.GenerateBatchOutput
 import io.temporal.workflow.WorkflowInterface
 import io.temporal.workflow.WorkflowMethod
 
@@ -10,6 +8,6 @@ import io.temporal.workflow.WorkflowMethod
 interface GenerateBatchWorkflow {
 
     @WorkflowMethod
-    GenerateBatchOutput generateBatch(GenerateBatchInput generateBatchInput)
+    void generateBatch(GenerateBatchInput generateBatchInput)
 
 }
