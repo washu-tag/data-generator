@@ -8,6 +8,9 @@ import io.temporal.activity.ActivityMethod
 interface FormHl7LogActivity {
 
     @ActivityMethod
-    void formLogFiles(List<Hl7LogFile> hl7LogFiles)
+    List<Hl7LogFile> identifyLogFiles(File baseDir)
+
+    @ActivityMethod
+    void formLogFile(Hl7LogFile hl7LogFile)
 
 }

@@ -2,11 +2,9 @@ package edu.washu.tag.generator.temporal.workflow
 
 import edu.washu.tag.generator.BatchProcessor
 import edu.washu.tag.generator.BatchRequest
-import edu.washu.tag.generator.Hl7Logger
 import edu.washu.tag.generator.IdOffsets
 import edu.washu.tag.generator.metadata.NameCache
 import edu.washu.tag.generator.temporal.activity.EarlySetupHandlerActivity
-import edu.washu.tag.generator.temporal.activity.FormHl7LogActivity
 import edu.washu.tag.generator.temporal.model.GenerateBatchInput
 import edu.washu.tag.generator.temporal.model.GenerateDatasetInput
 import edu.washu.tag.generator.temporal.TemporalApplication
@@ -40,18 +38,6 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
                 ).build()
         )
 
-    private final FormHl7LogActivity formHl7LogActivity =
-        Workflow.newActivityStub(
-            FormHl7LogActivity,
-            ActivityOptions.newBuilder()
-                .setStartToCloseTimeout(Duration.ofMinutes(15))
-                .setRetryOptions(RetryOptions.newBuilder()
-                    .setMaximumInterval(Duration.ofSeconds(1))
-                    .setMaximumAttempts(3)
-                    .build())
-                .build()
-        )
-
     @Override
     void generateDataset(GenerateDatasetInput input) {
         final WorkflowInfo workflowInfo = Workflow.getInfo()
@@ -80,8 +66,14 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
 
         // Output combined HL7(-ish) log files now that all results are prepared
         Async.function(
-            formHl7LogActivity.&formLogFiles,
-            new Hl7Logger().identifyHl7LogFiles(BatchProcessor.hl7Output)
+            Workflow.newChildWorkflowStub(
+                CombineHl7Workflow,
+                ChildWorkflowOptions.newBuilder()
+                    .setTaskQueue(TemporalApplication.CHILD_QUEUE)
+                    .setWorkflowId("${workflowInfo.workflowId}/combine-hl7")
+                    .build()
+            ).&combineLogs,
+            BatchProcessor.hl7Output
         ).get()
     }
 

@@ -15,12 +15,15 @@ class FormHl7LogActivityImpl implements FormHl7LogActivity {
     private static final Logger logger = Workflow.getLogger(FormHl7LogActivityImpl)
 
     @Override
-    void formLogFiles(List<Hl7LogFile> hl7LogFiles) {
-        hl7LogFiles.each { hl7LogFile ->
-            logger.info("Preparing HL7-ish log file ${hl7LogFile.asFile.name}")
-            new Hl7Logger().writeToHl7ishLogFile(hl7LogFile)
-            logger.info("Successfully wrote ${hl7LogFile.asFile.name}")
-        }
+    List<Hl7LogFile> identifyLogFiles(File baseDir) {
+        new Hl7Logger().identifyHl7LogFiles(baseDir)
+    }
+
+    @Override
+    void formLogFile(Hl7LogFile hl7LogFile) {
+        logger.info("Preparing HL7-ish log file ${hl7LogFile.asFile.name}")
+        new Hl7Logger().writeToHl7ishLogFile(hl7LogFile)
+        logger.info("Successfully wrote ${hl7LogFile.asFile.name}")
     }
 
 }
