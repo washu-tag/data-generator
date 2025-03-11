@@ -27,14 +27,10 @@ class PopulationGenerator {
     static void main(String[] args) {
         final PopulationGenerator generator = new PopulationGenerator()
         final String configName = args[0]
-        generator.setSpecificationParameters(
-                new YamlObjectMapper().readValue(
-                        configName == 'default' ?
-                                FileIOUtils.readResource('basicRequest.yaml') :
-                                new File(configName).text,
-                        SpecificationParameters
-                )
-        )
+        if (configName != 'default') {
+            generator.readSpecificationParameters(configName)
+        }
+
         generator.setWriteDataToFiles(args[1] == 'true')
         generator.setGenerateTestQueries(args[2] == 'true')
 
@@ -87,6 +83,12 @@ class PopulationGenerator {
                 studyOffset: studiesPerFullBatch * batchId
             )
         }
+    }
+
+    void readSpecificationParameters(String configName) {
+        setSpecificationParameters(
+            new YamlObjectMapper().readValue(new File(configName), SpecificationParameters)
+        )
     }
 
     BatchSpecification generateBatch(NameCache nameCache, IdOffsets idOffsets, BatchRequest batchRequest) {

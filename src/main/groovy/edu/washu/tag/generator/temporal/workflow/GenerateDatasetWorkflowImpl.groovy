@@ -4,10 +4,11 @@ import edu.washu.tag.generator.BatchProcessor
 import edu.washu.tag.generator.BatchRequest
 import edu.washu.tag.generator.Hl7Logger
 import edu.washu.tag.generator.IdOffsets
-import edu.washu.tag.generator.PopulationGenerator
 import edu.washu.tag.generator.metadata.NameCache
+import edu.washu.tag.generator.temporal.activity.EarlySetupHandlerActivity
 import edu.washu.tag.generator.temporal.activity.FormHl7LogActivity
-import edu.washu.tag.generator.temporal.GenerateDatasetInput
+import edu.washu.tag.generator.temporal.model.GenerateBatchInput
+import edu.washu.tag.generator.temporal.model.GenerateDatasetInput
 import edu.washu.tag.generator.temporal.TemporalApplication
 import io.temporal.activity.ActivityOptions
 import io.temporal.common.RetryOptions
@@ -26,12 +27,18 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
 
     private static final Logger logger = Workflow.getLogger(GenerateDatasetWorkflowImpl)
 
-    private final GenerateBatchWorkflow generateBatchWorkflow = Workflow.newChildWorkflowStub(
-        GenerateBatchWorkflow,
-        ChildWorkflowOptions.newBuilder()
-            .setTaskQueue(TemporalApplication.CHILD_QUEUE)
-            .build()
-    )
+    private final EarlySetupHandlerActivity earlySetupActivity =
+        Workflow.newActivityStub(
+            EarlySetupHandlerActivity,
+            ActivityOptions.newBuilder()
+                .setStartToCloseTimeout(Duration.ofSeconds(15))
+                .setTaskQueue(TemporalApplication.PARENT_QUEUE)
+                .setRetryOptions(
+                    RetryOptions.newBuilder()
+                        .setMaximumAttempts(1)
+                        .build()
+                ).build()
+        )
 
     private final FormHl7LogActivity formHl7LogActivity =
         Workflow.newActivityStub(
@@ -47,24 +54,26 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
 
     @Override
     void generateDataset(GenerateDatasetInput input) {
-        Workflow.sleep(1) // hack
-        final String specificationParametersPath = input.specificationParametersPath
         final WorkflowInfo workflowInfo = Workflow.getInfo()
         final String workflowLoggingInfo = "[workflowId: ${workflowInfo.workflowId}]"
         logger.info("${workflowLoggingInfo} Beginning workflow ${this.class.simpleName}")
 
-        BatchProcessor.initDirs()
-        final PopulationGenerator generator = new PopulationGenerator()
-
-        final NameCache nameCache = NameCache.initInstance()
+        final NameCache nameCache = earlySetupActivity.initNameCache()
         final IdOffsets idOffsets = new IdOffsets()
 
-        final List<BatchRequest> batchRequests = generator.chunkRequest()
-        logger.info("${workflowLoggingInfo} Request has been split into ${batchRequests.size()} batches")
+        final List<BatchRequest> batchRequests = earlySetupActivity.chunkBatches(input.specificationParametersPath)
 
         // Launch child workflow for each batch to fulfill
         Promise.allOf(batchRequests.collect { batchRequest ->
-            Async.function(generateBatchWorkflow.&generateBatch, specificationParametersPath, nameCache, idOffsets, batchRequest)
+            Async.function(
+                Workflow.newChildWorkflowStub(
+                    GenerateBatchWorkflow,
+                    ChildWorkflowOptions.newBuilder()
+                        .setTaskQueue(TemporalApplication.CHILD_QUEUE)
+                        .setWorkflowId("${workflowInfo.workflowId}/batch-${batchRequest.id}")
+                        .build()
+                ).&generateBatch,
+                new GenerateBatchInput(input.specificationParametersPath, nameCache, idOffsets, batchRequest))
         }).get()
 
         logger.info("${workflowLoggingInfo} all batches have been written")
