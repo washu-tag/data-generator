@@ -6,7 +6,9 @@ import edu.washu.tag.generator.temporal.TemporalApplication
 import io.temporal.spring.boot.ActivityImpl
 import io.temporal.workflow.Workflow
 import org.slf4j.Logger
+import org.springframework.stereotype.Component
 
+@Component
 @ActivityImpl(taskQueues = TemporalApplication.PARENT_QUEUE)
 class FormHl7LogActivityImpl implements FormHl7LogActivity {
 
