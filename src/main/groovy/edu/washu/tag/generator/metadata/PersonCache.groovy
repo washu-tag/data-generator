@@ -4,10 +4,14 @@ import edu.washu.tag.generator.util.RandomGenUtils
 
 class PersonCache<X> {
 
-    private final Map<X, List<Person>> personCache
+    private Map<X, List<Person>> personCache
 
     PersonCache(Map<X, List<Person>> personCache) {
         this.personCache = personCache
+    }
+
+    PersonCache() {
+
     }
 
     List<Person> selectPeople(X personLink, int numPeople) {

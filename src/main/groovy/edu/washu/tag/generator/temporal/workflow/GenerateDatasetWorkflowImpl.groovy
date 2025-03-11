@@ -47,6 +47,7 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
 
     @Override
     void generateDataset(GenerateDatasetInput input) {
+        Workflow.sleep(1) // hack
         final String specificationParametersPath = input.specificationParametersPath
         final WorkflowInfo workflowInfo = Workflow.getInfo()
         final String workflowLoggingInfo = "[workflowId: ${workflowInfo.workflowId}]"
