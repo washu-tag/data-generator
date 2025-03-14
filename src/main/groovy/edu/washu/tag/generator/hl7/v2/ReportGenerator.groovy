@@ -11,7 +11,8 @@ import edu.washu.tag.generator.metadata.Patient
 )
 @JsonSubTypes([
     @JsonSubTypes.Type(value = CyclicVariedGptGenerator, name = 'gpt'),
-    @JsonSubTypes.Type(value = FixedSampleReportGenerator, name = 'fixed')
+    @JsonSubTypes.Type(value = FixedSampleReportGenerator, name = 'fixed'),
+    @JsonSubTypes.Type(value = FixedSampleReportGenerator, name = 'fixed_large')
 ])
 abstract class ReportGenerator {
 

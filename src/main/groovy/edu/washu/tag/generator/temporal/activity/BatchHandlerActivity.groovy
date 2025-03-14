@@ -1,6 +1,6 @@
 package edu.washu.tag.generator.temporal.activity
 
-import edu.washu.tag.generator.temporal.model.GenerateBatchInput
+import edu.washu.tag.generator.temporal.model.BatchHandlerActivityInput
 import io.temporal.activity.ActivityInterface
 import io.temporal.activity.ActivityMethod
 
@@ -8,6 +8,6 @@ import io.temporal.activity.ActivityMethod
 interface BatchHandlerActivity {
 
     @ActivityMethod
-    void formAndWriteBatch(GenerateBatchInput generateBatchInput)
+    void formAndWriteBatch(BatchHandlerActivityInput batchHandlerActivityInput)
 
 }

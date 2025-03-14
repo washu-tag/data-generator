@@ -8,6 +8,10 @@ import edu.washu.tag.generator.util.SequentialIdGenerator
 import edu.washu.tag.util.FileIOUtils
 import groovyx.gpars.GParsPool
 import org.apache.commons.math3.distribution.EnumeratedDistribution
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+import java.util.function.Consumer
 
 import static java.lang.Math.round
 
@@ -16,6 +20,7 @@ class PopulationGenerator {
     SpecificationParameters specificationParameters = new YamlObjectMapper().readValue(FileIOUtils.readResource('basicRequest.yaml'), SpecificationParameters)
     boolean writeDataToFiles = false
     boolean generateTestQueries = false
+    private final Logger logger = LoggerFactory.getLogger(PopulationGenerator)
 
     private static final EnumeratedDistribution<PatientRandomizer> patientRandomizers = RandomGenUtils.setupWeightedLottery([
             (new DefaultPatientRandomizer()) : 85,
@@ -67,9 +72,9 @@ class PopulationGenerator {
         final int patientsPerFullBatch = BatchSpecification.MAX_PATIENTS
         final int patientsInIncompleteBatch = totalNumPatients % patientsPerFullBatch
         final boolean hasIncompleteBatch = patientsInIncompleteBatch != 0
-        final int studiesPerFullBatch = round((patientsPerFullBatch * totalNumStudies) / totalNumPatients).intValue()
+        final int studiesPerFullBatch = round(((long) patientsPerFullBatch * (long) totalNumStudies) / totalNumPatients).intValue()
         final int studiesInIncompleteBatch = totalNumStudies % studiesPerFullBatch
-        final int seriesPerFullBatch = round((patientsPerFullBatch * totalNumSeries) / totalNumPatients).intValue()
+        final int seriesPerFullBatch = round(((long) patientsPerFullBatch * (long) totalNumSeries) / totalNumPatients).intValue()
         final int seriesInIncompleteBatch = totalNumSeries % seriesPerFullBatch
         final int totalNumBatches = Math.ceil(specificationParameters.numPatients / BatchSpecification.MAX_PATIENTS).intValue()
         (0 ..< totalNumBatches).collect { batchId ->
@@ -92,10 +97,39 @@ class PopulationGenerator {
     }
 
     BatchSpecification generateBatch(NameCache nameCache, IdOffsets idOffsets, BatchRequest batchRequest) {
+        final BatchSpecification batchSpecification = new BatchSpecification(id: batchRequest.id)
+        final Consumer<Patient> patientConsumer = { Patient patient -> batchSpecification.patients << patient }
+        generateBatchWithHandler(nameCache, idOffsets, batchRequest, patientConsumer, false)
+
+        if (specificationParameters.generateRadiologyReports) {
+            GParsPool.withPool {
+                batchSpecification.patients.eachParallel { Patient patient ->
+                    specificationParameters.reportGeneratorImplementation.generateReportsForPatient(patient)
+                }
+            }
+        }
+
+        batchSpecification.writeToFile()
+        batchSpecification
+    }
+
+    void generateAndWriteFullBatch(NameCache nameCache, IdOffsets idOffsets, BatchRequest batchRequest, boolean writeDicom, boolean writeHl7) {
+        final OutputHandler outputHandler = new OutputHandler(batchRequest.id)
+        final Consumer<Patient> patientConsumer = { Patient patient ->
+            if (writeDicom) {
+                outputHandler.writeDicomForPatient(patient)
+            }
+            if (writeHl7) {
+                outputHandler.writeHl7ForPatient(patient)
+            }
+        }
+        generateBatchWithHandler(nameCache, idOffsets, batchRequest, patientConsumer, true)
+    }
+
+    private void generateBatchWithHandler(NameCache nameCache, IdOffsets idOffsets, BatchRequest batchRequest, Consumer<Patient> handler, boolean generateReports) {
         specificationParameters.postprocess()
         NameCache.cache(nameCache)
 
-        final BatchSpecification batchSpecification = new BatchSpecification(id: batchRequest.id)
         final GenerationContext generationContext = new GenerationContext(
             specificationParameters: specificationParameters,
             patientIdEncoders: idOffsets.getPatientIdEncodersFromOffset(batchRequest.patientOffset),
@@ -114,23 +148,18 @@ class PopulationGenerator {
             }
             final Patient patient = patientRandomizers.sample().createPatient(specificationParameters)
             patient.randomize(generationContext, studyIdGenerator)
-            batchSpecification.patients << patient
             patient.studies.each { study ->
                 generatedStudies++
                 generatedSeries += study.series.size()
             }
-        }
-
-        if (specificationParameters.generateRadiologyReports) {
-            GParsPool.withPool {
-                batchSpecification.patients.eachParallel { Patient patient ->
-                    specificationParameters.reportGeneratorImplementation.generateReportsForPatient(patient)
-                }
+            if (specificationParameters.generateRadiologyReports && generateReports) {
+                specificationParameters.reportGeneratorImplementation.generateReportsForPatient(patient)
+            }
+            handler.accept(patient)
+            if ((generatedPatients + 1) % 100 == 0) {
+                logger.info("Generated DICOM and/or HL7 for patient ${patient.patientInstanceUid} in batch ${batchRequest.id} [${generatedPatients + 1}/${batchRequest.numPatients}]")
             }
         }
-
-        batchSpecification.writeToFile()
-        batchSpecification
     }
 
 }

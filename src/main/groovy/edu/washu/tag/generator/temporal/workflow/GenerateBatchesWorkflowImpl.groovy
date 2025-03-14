@@ -2,7 +2,8 @@ package edu.washu.tag.generator.temporal.workflow
 
 import edu.washu.tag.generator.temporal.TemporalApplication
 import edu.washu.tag.generator.temporal.activity.BatchHandlerActivity
-import edu.washu.tag.generator.temporal.model.GenerateBatchInput
+import edu.washu.tag.generator.temporal.model.BatchHandlerActivityInput
+import edu.washu.tag.generator.temporal.model.GenerateBatchesInput
 import io.temporal.activity.ActivityOptions
 import io.temporal.common.RetryOptions
 import io.temporal.spring.boot.WorkflowImpl
@@ -10,8 +11,8 @@ import io.temporal.workflow.Workflow
 
 import java.time.Duration
 
-@WorkflowImpl(taskQueues = TemporalApplication.CHILD_QUEUE)
-class GenerateBatchWorkflowImpl implements GenerateBatchWorkflow {
+@WorkflowImpl(taskQueues = TemporalApplication.TASK_QUEUE)
+class GenerateBatchesWorkflowImpl implements GenerateBatchWorkflow {
 
     private final BatchHandlerActivity batchHandlerActivity =
         Workflow.newActivityStub(
@@ -26,8 +27,17 @@ class GenerateBatchWorkflowImpl implements GenerateBatchWorkflow {
         )
 
     @Override
-    void generateBatch(GenerateBatchInput generateBatchInput) {
-        batchHandlerActivity.formAndWriteBatch(generateBatchInput)
+    void generateBatches(GenerateBatchesInput generateBatchInput) {
+        generateBatchInput.batchChunk.batchRequests.each { batchRequest ->
+            batchHandlerActivity.formAndWriteBatch(
+                new BatchHandlerActivityInput(
+                    generateBatchInput.datasetInput,
+                    generateBatchInput.nameCachePath,
+                    generateBatchInput.idOffsets,
+                    batchRequest
+                )
+            ) // synchronous to process a whole batch before moving on
+        }
     }
 
 }

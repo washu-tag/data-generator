@@ -2,14 +2,13 @@ package edu.washu.tag.generator.temporal.model
 
 import edu.washu.tag.generator.BatchRequest
 import edu.washu.tag.generator.IdOffsets
-import edu.washu.tag.generator.metadata.NameCache
 import groovy.transform.TupleConstructor
 
 @TupleConstructor
-class GenerateBatchInput {
+class BatchHandlerActivityInput {
 
-    String specificationParametersPath
-    NameCache nameCache
+    GenerateDatasetInput datasetInput
+    File nameCachePath
     IdOffsets idOffsets
     BatchRequest batchRequest
 

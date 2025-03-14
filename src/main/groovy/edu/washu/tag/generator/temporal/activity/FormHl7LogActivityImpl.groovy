@@ -9,21 +9,24 @@ import org.slf4j.Logger
 import org.springframework.stereotype.Component
 
 @Component
-@ActivityImpl(taskQueues = TemporalApplication.PARENT_QUEUE)
+@ActivityImpl(taskQueues = TemporalApplication.TASK_QUEUE)
 class FormHl7LogActivityImpl implements FormHl7LogActivity {
 
     private static final Logger logger = Workflow.getLogger(FormHl7LogActivityImpl)
 
     @Override
-    List<Hl7LogFile> identifyLogFiles(File baseDir) {
-        new Hl7Logger().identifyHl7LogFiles(baseDir)
+    Map<String, List<Hl7LogFile>> identifyLogFiles(File baseDir) {
+        logger.info("Identifying HL7-ish log files to generate from ${baseDir}")
+        new Hl7Logger().identifyHl7LogFiles(baseDir).groupBy { it.year }
     }
 
     @Override
-    void formLogFile(Hl7LogFile hl7LogFile) {
-        logger.info("Preparing HL7-ish log file ${hl7LogFile.asFile.name}")
-        new Hl7Logger().writeToHl7ishLogFile(hl7LogFile)
-        logger.info("Successfully wrote ${hl7LogFile.asFile.name}")
+    void formLogFile(List<Hl7LogFile> hl7LogFiles) {
+        hl7LogFiles.each { hl7LogFile ->
+            logger.info("Preparing HL7-ish log file ${hl7LogFile.asFile.name}")
+            new Hl7Logger().writeToHl7ishLogFile(hl7LogFile)
+            logger.info("Successfully wrote ${hl7LogFile.asFile.name}")
+        }
     }
 
 }

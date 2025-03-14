@@ -10,6 +10,8 @@ import edu.washu.tag.generator.metadata.module.study.GeneralStudyModule
 import edu.washu.tag.generator.metadata.module.study.PatientStudyModule
 import edu.washu.tag.generator.metadata.protocols.*
 import edu.washu.tag.generator.util.RandomGenUtils
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.util.concurrent.ThreadLocalRandom
 

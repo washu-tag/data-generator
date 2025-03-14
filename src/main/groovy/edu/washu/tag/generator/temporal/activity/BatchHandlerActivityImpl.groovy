@@ -1,35 +1,35 @@
 package edu.washu.tag.generator.temporal.activity
 
-import edu.washu.tag.generator.BatchProcessor
-import edu.washu.tag.generator.BatchSpecification
+import com.fasterxml.jackson.databind.ObjectMapper
 import edu.washu.tag.generator.PopulationGenerator
+import edu.washu.tag.generator.metadata.NameCache
 import edu.washu.tag.generator.temporal.TemporalApplication
-import edu.washu.tag.generator.temporal.model.GenerateBatchInput
+import edu.washu.tag.generator.temporal.model.BatchHandlerActivityInput
 import io.temporal.spring.boot.ActivityImpl
 import io.temporal.workflow.Workflow
 import org.slf4j.Logger
 import org.springframework.stereotype.Component
 
 @Component
-@ActivityImpl(taskQueues = TemporalApplication.CHILD_QUEUE)
+@ActivityImpl(taskQueues = TemporalApplication.TASK_QUEUE)
 class BatchHandlerActivityImpl implements BatchHandlerActivity {
 
     private static final Logger logger = Workflow.getLogger(BatchHandlerActivityImpl)
 
     @Override
-    void formAndWriteBatch(GenerateBatchInput generateBatchInput) {
-        logger.info("Generating batch ${generateBatchInput.batchRequest.id}...")
+    void formAndWriteBatch(BatchHandlerActivityInput batchHandlerActivityInput) {
+        logger.info("Generating batch ${batchHandlerActivityInput.batchRequest.id}...")
         final PopulationGenerator populationGenerator = new PopulationGenerator()
-        populationGenerator.readSpecificationParameters(generateBatchInput.specificationParametersPath)
-        final BatchSpecification batchSpec = populationGenerator.generateBatch(
-            generateBatchInput.nameCache,
-            generateBatchInput.idOffsets,
-            generateBatchInput.batchRequest
+        populationGenerator.readSpecificationParameters(batchHandlerActivityInput.datasetInput.specificationParametersPath)
+        populationGenerator.generateAndWriteFullBatch(
+            new ObjectMapper().readValue(batchHandlerActivityInput.nameCachePath, NameCache),
+            batchHandlerActivityInput.idOffsets,
+            batchHandlerActivityInput.batchRequest,
+            batchHandlerActivityInput.datasetInput.writeDicom,
+            batchHandlerActivityInput.datasetInput.writeHl7
         )
 
-        logger.info("Generated batch file ${batchSpec.id}...")
-
-        new BatchProcessor().writeSpec(batchSpec, batchSpec.id, 0)
+        logger.info("Fulfilled entire batch ${batchHandlerActivityInput.batchRequest.id}...")
     }
 
 }

@@ -9,7 +9,7 @@ class BatchProcessor {
     boolean generateTests = false
     boolean radReportWritten = false
     static final File hl7Output = new File('hl7')
-    private static final File dicomOutput = new File('dicom_output')
+    static final File dicomOutput = new File('dicom_output')
 
     static void main(String[] args) {
         initDirs()
@@ -56,9 +56,9 @@ class BatchProcessor {
 
     void writeSpec(BatchSpecification batch, int index, Integer numBatches = batches.size()) {
         if (writeFiles) {
-            batch.generateDicom(index, numBatches, dicomOutput)
+            batch.generateDicom(index, numBatches)
             if (batch.containsRadiologyReport()) {
-                batch.generateHl7(index, numBatches, hl7Output)
+                batch.generateHl7(index, numBatches)
                 radReportWritten = true
             }
         }

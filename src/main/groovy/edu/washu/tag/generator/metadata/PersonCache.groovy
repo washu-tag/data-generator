@@ -4,7 +4,7 @@ import edu.washu.tag.generator.util.RandomGenUtils
 
 class PersonCache<X> {
 
-    private Map<X, List<Person>> personCache
+    Map<X, List<Person>> personCache
 
     PersonCache(Map<X, List<Person>> personCache) {
         this.personCache = personCache
