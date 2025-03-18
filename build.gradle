@@ -26,7 +26,7 @@ repositories {
 }
 
 final String vGroovy = '5.0.0-alpha-11'
-final String vQuerySpec = '1.0.0-SNAPSHOT'
+final String vQuerySpec = '1.0-SNAPSHOT'
 final String vJackson = '2.18.0'
 final String vHapiHl7V2 = '2.5.1'
 final String vCommonsIo = '2.17.0'
