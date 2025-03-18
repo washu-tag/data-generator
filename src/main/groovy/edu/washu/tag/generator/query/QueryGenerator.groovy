@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import edu.washu.tag.TestQuery
 import edu.washu.tag.TestQuerySuite
 import edu.washu.tag.generator.BatchSpecification
-import edu.washu.tag.generator.hl7.v2.segment.ObrGenerator
 import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.enums.Race
 import edu.washu.tag.generator.metadata.enums.Sex
+import edu.washu.tag.generator.metadata.patient.MainId
 import edu.washu.tag.util.FileIOUtils
 import edu.washu.tag.generator.util.TimeUtils
 import edu.washu.tag.validation.DateComparisonValidation
@@ -33,7 +33,6 @@ class QueryGenerator {
     private static final LoggableValidation VALIDATION_DOB = new DateComparisonValidation()
         .description('patient born after 1990-12-31')
         .columnName(COLUMN_DOB)
-        .truncation(8)
         .comparisonValue(19901231)
         .comparisonOperator(DateComparisonValidation.ComparisonOperator.GT)
     private static final String COLUMN_ORC_PLACER_ORDER_NUM = 'orc_2_placer_order_number'
@@ -52,6 +51,23 @@ class QueryGenerator {
         }
     }
 
+    private final TestQuery<BatchSpecification> patientIdQuery = new TestQuery<BatchSpecification>('patient_id', null)
+        .withDataProcessor(
+            new FirstPatientsRadReportResult(5)
+                .withColumnExtractions({ radiologyReport ->
+                    radiologyReport.patientIds.collectEntries { patientId ->
+                        [(patientId.expectedColumnName()) : patientId.idNumber]
+                    }
+                })
+        ).withPostProcessing({ query ->
+            final String guaranteedId = new MainId().expectedColumnName()
+            final String patientIds = (query.querySourceDataProcessor as FirstPatientsRadReportResult)
+                .expectation.rowAssertions.collect { row ->
+                    row.value.get(guaranteedId)
+                }.unique().join(', ')
+            query.setSql("SELECT * FROM ${TABLE_NAME} WHERE ${guaranteedId} IN (${patientIds})")
+        })
+
     private final List<TestQuery<BatchSpecification>> queries = [
         new TestQuery('sex_equals', "SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_SEX}='F'")
             .withDataProcessor(
@@ -63,13 +79,14 @@ class QueryGenerator {
                 new ExactNumberRadReportResult(matchesHl7Version('2.4'))
                     .withAdditionalValidation(VALIDATION_STUDY_INSTANCE_UID)
             ),
-        new TestQuery('dob_greater', "SELECT * FROM ${TABLE_NAME} WHERE SUBSTRING(${COLUMN_DOB}, 1, 8) > '19901231'")
+        new TestQuery('dob_greater', "SELECT * FROM ${TABLE_NAME} WHERE YEAR(${COLUMN_DOB}) > 1990")
             .withDataProcessor(
                 new ExactNumberRadReportResult(
                     { RadiologyReport radiologyReport ->
                         radiologyReport.patient.dateOfBirth.isAfter(LocalDate.of(1990, 12, 31))
                     }
-            ).withAdditionalValidation(VALIDATION_DOB)),
+                ).withAdditionalValidation(VALIDATION_DOB)
+            ),
         new TestQuery('placer_order_missing', "SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_ORC_PLACER_ORDER_NUM} IS NULL")
             .withDataProcessor(
                 new ExactNumberRadReportResult(matchesHl7Version('2.4'))
@@ -81,14 +98,16 @@ class QueryGenerator {
                     { RadiologyReport radiologyReport ->
                         radiologyReport.patient.sex == Sex.FEMALE && radiologyReport.race == Race.BLACK
                     }
-            ).withAdditionalValidation(VALIDATION_RACE)),
+                ).withAdditionalValidation(VALIDATION_RACE)
+            ),
         primaryModalityBySex(),
+        patientIdQuery,
         new TestQuery('all', "SELECT * FROM ${TABLE_NAME}")
             .withDataProcessor(
                 new ExactNumberRadReportResult(Function.identity() as Function<RadiologyReport, Boolean>)
             )
     ]
-    
+
     void processData(BatchSpecification batchSpecification) {
         queries.each { query ->
             query.querySourceDataProcessor.process(batchSpecification)
@@ -101,6 +120,7 @@ class QueryGenerator {
 
     void writeQueries() {
         queries.each { TestQuery<BatchSpecification> testQuery ->
+            testQuery.postProcessing?.accept(testQuery)
             testQuery.setExpectedQueryResult(testQuery.querySourceDataProcessor.outputExpectation())
         }
 
@@ -118,7 +138,7 @@ class QueryGenerator {
     private static TestQuery primaryModalityBySex() {
         new TestQuery('modality_grouping', FileIOUtils.readResource('modality_query.sql'))
             .withDataProcessor(
-                new GroupedAggregationRadReportResult(matchesHl7Version('2.7'))
+                new GroupedAggregationRadReportResult({ true })
                     .primaryColumn('primary_modality')
                     .primaryColumnDerivation({ report ->
                         ProcedureCode.lookup(report.study.procedureCodeId).impliedModality

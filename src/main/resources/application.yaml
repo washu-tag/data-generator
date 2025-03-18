@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: data-generator-temporal
+  temporal:
+    connection:
+      target: 'temporal-frontend.temporal:7233'
+    namespace: default
+    start-workers: true
+    workers-auto-discovery:
+      packages:
+        - edu.washu.tag.generator.temporal.activity
+        - edu.washu.tag.generator.temporal.workflow

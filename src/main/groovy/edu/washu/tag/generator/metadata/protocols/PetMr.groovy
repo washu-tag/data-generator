@@ -9,12 +9,16 @@ import edu.washu.tag.generator.metadata.seriesTypes.pt.MracPetWithAttenuationCor
 import edu.washu.tag.generator.metadata.seriesTypes.sr.PhoenixZIPReport
 import edu.washu.tag.generator.util.RandomGenUtils
 import org.apache.commons.math3.distribution.EnumeratedDistribution
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.util.concurrent.ThreadLocalRandom
 
 import static edu.washu.tag.generator.util.StringReplacements.BODYPART
 
 class PetMr extends PetStudy {
+
+    private final Logger logger = LoggerFactory.getLogger(PetMr)
 
     private static final EnumeratedDistribution<String> studyDescriptionRandomizer = RandomGenUtils.setupWeightedLottery([
             ("MR_PET_${BODYPART}".toString()) : 50,
@@ -23,7 +27,9 @@ class PetMr extends PetStudy {
             'PET-MR Study' : 5
     ])
 
-    private static final List<SeriesType> seriesTypes = [
+    @Override
+    List<SeriesType> getAllSeriesTypes() {
+        [
             new Localizer(),
             new FluidAttenuatedInversionRecovery(),
             new T1Weighted(anatomicalPlane : AnatomicalPlane.TRANSVERSE),
@@ -33,11 +39,7 @@ class PetMr extends PetStudy {
             new MracPetWithAttenuationCorrection(),
             new SusceptibilityWeightedImage(),
             new PhoenixZIPReport()
-    ]
-
-    @Override
-    List<SeriesType> getAllSeriesTypes() {
-        seriesTypes
+        ]
     }
 
     @Override

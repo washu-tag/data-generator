@@ -11,3 +11,4 @@ batches/
 .gradle/
 build/
 test_queries/
+deploy.sh

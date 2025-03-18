@@ -3,6 +3,7 @@ package edu.washu.tag.generator.metadata
 import ca.uhn.hl7v2.model.DataTypeException
 import ca.uhn.hl7v2.model.v281.datatype.XCN
 import ca.uhn.hl7v2.model.v281.datatype.XPN
+import com.fasterxml.jackson.annotation.JsonInclude
 import edu.washu.tag.generator.hl7.v2.model.CodedValue
 import edu.washu.tag.generator.hl7.v2.model.HierarchicDesignator
 import groovy.transform.builder.Builder
@@ -17,6 +18,7 @@ import static org.dcm4che3.data.PersonName.Component.*
 import static org.dcm4che3.data.PersonName.Group.*
 
 @Builder(builderStrategy = SimpleStrategy, prefix = '')
+@JsonInclude(JsonInclude.Include.NON_NULL)
 class Person {
 
     private static final EnumeratedDistribution<Boolean> capitalizationRandomizer = RandomGenUtils.setupWeightedLottery([(false): 99, (true): 1])

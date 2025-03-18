@@ -1,19 +1,16 @@
 package edu.washu.tag.generator.metadata
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import edu.washu.tag.generator.metadata.patient.EpicId
-import edu.washu.tag.generator.metadata.patient.MainId
+import edu.washu.tag.generator.GenerationContext
+import edu.washu.tag.generator.metadata.enums.Nationality
+import edu.washu.tag.generator.metadata.enums.Race
+import edu.washu.tag.generator.metadata.enums.Sex
 import edu.washu.tag.generator.metadata.patient.PatientId
-import edu.washu.tag.generator.metadata.patient.PatientIdEncoder
-import edu.washu.tag.generator.metadata.patient.SimplePatientIdEncoder
+import edu.washu.tag.generator.util.SequentialIdGenerator
 import org.dcm4che3.data.Attributes
 import org.dcm4che3.data.Tag
 import org.dcm4che3.data.VR
 import org.dcm4che3.util.UIDUtils
-import edu.washu.tag.generator.SpecificationParameters
-import edu.washu.tag.generator.metadata.enums.Race
-import edu.washu.tag.generator.metadata.enums.Nationality
-import edu.washu.tag.generator.metadata.enums.Sex
 
 import java.time.LocalDate
 import java.time.LocalTime
@@ -21,9 +18,6 @@ import java.time.LocalTime
 class Patient implements DicomEncoder {
 
     private static final LocalDate imagingDataEpoch = LocalDate.of(1994, 6, 12) // patient might have been born in 1930, but we didn't have DICOM-compliant MRI machines in the 1930s!
-    private static final List<PatientIdEncoder> patientIdEncoders = [
-            new SimplePatientIdEncoder(MainId), new SimplePatientIdEncoder(EpicId)
-    ]
 
     Sex sex
     LocalDate dateOfBirth
@@ -38,19 +32,18 @@ class Patient implements DicomEncoder {
     @JsonIgnore double personalHeightMod
     @JsonIgnore double personalWeightMod
 
-    Patient randomize(SpecificationParameters specificationParameters, double currentAverageStudiesPerPatient, long previouslyGeneratedSeries, long previouslyGeneratedStudies) {
-        long numSeries = previouslyGeneratedSeries
-        long numStudies = previouslyGeneratedStudies
-        patientIds = patientIdEncoders*.nextPatientId()
+    Patient randomize(GenerationContext generationContext, SequentialIdGenerator studyIdGenerator) {
         final LocalDate sixteenthBirthday = dateOfBirth.plusYears(16)
         patientInstanceUid = UIDUtils.createUID()
+        patientIds = generationContext.patientIdEncoders*.nextPatientId()
         earliestAvailableStudyDate = sixteenthBirthday.isAfter(imagingDataEpoch) ? sixteenthBirthday : imagingDataEpoch
-        specificationParameters.chooseNumberOfStudies(currentAverageStudiesPerPatient).times {
-            final Protocol selectedProtocol = specificationParameters.chooseProtocol(numSeries == 0 ? 0.0 : numSeries / numStudies, this)
-            final Study study = new Study(protocol : selectedProtocol, patient : this).randomize(specificationParameters, selectedProtocol)
+        generationContext.calculateStudyCountForCurrentPatient().times {
+            final Protocol selectedProtocol = generationContext.chooseProtocol(this)
+            final Study study = new Study(protocol : selectedProtocol, patient : this)
+                .randomize(generationContext.specificationParameters, studyIdGenerator, selectedProtocol)
             studies << study
-            numStudies++
-            numSeries += study.series.size()
+            generationContext.previouslyGeneratedStudies++
+            generationContext.previouslyGeneratedSeries += study.series.size()
         }
         this
     }

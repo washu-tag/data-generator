@@ -12,39 +12,50 @@ class Hl7Logger {
     private static final String CR_REPLACEMENT = '<R>'
     private static final DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern('uuuu-MM-dd HH:mm:ss.SSSS')
 
-    void writeToHl7ishLogFiles(File hl7SourceDir) {
+    List<Hl7LogFile> identifyHl7LogFiles(File hl7SourceDir) {
         final File logOutputDir = new File('hl7ish_logs')
 
-        (hl7SourceDir.listFiles() as List<File>).each { yearDir ->
+        (hl7SourceDir.listFiles() as List<File>).collectMany { yearDir ->
             final String year = yearDir.name
             final File logYearDir = new File(logOutputDir, year)
             logYearDir.mkdirs()
-            (yearDir.listFiles() as List<File>).each { monthDir ->
+            (yearDir.listFiles() as List<File>).collectMany { monthDir ->
                 final String month = monthDir.name.padLeft(2, '0')
-                (monthDir.listFiles() as List<File>).each { dayDir ->
+                (monthDir.listFiles() as List<File>).collect { dayDir ->
                     final String day = dayDir.name.padLeft(2, '0')
-                    final List<TimedMessage> messagesForDay = (dayDir.listFiles() as List<File>).findAll {
-                        it.name.endsWith('.hl7')
-                    }.collect { hl7File ->
-                        new TimedMessage(
-                                hl7File.text,
-                                hl7File
-                                        .name
-                                        .dropRight(4) // drop .hl7
-                                        .split('_')[1]
-                        )
-                    }
-                    messagesForDay.sort { it.reportTime }
 
-                    final File fileForDay = new File(logYearDir, "${year}${month}${day}.log")
-                    if (fileForDay.exists()) {
-                        fileForDay.delete()
-                    }
-                    fileForDay.createNewFile()
-                    fileForDay.text = messagesForDay*.transform().join("${CR_REPLACEMENT}\n\r\n")
+                    new Hl7LogFile(
+                        year: year,
+                        month: month,
+                        day: day,
+                        dayDir: dayDir,
+                        asFile: new File(logYearDir, "${year}${month}${day}.log")
+                    )
                 }
             }
         }
+    }
+
+    void writeToHl7ishLogFile(Hl7LogFile logFileToWrite) {
+        final List<TimedMessage> messagesForDay = (logFileToWrite.dayDir.listFiles() as List<File>).findAll {
+            it.name.endsWith('.hl7')
+        }.collect { hl7File ->
+            new TimedMessage(
+                hl7File.text,
+                hl7File
+                    .name
+                    .dropRight(4) // drop .hl7
+                    .split('_')[1]
+            )
+        }
+        messagesForDay.sort { it.reportTime }
+
+        final File fileForDay = logFileToWrite.asFile
+        if (fileForDay.exists()) {
+            fileForDay.delete()
+        }
+        fileForDay.createNewFile()
+        fileForDay.text = messagesForDay*.transform().join("${CR_REPLACEMENT}\n\r\n")
     }
 
     private class TimedMessage {

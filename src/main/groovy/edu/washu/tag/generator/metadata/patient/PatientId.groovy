@@ -18,7 +18,7 @@ trait PatientId {
         emptyDataStore.getCx1_IDNumber().setValue(idNumber)
         getAssigningAuthority().toHd(emptyDataStore.getCx4_AssigningAuthority())
         emptyDataStore.getCx5_IdentifierTypeCode().setValue(getIdentifierTypeCode())
-        emptyDataStore;
+        emptyDataStore
     }
 
     @JsonIgnore
@@ -26,5 +26,10 @@ trait PatientId {
 
     @JsonIgnore
     abstract String getIdentifierTypeCode()
+
+    @JsonIgnore
+    String expectedColumnName() {
+        getAssigningAuthority().namespaceId.toLowerCase() + '_' + getIdentifierTypeCode().toLowerCase()
+    }
 
 }

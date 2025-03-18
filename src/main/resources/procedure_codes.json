@@ -234,7 +234,7 @@
     }
   },
   "petmr head": {
-    "impliedModality": "MR",
+    "impliedModality": "PET",
     "codedTriplet": {
       "codeValue": "JPT78699C",
       "codingSchemeDesignator": "UNKDEV",
@@ -315,7 +315,7 @@
     }
   },
   "ultrasound": {
-    "impliedModality": "XR",
+    "impliedModality": "US",
     "codedTriplet": {
       "codeValue": "IMG2816",
       "codingSchemeDesignator": "UNKDEV",

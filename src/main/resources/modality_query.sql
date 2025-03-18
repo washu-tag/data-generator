@@ -1,1 +1,1 @@
-SELECT modality as primary_modality, COUNT(CASE WHEN sex='M' THEN 1 END) as male_count, COUNT(CASE WHEN sex='F' THEN 1 END) as female_count, COUNT(*) as total_count FROM syntheticdata WHERE version_id='2.7' GROUP BY modality ORDER BY modality
+SELECT modality as primary_modality, COUNT(CASE WHEN sex='M' THEN 1 END) as male_count, COUNT(CASE WHEN sex='F' THEN 1 END) as female_count, COUNT(*) as total_count FROM syntheticdata GROUP BY modality ORDER BY modality
