@@ -12,8 +12,6 @@ import io.temporal.workflow.Workflow
 import org.slf4j.Logger
 import org.springframework.stereotype.Component
 
-import java.nio.file.Files
-
 @Component
 @ActivityImpl(taskQueues = TemporalApplication.TASK_QUEUE)
 class EarlySetupHandlerActivityImpl implements EarlySetupHandlerActivity {
@@ -36,7 +34,7 @@ class EarlySetupHandlerActivityImpl implements EarlySetupHandlerActivity {
 
     @Override
     File initNameCache() {
-        final File asFile = new File("name_cache_${System.currentTimeMillis()}")
+        final File asFile = new File("name_cache_${System.currentTimeMillis()}.json")
         new ObjectMapper().writeValue(asFile, NameCache.initInstance())
         asFile
     }
