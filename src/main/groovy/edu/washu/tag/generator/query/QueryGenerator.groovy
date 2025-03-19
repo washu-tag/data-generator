@@ -8,10 +8,12 @@ import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.enums.Race
 import edu.washu.tag.generator.metadata.enums.Sex
+import edu.washu.tag.generator.metadata.patient.EpicId
 import edu.washu.tag.generator.metadata.patient.MainId
 import edu.washu.tag.util.FileIOUtils
 import edu.washu.tag.generator.util.TimeUtils
 import edu.washu.tag.validation.DateComparisonValidation
+import edu.washu.tag.validation.ExactRowsResult
 import edu.washu.tag.validation.FixedColumnsValidator
 import edu.washu.tag.validation.LoggableValidation
 
@@ -22,6 +24,10 @@ import java.util.function.Function
 class QueryGenerator {
 
     public static final String TABLE_NAME = 'syntheticdata'
+    public static final String COLUMN_MESSAGE_CONTROL_ID = 'message_control_id'
+    private static final String COLUMN_REPORT_TEXT = 'report_text'
+    private static final String VERSION_2_4_UID = '2.25.155851373268730741395170003437433181776'
+    private static final String VERSION_2_7_UID = '2.25.143467293620292044279751197905759993120'
     private static final String COLUMN_HL7_VERSION = 'version_id'
     private static final String COLUMN_SEX = 'sex'
     private static final LoggableValidation VALIDATION_SEX = new FixedColumnsValidator(COLUMN_SEX, 'F')
@@ -55,15 +61,15 @@ class QueryGenerator {
         .withDataProcessor(
             new FirstPatientsRadReportResult(5)
                 .withColumnExtractions({ radiologyReport ->
-                    radiologyReport.patientIds.collectEntries { patientId ->
-                        [(patientId.expectedColumnName()) : patientId.idNumber]
+                    [new MainId(), new EpicId()]*.expectedColumnName().collectEntries { columnName ->
+                        [(columnName): radiologyReport.patientIds.find { it.expectedColumnName() == columnName }?.idNumber]
                     }
                 })
         ).withPostProcessing({ query ->
             final String guaranteedId = new MainId().expectedColumnName()
             final String patientIds = (query.querySourceDataProcessor as FirstPatientsRadReportResult)
                 .expectation.rowAssertions.collect { row ->
-                    row.value.get(guaranteedId)
+                    "'${row.value.get(guaranteedId)}'"
                 }.unique().join(', ')
             query.setSql("SELECT * FROM ${TABLE_NAME} WHERE ${guaranteedId} IN (${patientIds})")
         })
@@ -108,6 +114,26 @@ class QueryGenerator {
             )
     ]
 
+    /**
+     * The 2.4 report had some special characters inserted into it downstream, so this test is dependent on that data.
+     */
+    private final List<TestQuery<BatchSpecification>> hardcodedQueries = [
+        new TestQuery<BatchSpecification>(
+            'report_text',
+            "SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_MESSAGE_CONTROL_ID} IN ('${VERSION_2_4_UID}', '${VERSION_2_7_UID}')"
+        ).withDataProcessor(
+            new FixedResultQueryProcessor(
+                new ExactRowsResult(
+                    uniqueIdColumnName: COLUMN_MESSAGE_CONTROL_ID,
+                    rowAssertions: [
+                        (VERSION_2_4_UID): [(COLUMN_REPORT_TEXT): FileIOUtils.readResource('query_2_4_report_text.txt')],
+                        (VERSION_2_7_UID): [(COLUMN_REPORT_TEXT): FileIOUtils.readResource('query_2_7_report_text.txt')]
+                    ]
+                )
+            )
+        )
+    ]
+
     void processData(BatchSpecification batchSpecification) {
         queries.each { query ->
             query.querySourceDataProcessor.process(batchSpecification)
@@ -124,13 +150,17 @@ class QueryGenerator {
             testQuery.setExpectedQueryResult(testQuery.querySourceDataProcessor.outputExpectation())
         }
 
+        hardcodedQueries.each { query ->
+            query.setExpectedQueryResult(query.querySourceDataProcessor.outputExpectation())
+        }
+
         new ObjectMapper()
             .writerWithDefaultPrettyPrinter()
             .writeValue(
                 new File(testQueryOutput, "queries_${TimeUtils.HL7_FORMATTER_DATETIME.format(LocalDateTime.now())}.json"),
                 new TestQuerySuite(
                     viewName: TABLE_NAME,
-                    testQueries: queries
+                    testQueries: queries + hardcodedQueries
                 )
             )
     }
