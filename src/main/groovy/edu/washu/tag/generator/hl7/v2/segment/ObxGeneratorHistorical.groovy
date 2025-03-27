@@ -52,7 +52,7 @@ class ObxGeneratorHistorical extends ObxGenerator {
     }
 
     @Override
-    protected String getEncodedStatus(ReportStatus status) {
+    String getEncodedStatus(ReportStatus status) {
         status.historicalText
     }
 

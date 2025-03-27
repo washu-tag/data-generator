@@ -21,7 +21,7 @@ class CombineHl7WorkflowImpl implements CombineHl7Workflow {
         Workflow.newActivityStub(
             FormHl7LogActivity,
             ActivityOptions.newBuilder()
-                .setStartToCloseTimeout(Duration.ofMinutes(10))
+                .setStartToCloseTimeout(Duration.ofMinutes(30))
                 .setRetryOptions(RetryOptions.newBuilder()
                     .setMaximumInterval(Duration.ofSeconds(1))
                     .setMaximumAttempts(3)

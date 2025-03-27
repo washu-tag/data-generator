@@ -17,6 +17,8 @@ import edu.washu.tag.generator.util.LineWrapper
 )
 class CurrentRadiologyReport extends RadiologyReport {
 
+    public static final String CURRENT_VERSION = '2.7'
+
     @Override
     protected void createReport(HapiContext hapiContext, ORU_R01 radReport) {
         final MSH msh = radReport.getMSH()
@@ -53,7 +55,7 @@ class CurrentRadiologyReport extends RadiologyReport {
 
     @Override
     String getHl7Version() {
-        '2.7'
+        CURRENT_VERSION
     }
 
     protected PidGenerator getPidGenerator() {

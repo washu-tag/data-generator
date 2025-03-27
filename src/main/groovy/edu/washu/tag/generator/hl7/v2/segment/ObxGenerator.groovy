@@ -64,8 +64,8 @@ class ObxGenerator extends SegmentGenerator<OBX> {
         Terser.set(baseSegment, 3, 0, 1, 2, observationId)
     }
 
-    protected String getEncodedStatus(ReportStatus status) {
-        return status.currentText
+    String getEncodedStatus(ReportStatus status) {
+        status.currentText
     }
 
     protected void encodeResponsibleObserver(Person technician, OBX baseSegment) {

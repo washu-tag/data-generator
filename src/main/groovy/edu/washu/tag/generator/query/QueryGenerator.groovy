@@ -4,12 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import edu.washu.tag.TestQuery
 import edu.washu.tag.TestQuerySuite
 import edu.washu.tag.generator.BatchSpecification
+import edu.washu.tag.generator.hl7.v2.segment.ObxGenerator
+import edu.washu.tag.generator.hl7.v2.segment.ObxGeneratorHistorical
 import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.enums.Race
 import edu.washu.tag.generator.metadata.enums.Sex
 import edu.washu.tag.generator.metadata.patient.EpicId
 import edu.washu.tag.generator.metadata.patient.MainId
+import edu.washu.tag.generator.metadata.reports.CurrentRadiologyReport
 import edu.washu.tag.util.FileIOUtils
 import edu.washu.tag.generator.util.TimeUtils
 import edu.washu.tag.validation.DateComparisonValidation
@@ -49,6 +52,7 @@ class QueryGenerator {
     private static final LoggableValidation VALIDATION_RACE = new FixedColumnsValidator()
         .validating(COLUMN_SEX, 'F')
         .validating(COLUMN_RACE, ['B', 'BLACK'])
+    private static final String COLUMN_REPORT_STATUS = 'report_status'
     private static final File testQueryOutput = new File('test_queries')
 
     static {
@@ -107,6 +111,7 @@ class QueryGenerator {
                 ).withAdditionalValidation(VALIDATION_RACE)
             ),
         primaryModalityBySex(),
+        reportStatusCount(),
         patientIdQuery,
         new TestQuery('all', "SELECT * FROM ${TABLE_NAME}")
             .withDataProcessor(
@@ -183,6 +188,27 @@ class QueryGenerator {
                                 sexFilter(Sex.FEMALE)
                         )
                     ).addCase(
+                        new GroupedAggregationRadReportResult.Case(
+                            'total_count',
+                            { true }
+                        )
+                    )
+            )
+    }
+
+    private static TestQuery reportStatusCount() {
+        final ObxGenerator currentObx = new ObxGenerator()
+        final ObxGenerator historicalObx = new ObxGeneratorHistorical(null)
+        new TestQuery('report_status_count', "SELECT ${COLUMN_REPORT_STATUS}, COUNT(*) as total_count FROM ${TABLE_NAME} GROUP BY ${COLUMN_REPORT_STATUS} ORDER BY ${COLUMN_REPORT_STATUS}")
+            .withDataProcessor(
+                new GroupedAggregationRadReportResult({ true })
+                    .primaryColumn(COLUMN_REPORT_STATUS)
+                    .primaryColumnDerivation({ report ->
+                        if (!report.includeObx) {
+                            return null
+                        }
+                        (report.hl7Version == CurrentRadiologyReport.CURRENT_VERSION ? currentObx : historicalObx).getEncodedStatus(report.orcStatus)
+                    }).addCase(
                         new GroupedAggregationRadReportResult.Case(
                             'total_count',
                             { true }
