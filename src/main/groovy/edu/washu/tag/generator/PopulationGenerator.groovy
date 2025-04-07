@@ -7,6 +7,7 @@ import edu.washu.tag.generator.util.RandomGenUtils
 import edu.washu.tag.generator.util.SequentialIdGenerator
 import edu.washu.tag.util.FileIOUtils
 import groovyx.gpars.GParsPool
+import io.temporal.activity.Activity
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -113,7 +114,7 @@ class PopulationGenerator {
         batchSpecification
     }
 
-    void generateAndWriteFullBatch(NameCache nameCache, IdOffsets idOffsets, BatchRequest batchRequest, boolean writeDicom, boolean writeHl7) {
+    void generateAndWriteFullBatch(NameCache nameCache, IdOffsets idOffsets, BatchRequest batchRequest, boolean writeDicom, boolean writeHl7, boolean temporalHeartbeat = false) {
         final OutputHandler outputHandler = new OutputHandler(batchRequest.id)
         final Consumer<Patient> patientConsumer = { Patient patient ->
             if (writeDicom) {
@@ -123,10 +124,10 @@ class PopulationGenerator {
                 outputHandler.writeHl7ForPatient(patient)
             }
         }
-        generateBatchWithHandler(nameCache, idOffsets, batchRequest, patientConsumer, true)
+        generateBatchWithHandler(nameCache, idOffsets, batchRequest, patientConsumer, true, temporalHeartbeat)
     }
 
-    private void generateBatchWithHandler(NameCache nameCache, IdOffsets idOffsets, BatchRequest batchRequest, Consumer<Patient> handler, boolean generateReports) {
+    private void generateBatchWithHandler(NameCache nameCache, IdOffsets idOffsets, BatchRequest batchRequest, Consumer<Patient> handler, boolean generateReports, boolean temporalHeartbeat = false) {
         specificationParameters.postprocess()
         NameCache.cache(nameCache)
 
@@ -158,6 +159,9 @@ class PopulationGenerator {
             handler.accept(patient)
             if ((generatedPatients + 1) % 100 == 0) {
                 logger.info("Generated DICOM and/or HL7 for patient ${patient.patientInstanceUid} in batch ${batchRequest.id} [${generatedPatients + 1}/${batchRequest.numPatients}]")
+            }
+            if (temporalHeartbeat) {
+                Activity.executionContext.heartbeat(null)
             }
         }
     }

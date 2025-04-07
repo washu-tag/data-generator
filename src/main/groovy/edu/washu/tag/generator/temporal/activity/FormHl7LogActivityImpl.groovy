@@ -3,6 +3,7 @@ package edu.washu.tag.generator.temporal.activity
 import edu.washu.tag.generator.Hl7LogFile
 import edu.washu.tag.generator.Hl7Logger
 import edu.washu.tag.generator.temporal.TemporalApplication
+import io.temporal.activity.Activity
 import io.temporal.spring.boot.ActivityImpl
 import io.temporal.workflow.Workflow
 import org.slf4j.Logger
@@ -22,9 +23,11 @@ class FormHl7LogActivityImpl implements FormHl7LogActivity {
 
     @Override
     void formLogFile(List<Hl7LogFile> hl7LogFiles) {
+        Activity.executionContext.heartbeat(null)
         hl7LogFiles.each { hl7LogFile ->
             logger.info("Preparing HL7-ish log file ${hl7LogFile.asFile.name}")
             new Hl7Logger().writeToHl7ishLogFile(hl7LogFile)
+            Activity.executionContext.heartbeat(null)
             logger.info("Successfully wrote ${hl7LogFile.asFile.name}")
         }
     }
