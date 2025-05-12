@@ -32,5 +32,3 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           tags: ghcr.io/washu-tag/data-generator:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
