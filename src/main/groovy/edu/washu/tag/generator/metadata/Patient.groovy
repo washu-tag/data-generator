@@ -17,7 +17,7 @@ import java.time.LocalTime
 
 class Patient implements DicomEncoder {
 
-    private static final LocalDate imagingDataEpoch = LocalDate.of(1994, 6, 12) // patient might have been born in 1930, but we didn't have DICOM-compliant MRI machines in the 1930s!
+    public static final LocalDate imagingDataEpoch = LocalDate.of(1994, 6, 12) // patient might have been born in 1930, but we didn't have DICOM-compliant MRI machines in the 1930s!
 
     Sex sex
     LocalDate dateOfBirth

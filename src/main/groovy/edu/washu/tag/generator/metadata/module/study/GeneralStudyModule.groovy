@@ -20,7 +20,6 @@ class GeneralStudyModule implements StudyLevelModule {
             ({ Person person, boolean supportsNonLatin -> person.serializeToInitials() })             : 60,
             ({ Person person, boolean supportsNonLatin -> person.serializeToDicom(supportsNonLatin) }): 40
     ]) as EnumeratedDistribution<Closure>
-    private static final LocalDate studyEndpoint = LocalDate.now().minusMonths(6)
 
     // Study ID and Accession Number handled outside
     @Override
@@ -28,7 +27,7 @@ class GeneralStudyModule implements StudyLevelModule {
         final Protocol protocol = study.protocol
         final Equipment scanner = study.primaryEquipment // if more than one device, they should at least handle all study-level fields the same
         study.setStudyInstanceUid(UIDUtils.createUID())
-        study.setStudyDate(RandomGenUtils.randomDate(patient.earliestAvailableStudyDate, studyEndpoint))
+        study.setStudyDate(specificationParameters.studyDateDistribution.generateStudyDate(patient))
         study.setStudyTime(RandomGenUtils.randomStudyTime())
 
         if (protocol.includeMedicalStaff()) {

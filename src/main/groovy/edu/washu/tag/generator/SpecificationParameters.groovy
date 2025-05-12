@@ -4,7 +4,11 @@ import edu.washu.tag.generator.hl7.v2.FixedSampleReportGenerator
 import edu.washu.tag.generator.hl7.v2.ReportGenerator
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.Protocol
+import edu.washu.tag.generator.metadata.study.StudyDateDistribution
+import edu.washu.tag.generator.metadata.study.UniformStudyDateDistribution
 import edu.washu.tag.generator.util.RandomGenUtils
+
+import java.time.LocalDate
 
 class SpecificationParameters {
 
@@ -26,6 +30,7 @@ class SpecificationParameters {
     boolean includePixelData
     boolean includeBinariesInPrivateElements
     boolean generateRadiologyReports = false
+    StudyDateDistribution studyDateDistribution = new UniformStudyDateDistribution()
     ReportGenerator reportGeneratorImplementation = new FixedSampleReportGenerator()
 
     void postprocess() {
@@ -91,11 +96,5 @@ class SpecificationParameters {
             RandomGenUtils.randomListEntry(filteredList)
         }
     }
-
-    /* boolean normalizeSeriesDescription
-    boolean normalizePatientNames
-    boolean includeOutsideHospitals
-    boolean includeInfants*/
-
 
 }
