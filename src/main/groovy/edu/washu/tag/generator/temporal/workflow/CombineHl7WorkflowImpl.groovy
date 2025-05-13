@@ -21,7 +21,7 @@ class CombineHl7WorkflowImpl implements CombineHl7Workflow {
         Workflow.newActivityStub(
             FormHl7LogActivity,
             ActivityOptions.newBuilder()
-                .setStartToCloseTimeout(Duration.ofHours(1))
+                .setStartToCloseTimeout(Duration.ofHours(4))
                 .setRetryOptions(RetryOptions.newBuilder()
                     .setMaximumInterval(Duration.ofSeconds(1))
                     .setMaximumAttempts(3)
@@ -33,9 +33,9 @@ class CombineHl7WorkflowImpl implements CombineHl7Workflow {
     void combineLogs(File hl7BaseDir) {
         final Map<String, List<Hl7LogFile>> hl7LogFileGroup = hl7LogActivity.identifyLogFiles(hl7BaseDir)
         logger.info("Attempting to create combined ${hl7LogFileGroup.values()*.size().sum()} HL7-ish log files")
-        hl7LogFileGroup.each { hl7LogFiles ->
-            hl7LogActivity.formLogFile(hl7LogFiles.value) // synchronous and not parallel to reduce load on file system
-        }
+        Promise.allOf(hl7LogFileGroup.collect { hl7LogFiles ->
+            Async.procedure(hl7LogActivity::formLogFile, hl7LogFiles.value)
+        }).get()
     }
 
 }
