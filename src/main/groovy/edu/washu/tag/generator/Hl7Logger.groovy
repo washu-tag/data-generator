@@ -36,7 +36,17 @@ class Hl7Logger {
         }
     }
 
-    void writeToHl7ishLogFile(Hl7LogFile logFileToWrite) {
+    void writeToHl7ishLogFile(Hl7LogFile logFileToWrite, boolean overwriteExisting = true) {
+        final File fileForDay = logFileToWrite.asFile
+        if (fileForDay.exists()) {
+            if (overwriteExisting) {
+                fileForDay.delete()
+            } else {
+                return
+            }
+        }
+        fileForDay.createNewFile()
+
         final List<TimedMessage> messagesForDay = (logFileToWrite.dayDir.listFiles() as List<File>).findAll {
             it.name.endsWith('.hl7')
         }.collect { hl7File ->
@@ -50,11 +60,6 @@ class Hl7Logger {
         }
         messagesForDay.sort { it.reportTime }
 
-        final File fileForDay = logFileToWrite.asFile
-        if (fileForDay.exists()) {
-            fileForDay.delete()
-        }
-        fileForDay.createNewFile()
         fileForDay.text = messagesForDay*.transform().join("${CR_REPLACEMENT}\n\r\n")
     }
 

@@ -26,7 +26,7 @@ class FormHl7LogActivityImpl implements FormHl7LogActivity {
         Activity.executionContext.heartbeat(null)
         hl7LogFiles.eachWithIndex { hl7LogFile, index ->
             logger.info("Preparing HL7-ish log file ${hl7LogFile.asFile.name}")
-            new Hl7Logger().writeToHl7ishLogFile(hl7LogFile)
+            new Hl7Logger().writeToHl7ishLogFile(hl7LogFile, false)
             Activity.executionContext.heartbeat("Activity completed [${index + 1}/${hl7LogFiles.size()}] logs")
             logger.info("Successfully wrote ${hl7LogFile.asFile.name}")
         }
