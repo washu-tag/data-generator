@@ -2,6 +2,8 @@ package edu.washu.tag.generator
 
 import edu.washu.tag.generator.util.TimeUtils
 import org.apache.commons.lang3.RandomUtils
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -11,6 +13,7 @@ class Hl7Logger {
 
     private static final String CR_REPLACEMENT = '<R>'
     private static final DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern('uuuu-MM-dd HH:mm:ss.SSSS')
+    private static final Logger logger = LoggerFactory.getLogger(Hl7Logger)
 
     List<Hl7LogFile> identifyHl7LogFiles(File hl7SourceDir) {
         final File logOutputDir = new File('hl7ish_logs')
@@ -47,6 +50,7 @@ class Hl7Logger {
         }
         fileForDay.createNewFile()
 
+        logger.info('Parsing log files in {}...', logFileToWrite.dayDir.absolutePath)
         final List<TimedMessage> messagesForDay = (logFileToWrite.dayDir.listFiles() as List<File>).findAll {
             it.name.endsWith('.hl7')
         }.collect { hl7File ->
@@ -58,6 +62,7 @@ class Hl7Logger {
                     .split('_')[1]
             )
         }
+        logger.info('Parsed log files in {}', logFileToWrite.dayDir.absolutePath)
         messagesForDay.sort { it.reportTime }
 
         fileForDay.text = messagesForDay*.transform().join("${CR_REPLACEMENT}\n\r\n")
