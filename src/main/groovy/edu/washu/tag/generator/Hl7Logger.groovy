@@ -50,7 +50,7 @@ class Hl7Logger {
         }
         fileForDay.createNewFile()
 
-        logger.info('Parsing log files in {}...', logFileToWrite.dayDir.absolutePath)
+        logger.info('Reading hl7 files in {}...', logFileToWrite.dayDir.absolutePath)
         final List<TimedMessage> messagesForDay = (logFileToWrite.dayDir.listFiles() as List<File>).findAll {
             it.name.endsWith('.hl7')
         }.collect { hl7File ->
@@ -62,7 +62,7 @@ class Hl7Logger {
                     .split('_')[1]
             )
         }
-        logger.info('Parsed log files in {}', logFileToWrite.dayDir.absolutePath)
+        logger.info('Read hl7 files in {}', logFileToWrite.dayDir.absolutePath)
         messagesForDay.sort { it.reportTime }
 
         fileForDay.text = messagesForDay*.transform().join("${CR_REPLACEMENT}\n\r\n")
