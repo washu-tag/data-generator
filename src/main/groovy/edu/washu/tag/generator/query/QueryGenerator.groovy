@@ -22,6 +22,7 @@ import edu.washu.tag.validation.FixedColumnsValidator
 import edu.washu.tag.validation.LoggableValidation
 import edu.washu.tag.validation.column.ColumnType
 import edu.washu.tag.validation.column.InstantType
+import edu.washu.tag.validation.column.IntegerType
 import edu.washu.tag.validation.column.LocalDateType
 
 import java.time.LocalDate
@@ -62,6 +63,7 @@ class QueryGenerator {
     private static final String COLUMN_MESSAGE_DT = 'message_dt'
     private static final String COLUMN_REQUESTED_DT = 'requested_dt'
     private static final String COLUMN_STATUS_CHANGE_DT = 'results_report_status_change_dt'
+    private static final String COLUMN_YEAR = 'year'
     private static final File testQueryOutput = new File('test_queries')
 
     static {
@@ -271,7 +273,8 @@ class QueryGenerator {
                     new LocalDateType(COLUMN_DOB),
                     new InstantType(COLUMN_MESSAGE_DT),
                     new InstantType(COLUMN_REQUESTED_DT),
-                    new InstantType(COLUMN_STATUS_CHANGE_DT)
+                    new InstantType(COLUMN_STATUS_CHANGE_DT),
+                    new IntegerType(COLUMN_YEAR)
                 ] as Set<ColumnType<?>>)
             ).withPostProcessing({ query ->
                 final String reportId = (query.querySourceDataProcessor as ExpectedRadReportQueryProcessor).matchedReportIds[0]
