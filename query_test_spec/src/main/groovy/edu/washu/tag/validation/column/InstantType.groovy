@@ -10,6 +10,10 @@ class InstantType extends ColumnType<Instant> {
         super(columnName)
     }
 
+    InstantType() {
+        super()
+    }
+
     @Override
     Instant readValue(Row row, int index) {
         row.getInstant(index)

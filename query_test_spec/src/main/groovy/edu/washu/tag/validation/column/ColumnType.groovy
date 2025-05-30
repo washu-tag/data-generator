@@ -16,6 +16,10 @@ abstract class ColumnType<X> {
         this.columnName = columnName
     }
 
+    ColumnType() {
+
+    }
+
     abstract X readValue(Row row, int index)
 
 }

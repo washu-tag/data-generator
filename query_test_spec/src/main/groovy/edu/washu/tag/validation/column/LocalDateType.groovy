@@ -10,6 +10,10 @@ class LocalDateType extends ColumnType<LocalDate> {
         super(columnName)
     }
 
+    LocalDateType() {
+        super()
+    }
+
     @Override
     LocalDate readValue(Row row, int index) {
         row.getLocalDate(index)
