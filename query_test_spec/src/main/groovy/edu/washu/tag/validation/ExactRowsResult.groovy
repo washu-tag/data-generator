@@ -1,5 +1,6 @@
 package edu.washu.tag.validation
 
+import edu.washu.tag.validation.column.ColumnType
 import org.apache.spark.api.java.function.ForeachFunction
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Encoders
@@ -13,6 +14,7 @@ class ExactRowsResult implements ExpectedQueryResult {
 
     String uniqueIdColumnName
     Map<String, Map<String, String>> rowAssertions = [:]
+    Set<ColumnType<?>> columnTypes = []
     private static final Logger logger = LoggerFactory.getLogger(ExactRowsResult)
 
     @Override
@@ -26,9 +28,19 @@ class ExactRowsResult implements ExpectedQueryResult {
             void call(Row row) throws Exception {
                 final String uniqueId = row.getString(row.fieldIndex(uniqueIdColumnName))
                 rowAssertions.get(uniqueId).each { columnName, expectedValue ->
-                    assertThat(row.getString(row.fieldIndex(columnName)))
-                        .as(columnName)
-                        .isEqualTo(expectedValue)
+                    final int columnIndex = row.fieldIndex(columnName)
+                    final ColumnType<?> existingMapping = columnTypes.find { columnType ->
+                        columnType.columnName == columnName
+                    }
+                    if (existingMapping != null) {
+                        assertThat(existingMapping.readValue(row, columnIndex))
+                            .as(columnName)
+                            .isEqualTo(expectedValue)
+                    } else {
+                        assertThat(row.getString(row.fieldIndex(columnName)))
+                            .as(columnName)
+                            .isEqualTo(expectedValue)
+                    }
                 }
             }
         })

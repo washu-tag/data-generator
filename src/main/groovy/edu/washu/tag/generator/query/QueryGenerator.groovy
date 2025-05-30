@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import edu.washu.tag.TestQuery
 import edu.washu.tag.TestQuerySuite
 import edu.washu.tag.generator.BatchSpecification
+import edu.washu.tag.generator.hl7.v2.segment.ObrGenerator
 import edu.washu.tag.generator.hl7.v2.segment.ObxGenerator
 import edu.washu.tag.generator.hl7.v2.segment.ObxGeneratorHistorical
 import edu.washu.tag.generator.metadata.ProcedureCode
@@ -13,15 +14,20 @@ import edu.washu.tag.generator.metadata.enums.Sex
 import edu.washu.tag.generator.metadata.patient.EpicId
 import edu.washu.tag.generator.metadata.patient.MainId
 import edu.washu.tag.generator.metadata.reports.CurrentRadiologyReport
-import edu.washu.tag.util.FileIOUtils
 import edu.washu.tag.generator.util.TimeUtils
+import edu.washu.tag.util.FileIOUtils
 import edu.washu.tag.validation.DateComparisonValidation
 import edu.washu.tag.validation.ExactRowsResult
 import edu.washu.tag.validation.FixedColumnsValidator
 import edu.washu.tag.validation.LoggableValidation
+import edu.washu.tag.validation.column.ColumnType
+import edu.washu.tag.validation.column.InstantType
+import edu.washu.tag.validation.column.LocalDateType
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
 import java.util.function.Function
 
 class QueryGenerator {
@@ -53,6 +59,9 @@ class QueryGenerator {
         .validating(COLUMN_SEX, 'F')
         .validating(COLUMN_RACE, ['B', 'BLACK'])
     private static final String COLUMN_REPORT_STATUS = 'report_status'
+    private static final String COLUMN_MESSAGE_DT = 'message_dt'
+    private static final String COLUMN_REQUESTED_DT = 'requested_dt'
+    private static final String COLUMN_STATUS_CHANGE_DT = 'results_report_status_change_dt'
     private static final File testQueryOutput = new File('test_queries')
 
     static {
@@ -112,10 +121,17 @@ class QueryGenerator {
             ),
         primaryModalityBySex(),
         reportStatusCount(),
+        extendedMetadata(),
         patientIdQuery,
         new TestQuery('all', "SELECT * FROM ${TABLE_NAME}")
             .withDataProcessor(
                 new ExactNumberRadReportResult(Function.identity() as Function<RadiologyReport, Boolean>)
+            ),
+        new TestQuery('null_message_dt', "SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_MESSAGE_DT} IS NULL")
+            .withDataProcessor(
+                new ExactNumberRadReportResult({ RadiologyReport radiologyReport ->
+                    radiologyReport.reportDateTime == null
+                })
             )
     ]
 
@@ -215,6 +231,52 @@ class QueryGenerator {
                         )
                     )
             )
+    }
+
+    private static TestQuery extendedMetadata() {
+        new TestQuery('extended_metadata', null)
+            .withDataProcessor(
+                new FirstMatchingReportsRadReportResult(
+                    1,
+                    { RadiologyReport radiologyReport ->
+                        radiologyReport.hl7Version == '2.7'
+                    }
+                ).withColumnExtractions({ RadiologyReport radiologyReport ->
+                    final ProcedureCode procedureCode = ProcedureCode.lookup(radiologyReport.study.procedureCodeId)
+                    final DateTimeFormatter dateTimeFormatter = new DateTimeFormatterBuilder()
+                        .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                        .appendLiteral('+00:00')
+                        .toFormatter()
+                    [
+                        'service_identifier': procedureCode.codedTriplet.codeValue,
+                        'sending_facility': 'ABCHOSP',
+                        (COLUMN_SEX): radiologyReport.patient.sex.dicomRepresentation,
+                        'zip_or_postal_code': '61111',
+                        'country': 'USA',
+                        'orc_3_filler_order_number': radiologyReport.study.accessionNumber,
+                        'obr_3_filler_order_number': radiologyReport.study.accessionNumber,
+                        'service_name': procedureCode.codedTriplet.codeMeaning,
+                        'service_coding_system': procedureCode.codedTriplet.codingSchemeDesignator,
+                        'diagnostic_service_id': ObrGenerator.derivePrimaryImagingModality(radiologyReport.study),
+                        'study_instance_uid': radiologyReport.study.studyInstanceUid,
+                        (COLUMN_DOB): DateTimeFormatter.ISO_LOCAL_DATE.format(radiologyReport.patient.dateOfBirth),
+                        (COLUMN_MESSAGE_DT): dateTimeFormatter.format(radiologyReport.reportDateTime),
+                        (COLUMN_REQUESTED_DT): dateTimeFormatter.format(radiologyReport.study.studyDateTime()),
+                        (COLUMN_STATUS_CHANGE_DT): dateTimeFormatter.format(radiologyReport.reportDateTime),
+                        (COLUMN_REPORT_STATUS): radiologyReport.orcStatus.currentText,
+                        'modality': ObrGenerator.derivePrimaryImagingModality(radiologyReport.study),
+                        'year': String.valueOf(radiologyReport.reportDateTime.getYear())
+                    ]
+                }).withColumnTypes([
+                    new LocalDateType(COLUMN_DOB),
+                    new InstantType(COLUMN_MESSAGE_DT),
+                    new InstantType(COLUMN_REQUESTED_DT),
+                    new InstantType(COLUMN_STATUS_CHANGE_DT)
+                ] as Set<ColumnType<?>>)
+            ).withPostProcessing({ query ->
+                final String reportId = (query.querySourceDataProcessor as ExpectedRadReportQueryProcessor).matchedReportIds[0]
+                query.setSql("SELECT * FROM ${TABLE_NAME} WHERE ${COLUMN_MESSAGE_CONTROL_ID}='${reportId}'")
+            })
     }
 
     private static Function<RadiologyReport, Boolean> matchesHl7Version(String version) {

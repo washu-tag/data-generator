@@ -12,6 +12,9 @@ abstract class ExpectedRadReportQueryProcessor implements QuerySourceDataProcess
     @JsonIgnore
     Function<RadiologyReport, Boolean> inclusionCriteria
 
+    @JsonIgnore
+    List<String> matchedReportIds = []
+
     @Override
     void process(BatchSpecification batchSpecification) {
         batchSpecification.patients.each { patient ->
@@ -21,6 +24,7 @@ abstract class ExpectedRadReportQueryProcessor implements QuerySourceDataProcess
                 radiologyReport.setStudy(study)
                 if (inclusionCriteria.apply(radiologyReport)) {
                     includeReport(radiologyReport)
+                    matchedReportIds << radiologyReport.messageControlId
                 }
             }
         }
