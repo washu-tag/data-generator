@@ -4,7 +4,7 @@ import org.apache.spark.sql.Row
 
 import java.time.Instant
 
-class IntegerType extends ColumnType<Integer> {
+class IntegerType extends ColumnType<String> {
 
     IntegerType(String columnName) {
         super(columnName)
@@ -15,8 +15,8 @@ class IntegerType extends ColumnType<Integer> {
     }
 
     @Override
-    Integer readValue(Row row, int index) {
-        row.getInt(index)
+    String readValue(Row row, int index) {
+        String.valueOf(row.getInt(index))
     }
 
 }
