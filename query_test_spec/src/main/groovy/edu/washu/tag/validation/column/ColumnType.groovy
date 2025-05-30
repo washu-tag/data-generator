@@ -8,7 +8,7 @@ import org.apache.spark.sql.Row
     include = JsonTypeInfo.As.PROPERTY,
     property = 'type'
 )
-abstract class ColumnType<X> {
+abstract class ColumnType<X> implements Serializable {
 
     String columnName
 
