@@ -31,7 +31,7 @@ class DerivedCtDoseReport implements PixelSpecification, PixelSource {
         graphics2D.setColor(Color.BLACK)
         graphics2D.fillRect(0, 0, 512, 512)
 
-        graphics2D.setFont(new Font('Verdana', Font.PLAIN, 9))
+        graphics2D.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 9))
         graphics2D.setColor(Color.WHITE)
         graphics2D.drawString(timeFormatter.format(study.studyDateTime()), 10, 10)
         graphics2D.drawString('Ward:', 10, 30)
