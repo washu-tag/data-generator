@@ -26,7 +26,8 @@ class BatchHandlerActivityImpl implements BatchHandlerActivity {
             batchHandlerActivityInput.idOffsets,
             batchHandlerActivityInput.batchRequest,
             batchHandlerActivityInput.datasetInput.writeDicom,
-            batchHandlerActivityInput.datasetInput.writeHl7
+            batchHandlerActivityInput.datasetInput.writeHl7,
+            true
         )
 
         logger.info("Fulfilled entire batch ${batchHandlerActivityInput.batchRequest.id}...")

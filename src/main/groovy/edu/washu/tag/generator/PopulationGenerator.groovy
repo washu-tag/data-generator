@@ -161,7 +161,7 @@ class PopulationGenerator {
                 logger.info("Generated DICOM and/or HL7 for patient ${patient.patientInstanceUid} in batch ${batchRequest.id} [${generatedPatients + 1}/${batchRequest.numPatients}]")
             }
             if (temporalHeartbeat) {
-                Activity.executionContext.heartbeat(null)
+                Activity.executionContext.heartbeat("Batch ${batchRequest.id}, patient ${generatedPatients + 1}")
             }
         }
     }
