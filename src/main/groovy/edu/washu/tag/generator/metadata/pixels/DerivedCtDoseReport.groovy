@@ -7,6 +7,8 @@ import org.dcm4che3.data.Tag
 import org.dcm4che3.data.UID
 import org.dcm4che3.data.VR
 import org.dcm4che3.image.BufferedImageUtils
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.awt.Color
 import java.awt.Font
@@ -18,6 +20,7 @@ class DerivedCtDoseReport implements PixelSpecification, PixelSource {
 
     public static final DerivedCtDoseReport INSTANCE = new DerivedCtDoseReport()
     private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern('dd-LLL-uuuu  HH:mm')
+    private static final Logger logger = LoggerFactory.getLogger(DerivedCtDoseReport)
 
     @Override
     PixelSource generateSource() {
@@ -31,8 +34,37 @@ class DerivedCtDoseReport implements PixelSpecification, PixelSource {
         graphics2D.setColor(Color.BLACK)
         graphics2D.fillRect(0, 0, 512, 512)
 
-        graphics2D.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 9))
+        graphics2D.setFont(new Font('Verdana', Font.PLAIN, 9))
         graphics2D.setColor(Color.WHITE)
+        try {
+            graphics2D.drawString(timeFormatter.format(study.studyDateTime()), 10, 10)
+            graphics2D.drawString('Ward:', 10, 30)
+            graphics2D.drawString('Physician:', 10, 40)
+            final String performing = doseReport.performingPhysiciansName?[0]
+            if (performing != null) {
+                graphics2D.drawString(performing.toUpperCase(), 115, 40)
+            }
+            graphics2D.drawString('Operator:', 10, 50)
+            final String operator = doseReport.operatorsName?[0]
+            if (operator != null) {
+                graphics2D.drawString(operator.toUpperCase(), 115, 50)
+            }
+            graphics2D.drawString('Total mAs 5990', 10, 70)
+            graphics2D.drawString('Total DLP 492 mGycm', 95, 70)
+            graphics2D.drawString('Scan', 130, 90)
+            graphics2D.drawString('kV', 200, 90)
+            graphics2D.drawString('mAs  / ref.', 230, 90)
+            graphics2D.drawString('CTDIvol*', 300, 90)
+            graphics2D.drawString('DLP', 380, 90)
+            graphics2D.drawString('TI', 420, 90)
+            graphics2D.drawString('cSL', 450, 90)
+            graphics2D.drawString('mGy', 319, 100)
+            graphics2D.drawString('mGycm', 363, 100)
+            graphics2D.drawString('Patient Position H-SP', 10, 120)
+        } catch (RuntimeException exception) {
+            logger.warn('Failed to draw string in graphics object of CT Dose report', exception)
+        }
+
         graphics2D.drawString(timeFormatter.format(study.studyDateTime()), 10, 10)
         graphics2D.drawString('Ward:', 10, 30)
         graphics2D.drawString('Physician:', 10, 40)
