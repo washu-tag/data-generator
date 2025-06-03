@@ -5,6 +5,8 @@ import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.metadata.scanners.SiemensBiographmMR
 import edu.washu.tag.generator.util.RandomGenUtils
 
+import java.util.concurrent.ThreadLocalRandom
+
 class FluidAttenuatedInversionRecovery extends MrSeriesType {
 
     private static final EnumeratedDistribution<String> randomizer = RandomGenUtils.setupWeightedLottery([
@@ -22,6 +24,11 @@ class FluidAttenuatedInversionRecovery extends MrSeriesType {
     @Override
     List<Class<? extends Equipment>> getCompatibleEquipment() {
         super.compatibleEquipment + [SiemensBiographmMR] as List<Class<? extends Equipment>>
+    }
+
+    @Override
+    int producedInstanceCount() {
+        ThreadLocalRandom.current().nextInt(18, 37)
     }
 
 }

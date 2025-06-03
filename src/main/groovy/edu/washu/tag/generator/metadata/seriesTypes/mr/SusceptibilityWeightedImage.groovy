@@ -23,4 +23,9 @@ class SusceptibilityWeightedImage extends MrSeriesType {
         super.compatibleEquipment + [SiemensBiographmMR] as List<Class<? extends Equipment>>
     }
 
+    @Override
+    int producedInstanceCount() {
+        48 // TODO: is this realistic?
+    }
+
 }

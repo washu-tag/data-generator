@@ -17,4 +17,9 @@ class DynamicContrastEnhanced extends MrSeriesType {
         randomizer
     }
 
+    @Override
+    int producedInstanceCount() {
+        120
+    }
+
 }

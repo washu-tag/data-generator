@@ -30,22 +30,28 @@ abstract class SeriesType {
         specificationParameters.createFullSopInstances ? createCustomizedInstances(patient, study, equipment, series) : createGenericInstances(patient, study, equipment, series)
     }
 
-    final List<Instance> createGenericInstances(Patient patient, Study study, Equipment equipment, Series series) {
-        final Instance instance = new Instance()
-        collectModules().each { module ->
-            (module as InstanceLevelModule).apply(specificationParameters, patient, study, equipment, series, instance)
-        }
-        if (specificationParameters.includePixelData) {
-            final PixelSpecification pixelSpec = pixelSpecFor(series, instance)
-            if (pixelSpec != null) {
-                instance.setPixelSource(pixelSpec.generateSource())
+    final List<Instance> createGenericInstances(Patient patient, Study study, Equipment equipment, Series series, int numInstances = 1) {
+        (0 ..< numInstances).collect {
+            final Instance instance = new Instance()
+            collectModules().each { module ->
+                module.apply(specificationParameters, patient, study, equipment, series, instance, it)
             }
+            if (specificationParameters.includePixelData) {
+                final PixelSpecification pixelSpec = pixelSpecFor(series, instance)
+                if (pixelSpec != null) {
+                    instance.setPixelSource(pixelSpec.generateSource())
+                }
+            }
+            instance
         }
-        [instance]
     }
 
     List<Instance> createCustomizedInstances(Patient patient, Study study, Equipment equipment, Series series) {
-        createGenericInstances(patient, study, equipment, series)
+        createGenericInstances(patient, study, equipment, series, producedInstanceCount())
+    }
+
+    int producedInstanceCount() {
+        1
     }
 
     List<SeriesLevelModule> allSeriesModules() {

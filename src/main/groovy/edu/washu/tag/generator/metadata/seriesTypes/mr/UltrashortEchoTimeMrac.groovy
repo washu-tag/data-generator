@@ -35,4 +35,9 @@ class UltrashortEchoTimeMrac extends MrSeriesType {
         [SiemensBiographmMR]
     }
 
+    @Override
+    int producedInstanceCount() {
+        15 // TODO: is this realistic?
+    }
+
 }

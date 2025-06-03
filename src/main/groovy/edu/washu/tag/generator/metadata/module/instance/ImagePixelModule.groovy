@@ -8,7 +8,7 @@ import edu.washu.tag.generator.metadata.module.InstanceLevelModule
 class ImagePixelModule implements InstanceLevelModule {
 
     @Override
-    void apply(SpecificationParameters specificationParameters, Patient patient, Study study, Equipment equipment, Series series, Instance instance) {
+    void apply(SpecificationParameters specificationParameters, Patient patient, Study study, Equipment equipment, Series series, Instance instance, int instanceIndex) {
         // TODO: this file's original contents have been lost, reconstruct it
     }
 

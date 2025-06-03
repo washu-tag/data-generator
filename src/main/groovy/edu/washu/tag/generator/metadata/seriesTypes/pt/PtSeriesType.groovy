@@ -18,6 +18,8 @@ import edu.washu.tag.generator.metadata.scanners.PhilipsGeminiR35
 import edu.washu.tag.generator.metadata.scanners.SiemensBiographTruePoint64
 import edu.washu.tag.generator.metadata.series.PtSeries
 
+import java.util.concurrent.ThreadLocalRandom
+
 abstract class PtSeriesType extends SeriesType {
 
     @Override
@@ -57,6 +59,15 @@ abstract class PtSeriesType extends SeriesType {
     @Override
     Class<? extends Series> seriesClass() {
         PtSeries
+    }
+
+    /*
+    TODO: multiple series in a study usually have the same instance count in practice. How
+    do we correlate between series here?
+     */
+    @Override
+    int producedInstanceCount() {
+        ThreadLocalRandom.current().nextInt(200, 401)
     }
 
     abstract boolean isAttenuationCorrected()

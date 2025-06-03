@@ -6,6 +6,8 @@ import edu.washu.tag.generator.metadata.ImageType
 import edu.washu.tag.generator.metadata.scanners.SiemensBiographmMR
 import edu.washu.tag.generator.util.RandomGenUtils
 
+import java.util.concurrent.ThreadLocalRandom
+
 class ThreePlaneLocalizer extends MrSeriesType {
 
     private static final EnumeratedDistribution<String> randomizer = RandomGenUtils.setupWeightedLottery([
@@ -30,6 +32,11 @@ class ThreePlaneLocalizer extends MrSeriesType {
     @Override
     List<Class<? extends Equipment>> getCompatibleEquipment() {
         super.compatibleEquipment + [SiemensBiographmMR] as List<Class<? extends Equipment>>
+    }
+
+    @Override
+    int producedInstanceCount() {
+        ThreadLocalRandom.current().nextInt(25, 51)
     }
 
 }

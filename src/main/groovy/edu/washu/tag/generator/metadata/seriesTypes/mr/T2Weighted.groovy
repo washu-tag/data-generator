@@ -4,6 +4,8 @@ import org.apache.commons.math3.distribution.EnumeratedDistribution
 import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.util.RandomGenUtils
 
+import java.util.concurrent.ThreadLocalRandom
+
 class T2Weighted extends MrSeriesType {
 
     private static final EnumeratedDistribution<String> randomizer = RandomGenUtils.setupWeightedLottery([
@@ -16,6 +18,11 @@ class T2Weighted extends MrSeriesType {
     @Override
     EnumeratedDistribution<String> getSeriesDescriptionRandomizer(Equipment scanner) {
         randomizer
+    }
+
+    @Override
+    int producedInstanceCount() {
+        ThreadLocalRandom.current().nextInt(16, 201)
     }
 
 }

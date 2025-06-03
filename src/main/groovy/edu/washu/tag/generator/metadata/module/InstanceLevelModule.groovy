@@ -9,6 +9,6 @@ import edu.washu.tag.generator.metadata.Study
 
 interface InstanceLevelModule {
 
-    void apply(SpecificationParameters specificationParameters, Patient patient, Study study, Equipment equipment, Series series, Instance instance)
+    void apply(SpecificationParameters specificationParameters, Patient patient, Study study, Equipment equipment, Series series, Instance instance, int instanceIndex)
 
 }

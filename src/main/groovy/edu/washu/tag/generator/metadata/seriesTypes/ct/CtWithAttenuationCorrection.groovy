@@ -24,4 +24,9 @@ class CtWithAttenuationCorrection extends CtSeriesType {
         equipment.getAttenuationCorrectedCtImageType()
     }
 
+    @Override
+    int producedInstanceCount() {
+        256 // TODO: is this realistic?
+    }
+
 }

@@ -30,13 +30,15 @@ class OutputHandler {
             layer.toFile().mkdir()
         }
         patient.studies.each { study ->
+            final Path studyPath = layer.resolve(study.studyInstanceUid)
+            studyPath.toFile().mkdir()
             if (patient.race != null) {
                 study.setEthnicGroup(patient.race.sampleEncodedValue())
             }
             study.resolvePrivateElements(patient, [])
             study.series.each { series ->
                 series.instances.each { instance ->
-                    instance.writeToDicomFile(patient, study, series, layer.resolve("${fileId}.dcm").toFile())
+                    instance.writeToDicomFile(patient, study, series, studyPath.resolve("${fileId}.dcm").toFile())
                     fileId++
                 }
             }

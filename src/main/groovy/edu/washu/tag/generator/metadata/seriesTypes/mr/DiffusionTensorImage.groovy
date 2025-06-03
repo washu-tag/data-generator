@@ -23,4 +23,9 @@ class DiffusionTensorImage extends MrSeriesType {
         super.compatibleEquipment + [SiemensBiographmMR] as List<Class<? extends Equipment>>
     }
 
+    @Override
+    int producedInstanceCount() {
+        25
+    }
+
 }

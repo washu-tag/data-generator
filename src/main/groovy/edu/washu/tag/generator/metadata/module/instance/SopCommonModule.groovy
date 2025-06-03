@@ -12,11 +12,11 @@ import edu.washu.tag.generator.metadata.module.InstanceLevelModule
 class SopCommonModule implements InstanceLevelModule {
 
     @Override
-    void apply(SpecificationParameters specificationParameters, Patient patient, Study study, Equipment equipment, Series series, Instance instance) {
+    void apply(SpecificationParameters specificationParameters, Patient patient, Study study, Equipment equipment, Series series, Instance instance, int instanceIndex) {
         instance.setSopClassUid(series.seriesType.sopClassUid)
         instance.setSopInstanceUid(UIDUtils.createUID())
         // TODO: Instance Creation Date and Time
-        instance.setInstanceNumber('1') // TODO
+        instance.setInstanceNumber(String.valueOf(1 + instanceIndex)) // TODO: some modalities get more fancy
         // TODO: Private Data Element Characteristics Sequence
     }
 

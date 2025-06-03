@@ -17,4 +17,9 @@ class DynamicSusceptibilityContrast extends MrSeriesType {
         randomizer
     }
 
+    @Override
+    int producedInstanceCount() {
+        10 // TODO: how realistic is this?
+    }
+
 }
