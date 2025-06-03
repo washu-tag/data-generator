@@ -65,31 +65,6 @@ class DerivedCtDoseReport implements PixelSpecification, PixelSource {
             logger.warn('Failed to draw string in graphics object of CT Dose report', exception)
         }
 
-        graphics2D.drawString(timeFormatter.format(study.studyDateTime()), 10, 10)
-        graphics2D.drawString('Ward:', 10, 30)
-        graphics2D.drawString('Physician:', 10, 40)
-        final String performing = doseReport.performingPhysiciansName?[0]
-        if (performing != null) {
-            graphics2D.drawString(performing.toUpperCase(), 115, 40)
-        }
-        graphics2D.drawString('Operator:', 10, 50)
-        final String operator = doseReport.operatorsName?[0]
-        if (operator != null) {
-            graphics2D.drawString(operator.toUpperCase(), 115, 50)
-        }
-        graphics2D.drawString('Total mAs 5990', 10, 70)
-        graphics2D.drawString('Total DLP 492 mGycm', 95, 70)
-        graphics2D.drawString('Scan', 130, 90)
-        graphics2D.drawString('kV', 200, 90)
-        graphics2D.drawString('mAs  / ref.', 230, 90)
-        graphics2D.drawString('CTDIvol*', 300, 90)
-        graphics2D.drawString('DLP', 380, 90)
-        graphics2D.drawString('TI', 420, 90)
-        graphics2D.drawString('cSL', 450, 90)
-        graphics2D.drawString('mGy', 319, 100)
-        graphics2D.drawString('mGycm', 363, 100)
-        graphics2D.drawString('Patient Position H-SP', 10, 120)
-
         final List<BurnedInSeries> burnedInSeries = []
         study.series.findAll { series ->
             series.modality == 'CT' && series.seriesInstanceUid != doseReport.seriesInstanceUid
