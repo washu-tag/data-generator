@@ -61,28 +61,28 @@ class DerivedCtDoseReport implements PixelSpecification, PixelSource {
             graphics2D.drawString('mGy', 319, 100)
             graphics2D.drawString('mGycm', 363, 100)
             graphics2D.drawString('Patient Position H-SP', 10, 120)
+
+            final List<BurnedInSeries> burnedInSeries = []
+            study.series.findAll { series ->
+                series.modality == 'CT' && series.seriesInstanceUid != doseReport.seriesInstanceUid
+            }.sort {
+                it.seriesNumber
+            }.each { series ->
+                burnedInSeries << new BurnedInSeries(series.seriesDescription, series.seriesNumber)
+            }
+            study.series.findAll { series ->
+                series.modality == 'PT'
+            }.each { series ->
+                burnedInSeries << new BurnedInSeries(series.seriesDescription, '')
+            }
+
+            burnedInSeries.eachWithIndex { series, index ->
+                final verticalCoordinate = 130 + 10 * index
+                graphics2D.drawString(series.description(), 10, verticalCoordinate)
+                graphics2D.drawString(series.number(), 135, verticalCoordinate)
+            }
         } catch (RuntimeException exception) {
             logger.warn('Failed to draw string in graphics object of CT Dose report', exception)
-        }
-
-        final List<BurnedInSeries> burnedInSeries = []
-        study.series.findAll { series ->
-            series.modality == 'CT' && series.seriesInstanceUid != doseReport.seriesInstanceUid
-        }.sort {
-            it.seriesNumber
-        }.each { series ->
-            burnedInSeries << new BurnedInSeries(series.seriesDescription, series.seriesNumber)
-        }
-        study.series.findAll { series ->
-            series.modality == 'PT'
-        }.each { series ->
-            burnedInSeries << new BurnedInSeries(series.seriesDescription, '')
-        }
-
-        burnedInSeries.eachWithIndex { series, index ->
-            final verticalCoordinate = 130 + 10 * index
-            graphics2D.drawString(series.description(), 10, verticalCoordinate)
-            graphics2D.drawString(series.number(), 135, verticalCoordinate)
         }
 
         graphics2D.dispose()
