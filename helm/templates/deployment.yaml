@@ -47,12 +47,12 @@ spec:
             - name: "AZURE_OPENAI_KEY"
               valueFrom:
                 secretKeyRef:
-                  key: AZURE_OPENAI_KEY
+                  key: azureOpenaiKey
                   name: "{{ .Release.Name }}-auth"
             - name: "AZURE_RESOURCE_NAME"
               valueFrom:
                 secretKeyRef:
-                  key: AZURE_RESOURCE_NAME
+                  key: azureResourceName
                   name: "{{ .Release.Name }}-auth"
           {{- with .Values.resources }}
           resources:
