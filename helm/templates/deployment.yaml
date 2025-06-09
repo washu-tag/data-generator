@@ -44,6 +44,17 @@ spec:
           {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- with .Values.resources }}
+          env:
+            - name: "AZURE_OPENAI_KEY"
+              valueFrom:
+                secretKeyRef:
+                  key: azureOpenaiKey
+                  name: {{ .Release.Name }}-auth
+            - name: "AZURE_RESOURCE_NAME"
+              valueFrom:
+                secretKeyRef:
+                  key: azureResourceName
+                  name: {{ .Release.Name }}-auth
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}

@@ -115,3 +115,6 @@ config:
           packages:
             - edu.washu.tag.generator.temporal.activity
             - edu.washu.tag.generator.temporal.workflow
+
+azureOpenaiKey: keyhere
+azureResourceName: resourcenamehere
