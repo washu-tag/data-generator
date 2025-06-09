@@ -44,20 +44,20 @@ spec:
           {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           env:
             - name: "AZURE_OPENAI_KEY"
               valueFrom:
                 secretKeyRef:
                   key: AZURE_OPENAI_KEY
-                  name: {{ .Release.Name }}-auth
+                  name: { { .Release.Name } }-auth
             - name: "AZURE_RESOURCE_NAME"
-              valueFrom:
-                secretKeyRef:
-                  key: AZURE_RESOURCE_NAME
-                  name: {{ .Release.Name }}-auth
-          resources:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+            valueFrom:
+              secretKeyRef:
+                key: AZURE_RESOURCE_NAME
+                name: { { .Release.Name } }-auth
           {{- with .Values.volumeMounts }}
           volumeMounts:
             {{- toYaml . | nindent 12 }}
