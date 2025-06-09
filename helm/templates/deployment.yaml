@@ -48,12 +48,12 @@ spec:
             - name: "AZURE_OPENAI_KEY"
               valueFrom:
                 secretKeyRef:
-                  key: azureOpenaiKey
+                  key: AZURE_OPENAI_KEY
                   name: {{ .Release.Name }}-auth
             - name: "AZURE_RESOURCE_NAME"
               valueFrom:
                 secretKeyRef:
-                  key: azureResourceName
+                  key: AZURE_RESOURCE_NAME
                   name: {{ .Release.Name }}-auth
           resources:
             {{- toYaml . | nindent 12 }}
