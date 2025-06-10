@@ -129,6 +129,32 @@ In the real world (i.e. on a clinical PACS), you'll find the same thing encoded 
 4. Referring Physician, Performing Physician(s), and Operators are sometimes included, and sometimes suppressed at the study level.
 5. Patient Weight and Patient Size (height) are configurable for the probability to include them. Additionally, they're further configurable on probability to encode them as "0.0" to match the real world.
 
+## Temporal Deployment
+
+The `helm/` directory contains a helm chart to deploy the data generator as a [temporal](https://temporal.io/) workflow. When deploying the helm chart,
+you should specify the path to the directory to mount into the data generator pod with `--set volumes[0].hostPath.path=$MOUNT_PATH` . If you are going to use
+the capability to generate report text with GPT, you should also set `env.secret.AZURE_OPENAI_KEY` and `env.secret.AZURE_RESOURCE_NAME` . When helm installs
+the chart, those values will be used to create Kubernetes secrets to expose within the data generator pod to allow the user to generate GPT reports without
+needing to specify the credentials at runtime. A full example installation command might look like:
+
+```shell
+helm upgrade --install -n data-generator data-generator helm/ -f helm/values.yaml --set env.secret.AZURE_OPENAI_KEY=$AZURE_OPENAI_KEY --set env.secret.AZURE_RESOURCE_NAME=$AZURE_RESOURCE_NAME --set volumes[0].hostPath.path=/scout/generator
+```
+
+Once deployed as a temporal worker, you can launch a data generation workflow in the temporal UI by clicking the "Start Workflow" button and filling out the form:
+1. For "Workflow ID", enter a unique string or use the "Random UUID" button.
+2. For "Task Queue", specify `data-generator`.
+3. For "Workflow Type", specify `GenerateDatasetWorkflow`.
+4. For Input > Data, provide your input parameters as a JSON object (see below).
+5. For Input > Encoding, select `json/plain`.
+
+The JSON input corresponds to a serialized version of [GenerateDatasetInput](src/main/groovy/edu/washu/tag/generator/temporal/model/GenerateDatasetInput.groovy)
+Currently, the properties of that object are:
+- `specificationParametersPath`: (_Required_) the full path to the [config](#config) YAML which you wish to use to generate a dataset.
+- `writeDicom`: (Optional) a boolean for controlling if DICOM files should be written for the dataset. Defaults to `true`.
+- `writeHl7`: (Optional) a boolean for controlling if HL7 files (and aggregated "hl7ish" log files) should be written for the dataset. Defaults to `true`.
+- `concurrentExecution`: (Optional) an integer for defining how many subactivities to run in parallel a large generation job will be split up into. Defaults to `4`.
+
 ---
 
 ## Possible updates to make
