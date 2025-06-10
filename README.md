@@ -148,12 +148,12 @@ Once deployed as a temporal worker, you can launch a data generation workflow in
 4. For Input > Data, provide your input parameters as a JSON object (see below).
 5. For Input > Encoding, select `json/plain`.
 
-The JSON input corresponds to a serialized version of [GenerateDatasetInput](src/main/groovy/edu/washu/tag/generator/temporal/model/GenerateDatasetInput.groovy)
+The JSON input corresponds to a serialized version of [GenerateDatasetInput](src/main/groovy/edu/washu/tag/generator/temporal/model/GenerateDatasetInput.groovy).
 Currently, the properties of that object are:
 - `specificationParametersPath`: (_Required_) the full path to the [config](#config) YAML which you wish to use to generate a dataset.
 - `writeDicom`: (Optional) a boolean for controlling if DICOM files should be written for the dataset. Defaults to `true`.
-- `writeHl7`: (Optional) a boolean for controlling if HL7 files (and aggregated "hl7ish" log files) should be written for the dataset. Defaults to `true`.
-- `concurrentExecution`: (Optional) an integer for defining how many subactivities to run in parallel a large generation job will be split up into. Defaults to `4`.
+- `writeHl7`: (Optional) a boolean for controlling if HL7 files (and aggregated "hl7ish" log files) should be written for the dataset corresponding to radiology reports. Defaults to `true`.
+- `concurrentExecution`: (Optional) an integer for defining how many subactivities to run in parallel for a large generation job. Defaults to `4`.
 
 ---
 
