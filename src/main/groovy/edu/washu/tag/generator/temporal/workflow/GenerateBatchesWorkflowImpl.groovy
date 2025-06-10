@@ -18,7 +18,7 @@ class GenerateBatchesWorkflowImpl implements GenerateBatchWorkflow {
         Workflow.newActivityStub(
             BatchHandlerActivity,
             ActivityOptions.newBuilder()
-                .setStartToCloseTimeout(Duration.ofHours(4))
+                .setStartToCloseTimeout(Duration.ofHours(24))
                 .setHeartbeatTimeout(Duration.ofMinutes(5))
                 .setRetryOptions(RetryOptions.newBuilder()
                     .setMaximumInterval(Duration.ofSeconds(1))
