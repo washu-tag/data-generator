@@ -32,7 +32,7 @@ final String vHapiHl7V2 = '2.5.1'
 final String vCommonsIo = '2.17.0'
 final String vCommonsLang3 = '3.17.0'
 final String vDcm4che = '5.33.0'
-final String vAzureOpenai = '1.0.0-beta.12'
+final String vOpenai = '2.7.0'
 final String vCommonsMath3 = '3.6.1'
 final String vGpars = '1.2.1'
 final String vTestNg = '7.9.0'
@@ -57,7 +57,7 @@ dependencies {
     implementation("commons-io:commons-io:${vCommonsIo}")
     implementation("org.apache.commons:commons-lang3:${vCommonsLang3}")
     implementation("org.dcm4che.tool:dcm4che-tool-storescu:${vDcm4che}")
-    implementation("com.azure:azure-ai-openai:${vAzureOpenai}")
+    implementation("com.openai:openai-java:${vOpenai}")
     implementation("org.apache.commons:commons-math3:${vCommonsMath3}")
     implementation("org.codehaus.gpars:gpars:${vGpars}")
     implementation("org.testng:testng:${vTestNg}")
