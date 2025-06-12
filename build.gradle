@@ -52,6 +52,7 @@ dependencies {
     implementation("org.apache.groovy:groovy:${vGroovy}")
     implementation("edu.washu.tag:query-spec:${vQuerySpec}")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${vJackson}")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${vJackson}")
     implementation("ca.uhn.hapi:hapi-base:${vHapiHl7V2}")
     implementation("ca.uhn.hapi:hapi-structures-v281:${vHapiHl7V2}")
     implementation("commons-io:commons-io:${vCommonsIo}")
