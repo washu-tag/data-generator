@@ -46,7 +46,7 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
         final File nameCache = earlySetupActivity.initNameCache()
         final IdOffsets idOffsets = new IdOffsets()
 
-        final List<BatchChunk> batchRequests = earlySetupActivity.chunkBatches(input.specificationParametersPath, input.concurrentExecution)
+        final List<BatchChunk> batchRequests = earlySetupActivity.chunkBatches(input.specificationParametersPath, input.concurrentExecution, input.outputDir)
 
         // Launch child workflow where each fulfills several batches in sequence
         Promise.allOf(batchRequests.collect { batchChunk ->

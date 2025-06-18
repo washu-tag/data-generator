@@ -84,7 +84,8 @@ tasks.register('generateSpecs', JavaExec) {
     args(
         propertyWithDefault('config', 'default'),
         propertyWithDefault('writeToFiles', false),
-        propertyWithDefault('generateTestQueries', false)
+        propertyWithDefault('generateTestQueries', false),
+        propertyWithDefault('outputDir', '.')
     )
 }
 
@@ -94,7 +95,8 @@ tasks.register('writeFiles', JavaExec) {
     args(
         resolveBatchArg(),
         propertyWithDefault('writeFiles', true),
-        propertyWithDefault('generateTestQueries', false)
+        propertyWithDefault('generateTestQueries', false),
+        propertyWithDefault('outputDir', '.')
     )
 }
 

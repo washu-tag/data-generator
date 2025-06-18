@@ -19,8 +19,8 @@ class EarlySetupHandlerActivityImpl implements EarlySetupHandlerActivity {
     private static final Logger logger = Workflow.getLogger(EarlySetupHandlerActivityImpl)
 
     @Override
-    List<BatchChunk> chunkBatches(String specificationParamsPath, int concurrentExecution) {
-        BatchProcessor.initDirs()
+    List<BatchChunk> chunkBatches(String specificationParamsPath, int concurrentExecution, String outputDir) {
+        BatchProcessor.initDirs(outputDir)
         final PopulationGenerator generator = new PopulationGenerator()
         generator.readSpecificationParameters(specificationParamsPath)
 

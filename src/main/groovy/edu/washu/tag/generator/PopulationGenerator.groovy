@@ -55,7 +55,7 @@ class PopulationGenerator {
         }
         println("STAGE 1 complete, batches have been generated")
 
-        BatchProcessor.initDirs()
+        BatchProcessor.initDirs(args.length > 3 ? args[3] : '.')
         if (generator.writeDataToFiles) {
             new BatchProcessor(
                 batches: batchSpecifications,
