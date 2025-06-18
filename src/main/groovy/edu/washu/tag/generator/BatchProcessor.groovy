@@ -31,10 +31,9 @@ class BatchProcessor {
 
     static void initDirs(String outputDirectory) {
         final Path output = Paths.get(outputDirectory)
-        output.toFile().mkdir()
         hl7Output = output.resolve('hl7').toFile()
         dicomOutput = output.resolve('dicom_output').toFile()
-        [dicomOutput, hl7Output].each { outputDir ->
+        [output.toFile(), dicomOutput, hl7Output].each { outputDir ->
             if (!outputDir.exists()) {
                 outputDir.mkdir()
             }

@@ -59,7 +59,7 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
                         .setWorkflowTaskTimeout(Duration.ofSeconds(30))
                         .build()
                 )::generateBatches,
-                new GenerateBatchesInput(input, nameCache, idOffsets, batchChunk))
+                new GenerateBatchesInput(input, nameCache, idOffsets, batchChunk, input.outputDir))
         }).get()
 
         logger.info("${workflowLoggingInfo} all batches have been written")

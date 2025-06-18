@@ -1,5 +1,6 @@
 package edu.washu.tag.generator.temporal.workflow
 
+import edu.washu.tag.generator.BatchProcessor
 import edu.washu.tag.generator.temporal.TemporalApplication
 import edu.washu.tag.generator.temporal.activity.BatchHandlerActivity
 import edu.washu.tag.generator.temporal.model.BatchHandlerActivityInput
@@ -29,6 +30,7 @@ class GenerateBatchesWorkflowImpl implements GenerateBatchWorkflow {
 
     @Override
     void generateBatches(GenerateBatchesInput generateBatchInput) {
+        BatchProcessor.initDirs(generateBatchInput.outputDir)
         generateBatchInput.batchChunk.batchRequests.each { batchRequest ->
             batchHandlerActivity.formAndWriteBatch(
                 new BatchHandlerActivityInput(
