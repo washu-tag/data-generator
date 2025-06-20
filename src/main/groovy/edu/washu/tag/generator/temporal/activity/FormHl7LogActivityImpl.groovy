@@ -20,6 +20,7 @@ class FormHl7LogActivityImpl implements FormHl7LogActivity {
     @Override
     Map<String, List<Hl7LogFile>> identifyLogFiles(File baseDir) {
         logger.info("Identifying HL7-ish log files to generate from ${baseDir}")
+        BatchProcessor.initDirs(baseDir.toPath().parent.toString())
         new Hl7Logger().identifyHl7LogFiles(baseDir).groupBy { it.year }
     }
 
