@@ -1,6 +1,7 @@
 package edu.washu.tag.generator.temporal.activity
 
 import edu.washu.tag.generator.Hl7LogFile
+import edu.washu.tag.generator.temporal.model.FormHl7LogFileInput
 import io.temporal.activity.ActivityInterface
 import io.temporal.activity.ActivityMethod
 
@@ -11,6 +12,6 @@ interface FormHl7LogActivity {
     Map<String, List<Hl7LogFile>> identifyLogFiles(File baseDir)
 
     @ActivityMethod
-    void formLogFile(List<Hl7LogFile> hl7LogFiles)
+    void formLogFile(FormHl7LogFileInput input)
 
 }

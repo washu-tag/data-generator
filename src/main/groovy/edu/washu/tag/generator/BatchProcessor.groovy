@@ -13,6 +13,7 @@ class BatchProcessor {
     boolean radReportWritten = false
     static File hl7Output
     static File dicomOutput
+    static File logOutput
 
     static void main(String[] args) {
         initDirs(args.length > 3 ? args[3] : '.')
@@ -33,7 +34,8 @@ class BatchProcessor {
         final Path output = Paths.get(outputDirectory)
         hl7Output = output.resolve('hl7').toFile()
         dicomOutput = output.resolve('dicom_output').toFile()
-        [output.toFile(), dicomOutput, hl7Output].each { outputDir ->
+        logOutput = output.resolve('hl7ish_logs').toFile()
+        [output.toFile(), dicomOutput, hl7Output, logOutput].each { outputDir ->
             if (!outputDir.exists()) {
                 outputDir.mkdir()
             }

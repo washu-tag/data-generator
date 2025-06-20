@@ -1,8 +1,10 @@
 package edu.washu.tag.generator.temporal.activity
 
+import edu.washu.tag.generator.BatchProcessor
 import edu.washu.tag.generator.Hl7LogFile
 import edu.washu.tag.generator.Hl7Logger
 import edu.washu.tag.generator.temporal.TemporalApplication
+import edu.washu.tag.generator.temporal.model.FormHl7LogFileInput
 import io.temporal.activity.Activity
 import io.temporal.spring.boot.ActivityImpl
 import io.temporal.workflow.Workflow
@@ -22,12 +24,13 @@ class FormHl7LogActivityImpl implements FormHl7LogActivity {
     }
 
     @Override
-    void formLogFile(List<Hl7LogFile> hl7LogFiles) {
+    void formLogFile(FormHl7LogFileInput input) {
         Activity.executionContext.heartbeat(null)
-        hl7LogFiles.eachWithIndex { hl7LogFile, index ->
+        BatchProcessor.initDirs(input.outputDir)
+        input.hl7LogFiles.eachWithIndex { hl7LogFile, index ->
             logger.info("Preparing HL7-ish log file ${hl7LogFile.asFile.name}")
             new Hl7Logger().writeToHl7ishLogFile(hl7LogFile, false)
-            Activity.executionContext.heartbeat("Activity completed [${index + 1}/${hl7LogFiles.size()}] logs")
+            Activity.executionContext.heartbeat("Activity completed [${index + 1}/${input.hl7LogFiles.size()}] logs")
             logger.info("Successfully wrote ${hl7LogFile.asFile.name}")
         }
     }
