@@ -63,6 +63,7 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
         }).get()
 
         logger.info("${workflowLoggingInfo} all batches have been written")
+        BatchProcessor.initDirs(input.outputDir)
 
         // Output combined HL7(-ish) log files now that all results are prepared
         Async.function(
