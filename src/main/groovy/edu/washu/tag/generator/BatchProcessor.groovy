@@ -2,17 +2,21 @@ package edu.washu.tag.generator
 
 import edu.washu.tag.generator.query.QueryGenerator
 
+import java.nio.file.Path
+import java.nio.file.Paths
+
 class BatchProcessor {
 
     List<File> batches
     boolean writeFiles = true // DICOM & HL7 [if generated]
     boolean generateTests = false
     boolean radReportWritten = false
-    static final File hl7Output = new File('hl7')
-    static final File dicomOutput = new File('dicom_output')
+    static File hl7Output
+    static File dicomOutput
+    static File logOutput
 
     static void main(String[] args) {
-        initDirs()
+        initDirs(args.length > 3 ? args[3] : '.')
         final BatchProcessor batchProcessor = new BatchProcessor(batches: args[0].split(',').collect {
             new File(it)
         })
@@ -26,8 +30,12 @@ class BatchProcessor {
         batchProcessor.writeAndCombineBatches()
     }
 
-    static void initDirs() {
-        [dicomOutput, hl7Output].each { outputDir ->
+    static void initDirs(String outputDirectory) {
+        final Path output = Paths.get(outputDirectory)
+        hl7Output = output.resolve('hl7').toFile()
+        dicomOutput = output.resolve('dicom_output').toFile()
+        logOutput = output.resolve('hl7ish_logs').toFile()
+        [output.toFile(), dicomOutput, hl7Output, logOutput].each { outputDir ->
             if (!outputDir.exists()) {
                 outputDir.mkdir()
             }

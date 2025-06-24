@@ -1,6 +1,7 @@
 package edu.washu.tag.generator.temporal.activity
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import edu.washu.tag.generator.BatchProcessor
 import edu.washu.tag.generator.PopulationGenerator
 import edu.washu.tag.generator.metadata.NameCache
 import edu.washu.tag.generator.temporal.TemporalApplication
@@ -18,6 +19,7 @@ class BatchHandlerActivityImpl implements BatchHandlerActivity {
 
     @Override
     void formAndWriteBatch(BatchHandlerActivityInput batchHandlerActivityInput) {
+        BatchProcessor.initDirs(batchHandlerActivityInput.datasetInput.outputDir)
         logger.info("Generating batch ${batchHandlerActivityInput.batchRequest.id}...")
         final PopulationGenerator populationGenerator = new PopulationGenerator()
         populationGenerator.readSpecificationParameters(batchHandlerActivityInput.datasetInput.specificationParametersPath)

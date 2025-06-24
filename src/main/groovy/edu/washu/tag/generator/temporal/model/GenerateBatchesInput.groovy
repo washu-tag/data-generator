@@ -10,5 +10,6 @@ class GenerateBatchesInput {
     File nameCachePath
     IdOffsets idOffsets
     BatchChunk batchChunk
+    String outputDir
 
 }

@@ -3,6 +3,7 @@ package edu.washu.tag.generator.temporal.workflow
 import edu.washu.tag.generator.Hl7LogFile
 import edu.washu.tag.generator.temporal.TemporalApplication
 import edu.washu.tag.generator.temporal.activity.FormHl7LogActivity
+import edu.washu.tag.generator.temporal.model.FormHl7LogFileInput
 import io.temporal.activity.ActivityOptions
 import io.temporal.common.RetryOptions
 import io.temporal.spring.boot.WorkflowImpl
@@ -34,7 +35,7 @@ class CombineHl7WorkflowImpl implements CombineHl7Workflow {
         final Map<String, List<Hl7LogFile>> hl7LogFileGroup = hl7LogActivity.identifyLogFiles(hl7BaseDir)
         logger.info("Attempting to create combined ${hl7LogFileGroup.values()*.size().sum()} HL7-ish log files")
         Promise.allOf(hl7LogFileGroup.collect { hl7LogFiles ->
-            Async.procedure(hl7LogActivity::formLogFile, hl7LogFiles.value)
+            Async.procedure(hl7LogActivity::formLogFile, new FormHl7LogFileInput(hl7LogFiles: hl7LogFiles.value, outputDir: hl7BaseDir.toPath().parent.toString()))
         }).get()
     }
 

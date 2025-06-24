@@ -46,7 +46,7 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
         final File nameCache = earlySetupActivity.initNameCache()
         final IdOffsets idOffsets = new IdOffsets()
 
-        final List<BatchChunk> batchRequests = earlySetupActivity.chunkBatches(input.specificationParametersPath, input.concurrentExecution)
+        final List<BatchChunk> batchRequests = earlySetupActivity.chunkBatches(input.specificationParametersPath, input.concurrentExecution, input.outputDir)
 
         // Launch child workflow where each fulfills several batches in sequence
         Promise.allOf(batchRequests.collect { batchChunk ->
@@ -59,10 +59,11 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
                         .setWorkflowTaskTimeout(Duration.ofSeconds(30))
                         .build()
                 )::generateBatches,
-                new GenerateBatchesInput(input, nameCache, idOffsets, batchChunk))
+                new GenerateBatchesInput(input, nameCache, idOffsets, batchChunk, input.outputDir))
         }).get()
 
         logger.info("${workflowLoggingInfo} all batches have been written")
+        BatchProcessor.initDirs(input.outputDir)
 
         // Output combined HL7(-ish) log files now that all results are prepared
         Async.function(

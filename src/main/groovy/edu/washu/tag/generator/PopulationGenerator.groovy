@@ -6,7 +6,6 @@ import edu.washu.tag.generator.metadata.patient.*
 import edu.washu.tag.generator.util.RandomGenUtils
 import edu.washu.tag.generator.util.SequentialIdGenerator
 import edu.washu.tag.util.FileIOUtils
-import groovyx.gpars.GParsPool
 import io.temporal.activity.Activity
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.slf4j.Logger
@@ -56,7 +55,7 @@ class PopulationGenerator {
         }
         println("STAGE 1 complete, batches have been generated")
 
-        BatchProcessor.initDirs()
+        BatchProcessor.initDirs(args.length > 3 ? args[3] : '.')
         if (generator.writeDataToFiles) {
             new BatchProcessor(
                 batches: batchSpecifications,
@@ -103,11 +102,7 @@ class PopulationGenerator {
         generateBatchWithHandler(nameCache, idOffsets, batchRequest, patientConsumer, false)
 
         if (specificationParameters.generateRadiologyReports) {
-            GParsPool.withPool {
-                batchSpecification.patients.eachParallel { Patient patient ->
-                    specificationParameters.reportGeneratorImplementation.generateReportsForPatient(patient)
-                }
-            }
+            specificationParameters.reportGeneratorImplementation.generateReportsForPatients(batchSpecification.patients, false)
         }
 
         batchSpecification.writeToFile()
@@ -139,6 +134,7 @@ class PopulationGenerator {
         int generatedStudies = 0
         int generatedSeries = 0
         final SequentialIdGenerator studyIdGenerator = idOffsets.getStudyIdEncoderFromOffset(batchRequest.studyOffset)
+        final List<Patient> patients = []
 
         batchRequest.numPatients.times { generatedPatients ->
             generationContext.setCurrentAverageStudiesPerPatient(generatedPatients == 0 ? 0.0 : generatedStudies / generatedPatients)
@@ -153,9 +149,17 @@ class PopulationGenerator {
                 generatedStudies++
                 generatedSeries += study.series.size()
             }
-            if (specificationParameters.generateRadiologyReports && generateReports) {
-                specificationParameters.reportGeneratorImplementation.generateReportsForPatient(patient)
+            if (temporalHeartbeat) {
+                Activity.executionContext.heartbeat("Batch ${batchRequest.id}, patient ${generatedPatients + 1} post-DICOM")
             }
+            patients << patient
+        }
+
+        if (specificationParameters.generateRadiologyReports && generateReports) {
+            specificationParameters.reportGeneratorImplementation.generateReportsForPatients(patients, temporalHeartbeat)
+        }
+
+        patients.eachWithIndex { patient, generatedPatients ->
             handler.accept(patient)
             if ((generatedPatients + 1) % 100 == 0) {
                 logger.info("Generated DICOM and/or HL7 for patient ${patient.patientInstanceUid} in batch ${batchRequest.id} [${generatedPatients + 1}/${batchRequest.numPatients}]")

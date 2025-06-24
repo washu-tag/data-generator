@@ -6,5 +6,6 @@ class GenerateDatasetInput {
     Boolean writeDicom = true
     Boolean writeHl7 = true
     int concurrentExecution = 4
+    String outputDir = '.'
 
 }

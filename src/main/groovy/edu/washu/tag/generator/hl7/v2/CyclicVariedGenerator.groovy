@@ -1,6 +1,7 @@
 package edu.washu.tag.generator.hl7.v2
 
 import edu.washu.tag.generator.ai.GeneratedReport
+import edu.washu.tag.generator.ai.PatientOutput
 import edu.washu.tag.generator.hl7.v2.model.ReportStatus
 import edu.washu.tag.generator.metadata.Patient
 
@@ -12,33 +13,39 @@ abstract class CyclicVariedGenerator extends ReportGenerator {
     private static final StudyReportGenerator historicalReportGenerator = new HistoricalStudyReportGenerator()
 
     @Override
-    void generateReportsForPatient(Patient patient) {
-        final List<GeneratedReport> reports = formBaseReports(patient)
+    void generateReportsForPatients(List<Patient> patients, boolean temporalHeartbeat) {
+        final List<PatientOutput> output = formBaseReports(patients, temporalHeartbeat)
 
-        patient.studies.each { study ->
-            final MessageRequirements messageRequirements = new MessageRequirements()
-                .extendedPid(overallReportIndex % 2 == 0)
-                .numPatientIds(1 + (overallReportIndex % 2))
-                .orcStatus(assignStatus())
-                .includeObx(overallReportIndex % 17 != 0)
-                .raceUnavailable(overallReportIndex % 31 == 0)
+        patients.each { patient ->
+            final List<GeneratedReport> reports = output.find { patientOutput ->
+                patientOutput.patientId == patient.patientIds[0].idNumber
+            }.generatedReports
 
-            study.setRadReport(
+            patient.studies.each { study ->
+                final MessageRequirements messageRequirements = new MessageRequirements()
+                    .extendedPid(overallReportIndex % 2 == 0)
+                    .numPatientIds(1 + (overallReportIndex % 2))
+                    .orcStatus(assignStatus())
+                    .includeObx(overallReportIndex % 17 != 0)
+                    .raceUnavailable(overallReportIndex % 31 == 0)
+
+                study.setRadReport(
                     (generateCurrent() ? currentReportGenerator : historicalReportGenerator).generateReportFrom(
-                            patient,
-                            study,
-                            messageRequirements,
-                            reports.find {
-                                it.uid == study.studyInstanceUid
-                            }
+                        patient,
+                        study,
+                        messageRequirements,
+                        reports.find {
+                            it.uid == study.studyInstanceUid
+                        }
                     )
-            )
-            overallReportIndex++
+                )
+                overallReportIndex++
+            }
+            patientIndex++
         }
-        patientIndex++
     }
 
-    protected abstract List<GeneratedReport> formBaseReports(Patient patient)
+    protected abstract List<PatientOutput> formBaseReports(List<Patient> patient, boolean temporalHeartbeat)
 
     protected ReportStatus assignStatus() {
         switch (overallReportIndex % 3) {

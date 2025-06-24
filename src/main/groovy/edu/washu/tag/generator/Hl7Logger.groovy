@@ -16,7 +16,7 @@ class Hl7Logger {
     private static final Logger logger = LoggerFactory.getLogger(Hl7Logger)
 
     List<Hl7LogFile> identifyHl7LogFiles(File hl7SourceDir) {
-        final File logOutputDir = new File('hl7ish_logs')
+        final File logOutputDir = BatchProcessor.logOutput
 
         (hl7SourceDir.listFiles() as List<File>).collectMany { yearDir ->
             final String year = yearDir.name

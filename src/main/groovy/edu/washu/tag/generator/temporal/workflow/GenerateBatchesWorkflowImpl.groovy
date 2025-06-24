@@ -1,5 +1,6 @@
 package edu.washu.tag.generator.temporal.workflow
 
+import edu.washu.tag.generator.BatchProcessor
 import edu.washu.tag.generator.temporal.TemporalApplication
 import edu.washu.tag.generator.temporal.activity.BatchHandlerActivity
 import edu.washu.tag.generator.temporal.model.BatchHandlerActivityInput
@@ -19,7 +20,7 @@ class GenerateBatchesWorkflowImpl implements GenerateBatchWorkflow {
             BatchHandlerActivity,
             ActivityOptions.newBuilder()
                 .setStartToCloseTimeout(Duration.ofHours(24))
-                .setHeartbeatTimeout(Duration.ofMinutes(5))
+                .setHeartbeatTimeout(Duration.ofMinutes(15))
                 .setRetryOptions(RetryOptions.newBuilder()
                     .setMaximumInterval(Duration.ofSeconds(1))
                     .setMaximumAttempts(3)
@@ -29,6 +30,7 @@ class GenerateBatchesWorkflowImpl implements GenerateBatchWorkflow {
 
     @Override
     void generateBatches(GenerateBatchesInput generateBatchInput) {
+        BatchProcessor.initDirs(generateBatchInput.outputDir)
         generateBatchInput.batchChunk.batchRequests.each { batchRequest ->
             batchHandlerActivity.formAndWriteBatch(
                 new BatchHandlerActivityInput(
