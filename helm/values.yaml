@@ -90,9 +90,15 @@ volumes:
   - name: data
     hostPath:
       path: /ceph/tag/home/data/create
+  - name: output
+    hostPath:
+      path: /scout/data-generator/output
 volumeMounts:
   - name: data
     mountPath: /data
+    readOnly: false
+  - name: output
+    mountPath: /output
     readOnly: false
 
 nodeSelector: {}
