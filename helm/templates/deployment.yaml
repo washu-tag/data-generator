@@ -49,11 +49,6 @@ spec:
                 secretKeyRef:
                   key: azureOpenaiKey
                   name: "{{ .Release.Name }}-auth"
-            - name: "AZURE_RESOURCE_NAME"
-              valueFrom:
-                secretKeyRef:
-                  key: azureResourceName
-                  name: "{{ .Release.Name }}-auth"
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -62,10 +57,16 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+            - name: config-volume
+              mountPath: /app/application.yaml
+              subPath: application.yaml
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+        - name: config-volume
+          configMap:
+            name: {{ include "helm.fullname" . }}-config
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
