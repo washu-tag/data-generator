@@ -22,9 +22,9 @@ fullnameOverride: ""
 # This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
 serviceAccount:
   # Specifies whether a service account should be created
-  create: false
+  create: true
   # Automatically mount a ServiceAccount's API credentials?
-  automount: false
+  automount: true
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.
@@ -110,8 +110,6 @@ affinity: {}
 config:
   application:
     spring:
-      application:
-        name: data-generator-temporal
       temporal:
         connection:
           target: 'temporal-internal-frontend.temporal:7236'
