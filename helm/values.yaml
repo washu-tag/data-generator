@@ -22,9 +22,9 @@ fullnameOverride: ""
 # This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
 serviceAccount:
   # Specifies whether a service account should be created
-  create: true
+  create: false
   # Automatically mount a ServiceAccount's API credentials?
-  automount: true
+  automount: false
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.
@@ -114,15 +114,8 @@ config:
         name: data-generator-temporal
       temporal:
         connection:
-          target: 'temporal-frontend.temporal:7233'
-        namespace: default
-        start-workers: true
-        workers-auto-discovery:
-          packages:
-            - edu.washu.tag.generator.temporal.activity
-            - edu.washu.tag.generator.temporal.workflow
+          target: 'temporal-internal-frontend.temporal:7236'
 
 env:
   secret:
     AZURE_OPENAI_KEY: keyhere
-    AZURE_RESOURCE_NAME: resourcenamehere

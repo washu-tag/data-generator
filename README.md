@@ -138,7 +138,7 @@ the chart, those values will be used to create Kubernetes secrets to expose with
 needing to specify the credentials at runtime. A full example installation command might look like:
 
 ```shell
-helm upgrade --install -n data-generator data-generator helm/ -f helm/values.yaml --set env.secret.AZURE_OPENAI_KEY=$AZURE_OPENAI_KEY --set env.secret.AZURE_RESOURCE_NAME=$AZURE_RESOURCE_NAME --set volumes[0].hostPath.path=/scout/generator
+helm upgrade --install -n data-generator data-generator helm/ -f helm/values.yaml --set env.secret.AZURE_OPENAI_KEY=$AZURE_OPENAI_KEY --set volumes[0].hostPath.path=/scout/generator --set volumes[1].hostPath.path=/scout/output
 ```
 
 Once deployed as a temporal worker, you can launch a data generation workflow in the temporal UI by clicking the "Start Workflow" button and filling out the form:
@@ -154,6 +154,7 @@ Currently, the properties of that object are:
 - `writeDicom`: (Optional) a boolean for controlling if DICOM files should be written for the dataset. Defaults to `true`.
 - `writeHl7`: (Optional) a boolean for controlling if HL7 files (and aggregated "hl7ish" log files) should be written for the dataset corresponding to radiology reports. Defaults to `true`.
 - `concurrentExecution`: (Optional) an integer for defining how many subactivities to run in parallel for a large generation job. Defaults to `4`.
+- `outputDir`: (Optional) an optional path for the output data. Defaults to `.`.
 
 ---
 

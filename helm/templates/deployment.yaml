@@ -49,11 +49,6 @@ spec:
                 secretKeyRef:
                   key: azureOpenaiKey
                   name: "{{ .Release.Name }}-auth"
-            - name: "AZURE_RESOURCE_NAME"
-              valueFrom:
-                secretKeyRef:
-                  key: azureResourceName
-                  name: "{{ .Release.Name }}-auth"
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
