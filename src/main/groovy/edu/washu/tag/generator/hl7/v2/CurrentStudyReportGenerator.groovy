@@ -24,7 +24,7 @@ class CurrentStudyReportGenerator extends StudyReportGenerator {
         final Institution procedureInstitution = study.primaryEquipment.institution ?: new ChestertonAdamsHospital()
         final RadiologyReport radReport = initReport()
         radReport.setReportDateTime(
-                study.studyDate.atTime(study.studyTime).plusSeconds(RandomUtils.insecure().randomInt(7200, 400000))
+                study.studyDate.atTime(study.studyTime).plusSeconds(RandomUtils.insecure().randomInt(900, 10800))
         )
         radReport.setGeneratedReport(generatedReport)
         radReport.setStudy(study)
