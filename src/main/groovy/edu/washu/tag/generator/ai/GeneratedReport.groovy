@@ -1,16 +1,85 @@
 package edu.washu.tag.generator.ai
 
+import ca.uhn.hl7v2.model.v281.message.ORU_R01
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
+import edu.washu.tag.generator.hl7.v2.ReportVersion
+import edu.washu.tag.generator.hl7.v2.segment.HistoricalReportStructurer
+import edu.washu.tag.generator.hl7.v2.segment.ObxGenerator
+import edu.washu.tag.generator.hl7.v2.segment.ObxManager
+import edu.washu.tag.generator.metadata.RadiologyReport
+import edu.washu.tag.generator.metadata.Study
+import edu.washu.tag.generator.util.RandomGenUtils
 
-class GeneratedReport {
+abstract class GeneratedReport<T extends GeneratedReport<T>> {
 
     @JsonPropertyDescription('UID for imaging study')
     String uid
-    @JsonPropertyDescription('Brief description of imaging exam performed, not mentioning date')
-    String examination
-    @JsonPropertyDescription('Detailed and lengthy narrative description of images')
-    String findings
-    @JsonPropertyDescription("Radiologist's detailed conclusions based on findings")
-    String impressions
+
+    List<ReportVersion> supportedVersions() {
+        ReportVersion.values()
+    }
+
+    List<ObxGenerator> writeReportText2_3(ORU_R01 radReportMessage, RadiologyReport radiologyReport) {
+        throwVersion(ReportVersion.V2_3)
+    }
+
+    String writeReportText2_4(ORU_R01 radReportMessage, RadiologyReport radiologyReport) {
+        throwVersion(ReportVersion.V2_4)
+    }
+
+    ObxManager writeReportText2_7(ORU_R01 radReportMessage, RadiologyReport radiologyReport) {
+        throwVersion(ReportVersion.V2_7)
+    }
+
+    String getUserMessage(Study study, StudyRep studyRep) {
+        ''
+    }
+
+    Boolean validateReport() {
+        true
+    }
+
+    Boolean checkApplicability(Study study) {
+        true
+    }
+
+    void preserveState(T destination) {
+
+    }
+
+    final void addObx(ORU_R01 radReportMessage, RadiologyReport radiologyReport, ReportVersion reportVersion) {
+        if (!(reportVersion in supportedVersions())) {
+            throwVersion(reportVersion)
+        }
+        final Closure<Void> reportWriter = switch (reportVersion) {
+            case ReportVersion.V2_3 -> this.&writeReportText2_3
+            case ReportVersion.V2_4 -> this.&writeReportText2_4
+            case ReportVersion.V2_7 -> this.&writeReportText2_7
+        }
+        reportWriter.call(radReportMessage, radiologyReport)
+
+        switch (reportVersion) {
+            case ReportVersion.V2_3 -> throwVersion(ReportVersion.V2_3)
+            case ReportVersion.V2_4 -> {
+                final String observationId = RandomGenUtils.randomIdStr()
+                HistoricalReportStructurer.generateObx(radiologyReport, writeReportText2_4(radReportMessage, radiologyReport)).eachWithIndex { obxGenerator, i ->
+                    obxGenerator
+                        .observationId(observationId)
+                        .generateSegment(radiologyReport, radReportMessage.PATIENT_RESULT.ORDER_OBSERVATION.getOBSERVATION(i).OBX)
+                }
+            }
+            case ReportVersion.V2_7 -> {
+                writeReportText2_7(radReportMessage, radiologyReport).obxGenerators.eachWithIndex { obxGenerator, i ->
+                    obxGenerator
+                        .setId(String.valueOf(i + 2))
+                        .generateSegment(radiologyReport, radReportMessage.PATIENT_RESULT.ORDER_OBSERVATION.getOBSERVATION(i).OBX)
+                }
+            }
+        }
+    }
+
+    static void throwVersion(ReportVersion reportVersion) {
+        throw new UnsupportedOperationException("Version ${reportVersion} not supported")
+    }
 
 }

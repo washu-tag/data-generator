@@ -7,6 +7,7 @@ import ca.uhn.hl7v2.util.Terser
 import edu.washu.tag.generator.hl7.v2.model.ReportStatus
 import edu.washu.tag.generator.metadata.Person
 import edu.washu.tag.generator.metadata.RadiologyReport
+import edu.washu.tag.generator.util.LineWrapper
 import groovy.transform.builder.Builder
 import groovy.transform.builder.SimpleStrategy
 
@@ -22,18 +23,26 @@ class ObxGenerator extends SegmentGenerator<OBX> {
 
     }
 
-    static ObxGenerator forGeneralDescription(String content) {
-        new ObxGenerator()
-                .content(content)
+    static List<ObxGenerator> forGeneralDescription(String content) {
+        LineWrapper.splitLongLines(content).collect { line ->
+            new ObxGenerator()
+                .content(line)
                 .observationId('GDT')
                 .observationSubId('1')
+        }
     }
 
-    static ObxGenerator forImpression(String content) {
-        new ObxGenerator()
-                .content(content)
+    static List<ObxGenerator> forEmptyGdt() {
+        forGeneralDescription('')
+    }
+
+    static List<ObxGenerator> forImpression(String content) {
+        LineWrapper.splitLongLines(content).collect { line ->
+            new ObxGenerator()
+                .content(line)
                 .observationId('IMP')
                 .observationSubId('2')
+        }
     }
 
     ObxGenerator content(String contentVal) {

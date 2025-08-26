@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import edu.washu.tag.TestQuery
 import edu.washu.tag.TestQuerySuite
 import edu.washu.tag.generator.BatchSpecification
+import edu.washu.tag.generator.hl7.v2.ReportVersion
 import edu.washu.tag.generator.hl7.v2.segment.ObrGenerator
 import edu.washu.tag.generator.hl7.v2.segment.ObxGenerator
 import edu.washu.tag.generator.hl7.v2.segment.ObxGeneratorHistorical
@@ -241,7 +242,7 @@ class QueryGenerator {
                 new FirstMatchingReportsRadReportResult(
                     1,
                     { RadiologyReport radiologyReport ->
-                        radiologyReport.hl7Version == '2.7'
+                        radiologyReport.hl7Version == ReportVersion.V2_7
                     }
                 ).withColumnExtractions({ RadiologyReport radiologyReport ->
                     final ProcedureCode procedureCode = ProcedureCode.lookup(radiologyReport.study.procedureCodeId)
@@ -284,7 +285,7 @@ class QueryGenerator {
 
     private static Function<RadiologyReport, Boolean> matchesHl7Version(String version) {
         { RadiologyReport radiologyReport ->
-            radiologyReport.hl7Version == version
+            radiologyReport.hl7Version.hl7Version == version
         }
     }
 

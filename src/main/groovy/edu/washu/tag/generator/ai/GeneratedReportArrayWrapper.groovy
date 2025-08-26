@@ -1,5 +1,7 @@
 package edu.washu.tag.generator.ai
 
-class GeneratedReportArrayWrapper extends ModelArrayWrapper<GeneratedReport> {
+import edu.washu.tag.generator.ai.catalog.ClassicReport
+
+class GeneratedReportArrayWrapper extends ModelArrayWrapper<ClassicReport> {
 
 }

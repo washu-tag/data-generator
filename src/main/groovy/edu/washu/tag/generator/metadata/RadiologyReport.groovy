@@ -11,6 +11,7 @@ import ca.uhn.hl7v2.validation.impl.ValidationContextImpl
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import edu.washu.tag.generator.ai.GeneratedReport
+import edu.washu.tag.generator.hl7.v2.ReportVersion
 import edu.washu.tag.generator.hl7.v2.model.ReportStatus
 import edu.washu.tag.generator.metadata.enums.Race
 import edu.washu.tag.generator.metadata.patient.PatientId
@@ -44,7 +45,7 @@ abstract class RadiologyReport {
     List<Person> assistantInterpreters
     ReportStatus orcStatus
     String reasonForStudy
-    GeneratedReport generatedReport
+    @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.PROPERTY, property = 'type') GeneratedReport generatedReport
     @JsonIgnore EI placerOrderNumber
     @JsonIgnore EI fillerOrderNumber
     @JsonIgnore NULLDT deliverToLocation
@@ -54,7 +55,7 @@ abstract class RadiologyReport {
     protected abstract void createReport(HapiContext hapiContext, ORU_R01 baseReport)
 
     @JsonIgnore
-    abstract String getHl7Version()
+    abstract ReportVersion getHl7Version()
 
     void postProcess() {
         final EI placerOrderNumber = new EI(null)

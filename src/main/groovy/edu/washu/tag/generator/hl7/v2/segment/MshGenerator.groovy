@@ -22,7 +22,7 @@ class MshGenerator extends SegmentGenerator<MSH> {
         msh.getMsh9_MessageType().getMsg2_TriggerEvent().setValue('R01') // intentionally skipping MSH-9.3
         msh.getMsh10_MessageControlID().setValue(radReport.messageControlId)
         msh.getMsh11_ProcessingID().getPt1_ProcessingID().setValue('P')
-        msh.getMsh12_VersionID().getVid1_VersionID().setValue(radReport.getHl7Version())
+        msh.getMsh12_VersionID().getVid1_VersionID().setValue(radReport.getHl7Version().hl7Version)
     }
     
 }

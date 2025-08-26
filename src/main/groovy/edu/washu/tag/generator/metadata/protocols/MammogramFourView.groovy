@@ -14,6 +14,7 @@ import edu.washu.tag.generator.util.RandomGenUtils
 
 class MammogramFourView extends Mammogram {
 
+    public static final String SIMPLE_DESC = 'four-view mammogram'
     private static final String DIAG_ID = 'mammogram bilat diag'
     private static final String SCREEN_ID = 'mammogram bilat screen'
     private static final EnumeratedDistribution<String> studyDescriptionRandomizer = RandomGenUtils.setupWeightedLottery([
@@ -46,7 +47,7 @@ class MammogramFourView extends Mammogram {
 
     @Override
     String getSimpleDescription(BodyPart bodyPart) {
-        'four-view mammogram'
+        SIMPLE_DESC
     }
 
     @Override
