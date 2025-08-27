@@ -75,7 +75,7 @@ class PopulationGenerator {
         final int studiesInIncompleteBatch = totalNumStudies % studiesPerFullBatch
         final int seriesPerFullBatch = round(((long) patientsPerFullBatch * (long) totalNumSeries) / totalNumPatients).intValue()
         final int seriesInIncompleteBatch = totalNumSeries % seriesPerFullBatch
-        final int totalNumBatches = Math.ceil(specificationParameters.numPatients / BatchSpecification.MAX_PATIENTS).intValue()
+        final int totalNumBatches = Math.ceil(specificationParameters.numPatients / patientsPerFullBatch).intValue()
         (0 ..< totalNumBatches).collect { batchId ->
             final boolean isPartialBatch = hasIncompleteBatch && batchId == totalNumBatches - 1
             new BatchRequest(
