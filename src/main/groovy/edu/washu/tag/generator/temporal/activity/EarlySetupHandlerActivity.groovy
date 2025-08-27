@@ -8,7 +8,7 @@ import io.temporal.activity.ActivityMethod
 interface EarlySetupHandlerActivity {
 
     @ActivityMethod
-    List<BatchChunk> chunkBatches(String specificationParamsPath, int concurrentExecution, String outputDir)
+    List<BatchChunk> chunkBatches(String specificationParamsPath, int concurrentExecution, String outputDir, int patientsPerFullBatch)
 
     @ActivityMethod
     File initNameCache()

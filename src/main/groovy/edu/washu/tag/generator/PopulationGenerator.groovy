@@ -64,12 +64,11 @@ class PopulationGenerator {
         }
     }
 
-    List<BatchRequest> chunkRequest() {
+    List<BatchRequest> chunkRequest(int patientsPerFullBatch = BatchSpecification.MAX_PATIENTS) {
         new File('batches').mkdir() // while we're still in a single process
         final int totalNumPatients = specificationParameters.numPatients
         final int totalNumStudies = specificationParameters.numStudies
         final int totalNumSeries = specificationParameters.numSeries
-        final int patientsPerFullBatch = BatchSpecification.MAX_PATIENTS
         final int patientsInIncompleteBatch = totalNumPatients % patientsPerFullBatch
         final boolean hasIncompleteBatch = patientsInIncompleteBatch != 0
         final int studiesPerFullBatch = round(((long) patientsPerFullBatch * (long) totalNumStudies) / totalNumPatients).intValue()
