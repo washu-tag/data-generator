@@ -32,10 +32,6 @@ class ObxGenerator extends SegmentGenerator<OBX> {
         }
     }
 
-    static List<ObxGenerator> forEmptyGdt() {
-        forGeneralDescription('')
-    }
-
     static List<ObxGenerator> forImpression(String content) {
         LineWrapper.splitLongLines(content).collect { line ->
             new ObxGenerator()

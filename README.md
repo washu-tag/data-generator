@@ -37,7 +37,7 @@ but there are a few booleans that could use explanation:
 
 * `generateRadiologyReports`: by default, this is set to `false` so no HL7 reports will be generated. You can set it
    to `true` to generate reports, but these are generated with GPT, so you must specify the corresponding Azure environment variables:
-   `AZURE_OPENAI_KEY` and `AZURE_RESOURCE_NAME`.
+   `AZURE_OPENAI_KEY`.
 * `includeBinariesInPrivateElements`: if set to `true`, some nonsense data of varying size (but reaching up to around 4MB)
    will be added to a DICOM private element in `(0015,1020)`. The intended use-cases are for creating larger files to test
    ingestion capabilities or DICOM header extraction.
@@ -133,7 +133,7 @@ In the real world (i.e. on a clinical PACS), you'll find the same thing encoded 
 
 The `helm/` directory contains a helm chart to deploy the data generator as a [temporal](https://temporal.io/) workflow. When deploying the helm chart,
 you should specify the path to the directory to mount into the data generator pod with `--set volumes[0].hostPath.path=$MOUNT_PATH` . If you are going to use
-the capability to generate report text with GPT, you should also set `env.secret.AZURE_OPENAI_KEY` and `env.secret.AZURE_RESOURCE_NAME` . When helm installs
+the capability to generate report text with GPT, you should also set `env.secret.AZURE_OPENAI_KEY` . When helm installs
 the chart, those values will be used to create Kubernetes secrets to expose within the data generator pod to allow the user to generate GPT reports without
 needing to specify the credentials at runtime. A full example installation command might look like:
 

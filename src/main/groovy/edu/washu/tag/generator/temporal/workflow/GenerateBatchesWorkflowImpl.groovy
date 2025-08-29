@@ -31,7 +31,7 @@ class GenerateBatchesWorkflowImpl implements GenerateBatchWorkflow {
     @Override
     void generateBatches(GenerateBatchesInput generateBatchInput) {
         BatchProcessor.initDirs(generateBatchInput.outputDir)
-        generateBatchInput.batchChunk.batchRequests.each { batchRequest ->
+        generateBatchInput.batchChunk.resolveToBatches().each { batchRequest ->
             batchHandlerActivity.formAndWriteBatch(
                 new BatchHandlerActivityInput(
                     generateBatchInput.datasetInput,

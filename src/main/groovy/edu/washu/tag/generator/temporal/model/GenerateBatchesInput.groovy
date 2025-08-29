@@ -1,5 +1,6 @@
 package edu.washu.tag.generator.temporal.model
 
+import edu.washu.tag.generator.BatchChunk
 import edu.washu.tag.generator.IdOffsets
 import groovy.transform.TupleConstructor
 

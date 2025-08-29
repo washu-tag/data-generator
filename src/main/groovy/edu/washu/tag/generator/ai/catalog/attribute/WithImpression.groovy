@@ -2,6 +2,9 @@ package edu.washu.tag.generator.ai.catalog.attribute
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
+import edu.washu.tag.generator.ai.catalog.builder.ModernReportTextBuilder
+import edu.washu.tag.generator.ai.catalog.builder.ReportTextBuilder
+import edu.washu.tag.generator.ai.catalog.builder.SectionInternalDelimiter
 
 trait WithImpression {
 
@@ -15,6 +18,13 @@ trait WithImpression {
 
     void setImpression(String impression) {
         this.impression = impression
+    }
+
+    <S extends ReportTextBuilder<?, S>> S addImpression(S textBuilder, SectionInternalDelimiter delimiter = SectionInternalDelimiter.NEWLINE) {
+        if (textBuilder instanceof ModernReportTextBuilder) {
+            textBuilder.beginImpression()
+        }
+        textBuilder.addSection('IMPRESSION', impression, delimiter)
     }
 
 }

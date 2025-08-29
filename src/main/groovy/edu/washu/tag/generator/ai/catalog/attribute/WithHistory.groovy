@@ -2,6 +2,8 @@ package edu.washu.tag.generator.ai.catalog.attribute
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
+import edu.washu.tag.generator.ai.catalog.builder.ReportTextBuilder
+import edu.washu.tag.generator.ai.catalog.builder.SectionInternalDelimiter
 
 trait WithHistory {
 
@@ -15,6 +17,10 @@ trait WithHistory {
 
     void setHistory(String history) {
         this.history = history
+    }
+
+    <S extends ReportTextBuilder<?, S>> S addHistory(S textBuilder, SectionInternalDelimiter delimiter = SectionInternalDelimiter.NEWLINE) {
+        textBuilder.addSection('HISTORY', history, delimiter)
     }
 
 }

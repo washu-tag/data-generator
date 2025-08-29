@@ -1,9 +1,9 @@
 package edu.washu.tag.generator.temporal.workflow
 
+import edu.washu.tag.generator.BatchChunk
 import edu.washu.tag.generator.BatchProcessor
 import edu.washu.tag.generator.IdOffsets
 import edu.washu.tag.generator.temporal.activity.EarlySetupHandlerActivity
-import edu.washu.tag.generator.temporal.model.BatchChunk
 import edu.washu.tag.generator.temporal.model.GenerateBatchesInput
 import edu.washu.tag.generator.temporal.model.GenerateDatasetInput
 import edu.washu.tag.generator.temporal.TemporalApplication
@@ -46,7 +46,7 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
         final File nameCache = earlySetupActivity.initNameCache()
         final IdOffsets idOffsets = new IdOffsets()
 
-        final List<BatchChunk> batchRequests = earlySetupActivity.chunkBatches(
+        final List<BatchChunk> batchChunks = earlySetupActivity.chunkBatches(
             input.specificationParametersPath,
             input.concurrentExecution,
             input.outputDir,
@@ -54,7 +54,7 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
         )
 
         // Launch child workflow where each fulfills several batches in sequence
-        Promise.allOf(batchRequests.collect { batchChunk ->
+        Promise.allOf(batchChunks.collect { batchChunk ->
             Async.function(
                 Workflow.newChildWorkflowStub(
                     GenerateBatchWorkflow,

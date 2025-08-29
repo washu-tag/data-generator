@@ -17,6 +17,7 @@ class CyclicVariedGptGenerator extends CyclicVariedGenerator {
     String endpoint
     String apiKeyEnvVar
     String model
+    Map<String, List<String>> queryParams = [:]
     int batchSize = 30
     Double customReportFraction = null
     private OpenAiWrapper openAiWrapper
@@ -25,7 +26,7 @@ class CyclicVariedGptGenerator extends CyclicVariedGenerator {
     @Override
     protected List<PatientOutput> formBaseReports(List<Patient> patients, boolean temporalHeartbeat) {
         if (openAiWrapper == null) {
-            openAiWrapper = new OpenAiWrapper(endpoint, apiKeyEnvVar, model)
+            openAiWrapper = new OpenAiWrapper(endpoint, apiKeyEnvVar, model, queryParams)
         }
         List<Patient> bulkPatients
         List<Patient> customPatients = []

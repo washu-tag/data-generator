@@ -24,12 +24,12 @@ class OpenAiWrapper {
     private static final String BASE_RAD_PROMPT_SINGULAR = FileIOUtils.readResource('rad_prompt_singular.txt')
     private static final ObjectMapper objectMapper = new ObjectMapper()
 
-    OpenAiWrapper(String endpoint, String apiKeyEnvVar, String modelName) {
+    OpenAiWrapper(String endpoint, String apiKeyEnvVar, String modelName, Map<String, List<String>> queryParams) {
         model = modelName
         client = OpenAIOkHttpClient.builder()
             .apiKey(System.getenv(apiKeyEnvVar))
             .baseUrl(endpoint)
-            .queryParams(['api-version': ['preview']])
+            .queryParams(queryParams)
             .build()
     }
 
