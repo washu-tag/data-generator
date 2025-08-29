@@ -46,6 +46,7 @@ class CombinedFindingsImpressionReport extends GeneratedReport<CombinedFindingsI
         final ModernReportTextBuilder textBuilder = new ModernReportTextBuilder()
         addExamination(textBuilder)
         addHistory(textBuilder, SectionInternalDelimiter.SPACE)
+        textBuilder.beginImpression()
         textBuilder.add(impressionFormat.serializeImpression(impression))
     }
 

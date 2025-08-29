@@ -21,10 +21,11 @@ trait WithImpression {
     }
 
     <S extends ReportTextBuilder<?, S>> S addImpression(S textBuilder, SectionInternalDelimiter delimiter = SectionInternalDelimiter.NEWLINE) {
+        textBuilder.add('')
         if (textBuilder instanceof ModernReportTextBuilder) {
             textBuilder.beginImpression()
         }
-        textBuilder.addSection('IMPRESSION', impression, delimiter)
+        textBuilder.add("IMPRESSION:${delimiter.delimiter}${impression}")
     }
 
 }
