@@ -26,7 +26,7 @@ class HistoricalStudyReportGenerator extends CurrentStudyReportGenerator {
     }
 
     @Override
-    protected RadiologyReport initReport() {
+    RadiologyReport initReport() {
         return new HistoricalRadiologyReport()
     }
 

@@ -9,4 +9,8 @@ abstract class StudyReportGenerator {
 
     abstract RadiologyReport generateReportFrom(Patient patient, Study study, MessageRequirements messageRequirements, GeneratedReport generatedReport)
 
+    abstract RadiologyReport initReport()
+
+    abstract Boolean checkReportCompatibility(GeneratedReport generatedReport)
+
 }

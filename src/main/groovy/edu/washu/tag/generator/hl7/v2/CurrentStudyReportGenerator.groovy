@@ -49,8 +49,14 @@ class CurrentStudyReportGenerator extends StudyReportGenerator {
         radReport
     }
 
-    protected RadiologyReport initReport() {
+    @Override
+    RadiologyReport initReport() {
         new CurrentRadiologyReport()
+    }
+
+    @Override
+    Boolean checkReportCompatibility(GeneratedReport generatedReport) {
+        generatedReport.supportedVersions().contains(initReport().hl7Version)
     }
 
     protected Race unavailableRace() {

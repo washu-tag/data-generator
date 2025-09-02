@@ -11,6 +11,7 @@ abstract class CyclicVariedGenerator extends ReportGenerator {
     int overallReportIndex = 0
     private static final StudyReportGenerator currentReportGenerator = new CurrentStudyReportGenerator()
     private static final StudyReportGenerator historicalReportGenerator = new HistoricalStudyReportGenerator()
+    private static final List<StudyReportGenerator> reportGenerators = [currentReportGenerator, historicalReportGenerator]
 
     @Override
     void generateReportsForPatients(List<Patient> patients, boolean temporalHeartbeat) {
@@ -29,14 +30,16 @@ abstract class CyclicVariedGenerator extends ReportGenerator {
                     .includeObx(overallReportIndex % 17 != 0)
                     .raceUnavailable(overallReportIndex % 31 == 0)
 
+                final GeneratedReport generatedReport = reports.find {
+                    it.uid == study.studyInstanceUid
+                }
+
                 study.setRadReport(
-                    (generateCurrent() ? currentReportGenerator : historicalReportGenerator).generateReportFrom(
+                    deriveReportGenerator(generatedReport).generateReportFrom(
                         patient,
                         study,
                         messageRequirements,
-                        reports.find {
-                            it.uid == study.studyInstanceUid
-                        }
+                        generatedReport
                     )
                 )
                 overallReportIndex++
@@ -60,6 +63,17 @@ abstract class CyclicVariedGenerator extends ReportGenerator {
 
     protected boolean generateCurrent() {
         overallReportIndex % 2 == 0
+    }
+
+    protected StudyReportGenerator deriveReportGenerator(GeneratedReport generatedReport) {
+        final StudyReportGenerator preferredGenerator = generateCurrent() ? currentReportGenerator : historicalReportGenerator
+        if (preferredGenerator.checkReportCompatibility(generatedReport)) {
+            preferredGenerator
+        } else {
+            reportGenerators.find { generator ->
+                generator.checkReportCompatibility(generatedReport)
+            }
+        }
     }
 
 }
