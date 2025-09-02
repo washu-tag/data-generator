@@ -30,8 +30,7 @@ class CombinedFindingsImpressionReport extends GeneratedReport<CombinedFindingsI
 
     @Override
     String getUserMessage(Study study, StudyRep studyRep) {
-        final String comparison = studyRep.compareTo == null ? 'There is no previous known comparison, so the comparison property should contain only a brief mention of no comparison available. ' : ''
-        "${comparison}Be brief in the examination section. The impression section should be significantly detailed."
+        'Be brief in the examination section. The impression section should be significantly detailed.'
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.openai.client.OpenAIClient
 import com.openai.client.okhttp.OpenAIOkHttpClient
 import edu.washu.tag.generator.ai.catalog.ClassicReport
+import edu.washu.tag.generator.ai.catalog.attribute.WithComparison
 import edu.washu.tag.generator.ai.wrapper.ArrayWrapperLlmCall
 import edu.washu.tag.generator.ai.wrapper.GenericLlmCall
 import edu.washu.tag.generator.metadata.Patient
@@ -45,8 +46,17 @@ class OpenAiWrapper {
             }
             final Study study = entry.key
             final Class<? extends GeneratedReport> reportClass = entry.value
+            final GeneratedReport promptReport = reportClass.getDeclaredConstructor().newInstance()
 
             final String comparison = {
+                if (promptReport instanceof WithComparison && studyRep.compareTo == null) {
+                    'There is no previous known comparison, so the comparison property should contain only a brief mention of no comparison available. '
+                } else {
+                    ''
+                }
+            }()
+
+            final String fullComparisonSerialization = {
                 if (studyRep.compareTo == null) {
                     ''
                 } else {
@@ -55,12 +65,11 @@ class OpenAiWrapper {
                 }
             }()
 
-            final GeneratedReport promptReport = reportClass.getDeclaredConstructor().newInstance()
             final String mainPrompt = BASE_RAD_PROMPT_SINGULAR +
                 " The patient is ${patient.sex.name().toLowerCase()} and was born on ${TimeUtils.UNAMBIGUOUS_DATE.format(patient.dateOfBirth)}." +
-                " The study you are currently evaluating is a ${studyRep.description}. " +
+                " The study you are currently evaluating is a ${studyRep.description}. ${comparison}" +
                 promptReport.getUserMessage(study, studyRep) +
-                comparison
+                fullComparisonSerialization
 
             final GeneratedReport generatedReport = new GenericLlmCall<>(
                 client,

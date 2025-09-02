@@ -37,8 +37,7 @@ class SplitFindingsByModalityReport extends GeneratedReport<SplitFindingsByModal
     @Override
     String getUserMessage(Study study, StudyRep studyRep) {
         expectedModalities = extractModalities(study)
-        final String comparison = studyRep.compareTo == null ? 'There is no previous known comparison, so the comparison property should contain only a brief mention of no comparison available. ' : ''
-        "${comparison}Be brief in the examination section. The findings and impressions should be significantly detailed. When generating the findings section of the report, each string should begin with the modality, followed by a colon, and followed by the findings. The exact imaging modalities that should be included are: ${expectedModalities}. The findings array must contain exactly ${expectedModalities.size()} items, one per provided modality."
+        "Be brief in the examination section. The findings and impressions should be significantly detailed. When generating the findings section of the report, each string should begin with the modality, followed by a colon, and followed by the findings. The exact imaging modalities that should be included are: ${expectedModalities}. The findings array must contain exactly ${expectedModalities.size()} items, one per provided modality."
     }
 
     @Override

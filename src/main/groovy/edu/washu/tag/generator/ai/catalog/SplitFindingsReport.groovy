@@ -47,8 +47,7 @@ class SplitFindingsReport extends GeneratedReport<SplitFindingsReport> implement
         } else {
             expectedBodyParts = [(study.bodyPartExamined.dicomRepresentation)] // TODO: improve all of this
         }
-        final String comparison = studyRep.compareTo == null ? 'There is no previous known comparison, so the comparison property should contain only a brief mention of no comparison available. ' : ''
-        "${comparison}Be brief in the examination section. The findings and impressions should be significantly detailed. When generating the findings section of the report, each string should begin with a body part, followed by a colon, and followed by the findings. The exact body parts that should be included are: ${expectedBodyParts}. The findings array must contain exactly ${expectedBodyParts.size()} items, one per provided body part."
+        "Be brief in the examination section. The findings and impressions should be significantly detailed. When generating the findings section of the report, each string should begin with a body part, followed by a colon, and followed by the findings. The exact body parts that should be included are: ${expectedBodyParts}. The findings array must contain exactly ${expectedBodyParts.size()} items, one per provided body part."
     }
 
     @Override

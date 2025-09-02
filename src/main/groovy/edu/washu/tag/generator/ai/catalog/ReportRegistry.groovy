@@ -9,7 +9,8 @@ class ReportRegistry {
     static final List<Class<? extends GeneratedReport>> generableReportClasses = [
         SplitFindingsReport,
         SplitFindingsByModalityReport,
-        CombinedFindingsImpressionReport
+        CombinedFindingsImpressionReport,
+        AbdominalAngiographyReport
     ]
     static final Map<Class<? extends GeneratedReport>, GeneratedReport> reportInstances = generableReportClasses.collectEntries { reportClass ->
         [(reportClass): reportClass.getDeclaredConstructor().newInstance()]
