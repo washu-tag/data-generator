@@ -38,13 +38,20 @@ class CyclicVariedGptGenerator extends CyclicVariedGenerator {
             }
         }
 
+        final Closure<Void> heartbeatAndLog = { String message ->
+            if (temporalHeartbeat) {
+                Activity.executionContext.heartbeat(message)
+            }
+            logger.info(message)
+        }
+
+        heartbeatAndLog("Generating ${patients.size()} patients with ${bulkPatients.size()} generated in bulk and ${customPatients.size()} generated with customized reports")
+
         final List<PatientOutput> patientOutputs = []
         while (bulkPatients.any { !it.reportsMatched }) {
             final List<Patient> sublist = prepareSublist(bulkPatients)
             final List<PatientOutput> generated = openAiWrapper.generateReportsForPatients(sublist)
-            if (temporalHeartbeat) {
-                Activity.executionContext.heartbeat('LLM called')
-            }
+            heartbeatAndLog('LLM called')
             generated.each { patientOutput ->
                 final Patient patient = sublist.find { pat ->
                     pat.patientIds[0].idNumber == patientOutput.patientId
@@ -58,13 +65,14 @@ class CyclicVariedGptGenerator extends CyclicVariedGenerator {
                 }
             }
         }
-        customPatients.each { patient ->
+        customPatients.eachWithIndex { patient, index ->
             patientOutputs << openAiWrapper.generateReportsForPatient(
                 patient,
                 patient.studies.collectEntries { study ->
                     [(study): ReportRegistry.randomReportClass(study)]
                 }
             )
+            heartbeatAndLog("Generated customized reports for patient [${index + 1}/${customPatients.size()}]")
         }
         patientOutputs
     }
