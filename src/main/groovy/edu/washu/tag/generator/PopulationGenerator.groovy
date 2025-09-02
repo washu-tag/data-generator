@@ -165,6 +165,8 @@ class PopulationGenerator {
             patients << patient
         }
 
+        logger.info("DICOM specs for batch ${batchRequest.id} with ${patients.size()} patients and ${patients*.studies.sum()} studies")
+
         if (specificationParameters.generateRadiologyReports && generateReports) {
             specificationParameters.reportGeneratorImplementation.generateReportsForPatients(patients, temporalHeartbeat)
         }
