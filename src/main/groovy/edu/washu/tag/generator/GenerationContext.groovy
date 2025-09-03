@@ -11,11 +11,14 @@ class GenerationContext {
     long previouslyGeneratedSeries
     long previouslyGeneratedStudies
     int studyCountOverride
+    int studyCountMaximum
     List<PatientIdEncoder> patientIdEncoders
 
     int calculateStudyCountForCurrentPatient() {
         if (studyCountOverride > 0) {
             studyCountOverride
+        } else if (studyCountMaximum > 0) {
+            Math.min(specificationParameters.chooseNumberOfStudies(currentAverageStudiesPerPatient), studyCountMaximum)
         } else {
             specificationParameters.chooseNumberOfStudies(currentAverageStudiesPerPatient)
         }

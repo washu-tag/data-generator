@@ -145,11 +145,16 @@ class PopulationGenerator {
         final List<Patient> patients = []
 
         batchRequest.numPatients.times { generatedPatients ->
+            final Closure<Integer> remainingStudies = { batchRequest.numStudies - generatedStudies }
+
             generationContext.setCurrentAverageStudiesPerPatient(generatedPatients == 0 ? 0.0 : generatedStudies / generatedPatients)
             generationContext.setPreviouslyGeneratedSeries(generatedSeries)
             generationContext.setPreviouslyGeneratedStudies(generatedStudies)
+            if (generatedPatients > batchRequest.numPatients - 4) {
+                generationContext.setStudyCountMaximum(remainingStudies() - (batchRequest.numPatients - generatedPatients - 1))
+            } // 3rd to last must leave 2 reports for final 2 patients, 2nd to last must leave a report for final patient
             if (generatedPatients == batchRequest.numPatients - 1) { // for last patient in batch, we need to ensure exact number of studies
-                generationContext.setStudyCountOverride(batchRequest.numStudies - generatedStudies)
+                generationContext.setStudyCountOverride(remainingStudies())
             }
             final Patient patient = patientRandomizers.sample().createPatient(specificationParameters)
             patient.randomize(generationContext, studyIdGenerator)
