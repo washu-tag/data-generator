@@ -13,8 +13,6 @@ import org.slf4j.LoggerFactory
 
 import java.util.function.Consumer
 
-import static java.lang.Math.round
-
 class PopulationGenerator {
 
     SpecificationParameters specificationParameters = new YamlObjectMapper().readValue(FileIOUtils.readResource('basicRequest.yaml'), SpecificationParameters)
@@ -165,7 +163,7 @@ class PopulationGenerator {
             patients << patient
         }
 
-        logger.info("DICOM specs for batch ${batchRequest.id} with ${patients.size()} patients and ${patients*.studies.sum()} studies")
+        logger.info("DICOM specs for batch ${batchRequest.id} with ${patients.size()} patients and ${patients*.studies*.size().sum()} studies")
 
         if (specificationParameters.generateRadiologyReports && generateReports) {
             specificationParameters.reportGeneratorImplementation.generateReportsForPatients(patients, temporalHeartbeat)
