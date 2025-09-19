@@ -24,6 +24,7 @@ class Patient implements DicomEncoder {
     LocalTime timeOfBirth
     Person patientName
     List<PatientId> patientIds
+    String legacyPatientId
     Race race
     List<Study> studies = []
     String patientInstanceUid // non-standard element
@@ -37,6 +38,7 @@ class Patient implements DicomEncoder {
         final LocalDate sixteenthBirthday = dateOfBirth.plusYears(16)
         patientInstanceUid = UIDUtils.createUID()
         patientIds = generationContext.patientIdEncoders*.nextPatientId()
+        legacyPatientId = generationContext.nextLegacyStandaloneId()
         earliestAvailableStudyDate = sixteenthBirthday.isAfter(imagingDataEpoch) ? sixteenthBirthday : imagingDataEpoch
         generationContext.calculateStudyCountForCurrentPatient().times {
             final Protocol selectedProtocol = generationContext.chooseProtocol(this)
@@ -49,11 +51,17 @@ class Patient implements DicomEncoder {
         this
     }
 
-    void encode(Attributes attributes) {
+    List<PatientId> patientIdsForStudy(Study study) {
+        patientIds.findAll {
+            it.isApplicableForStudy(study)
+        }
+    }
+
+    void encode(Study study, Attributes attributes) {
         attributes.setString(Tag.PatientSex, VR.CS, sex.dicomRepresentation)
         setDate(attributes, Tag.PatientBirthDate, dateOfBirth)
         setTime(attributes, Tag.PatientBirthTime, timeOfBirth)
-        attributes.setString(Tag.PatientID, VR.LO, patientIds[0].idNumber)
+        attributes.setString(Tag.PatientID, VR.LO, patientIdsForStudy(study)[0].idNumber)
     }
 
 }

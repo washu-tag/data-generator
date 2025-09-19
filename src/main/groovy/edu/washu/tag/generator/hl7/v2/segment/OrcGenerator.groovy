@@ -32,9 +32,7 @@ class OrcGenerator extends SegmentGenerator<ORC> {
 
         radReport.technician?.toXcn(baseSegment.getOrc10_EnteredBy(0), true)
 
-        final XCN orderer = baseSegment.getOrc12_OrderingProvider(0)
-        radReport.orderingProvider.toXcn(orderer, true, true)
-        orderer.getXcn13_IdentifierTypeCode().setValue('HOSP')
+        radReport.getDoctorEncoder().encode(radReport.orderingProvider, baseSegment.getOrc12_OrderingProvider(0))
 
         final PL entererLocation = baseSegment.getOrc13_EntererSLocation()
         entererLocation.getPl1_PointOfCare().getHd1_NamespaceID().setValue(GenerationConstants.MAIN_HOSPITAL + '_R')

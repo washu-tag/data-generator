@@ -5,6 +5,7 @@ import ca.uhn.hl7v2.model.v281.datatype.XCN
 import ca.uhn.hl7v2.model.v281.segment.OBR
 import ca.uhn.hl7v2.util.DeepCopy
 import ca.uhn.hl7v2.util.Terser
+import edu.washu.tag.generator.hl7.v2.model.DoctorEncoder
 import edu.washu.tag.generator.metadata.CodedTriplet
 import edu.washu.tag.generator.metadata.Person
 import edu.washu.tag.generator.metadata.ProcedureCode
@@ -66,7 +67,7 @@ class ObrGenerator extends SegmentGenerator<OBR> {
 
         addReasonForStudy(radReport, baseSegment)
 
-        final NameEncoder nameEncoder = new NameEncoder(baseSegment, radReport.malformInterpretersTechnician)
+        final NameEncoder nameEncoder = new NameEncoder(radReport, baseSegment)
         nameEncoder.encodeAssistantResultInterpreter(radReport.assistantInterpreters)
 
         final Person tech = radReport.technician
@@ -93,54 +94,31 @@ class ObrGenerator extends SegmentGenerator<OBR> {
         }
     }
 
-    protected class NameEncoder {
-        private final OBR obr
+    protected static final class NameEncoder {
+        private final DoctorEncoder doctorEncoder
+        private final OBR baseSegment
         private final boolean malform
 
-        protected NameEncoder(OBR obr, boolean malform) {
-            this.obr = obr
-            this.malform = malform
-        }
-
-        private void encodeValueViaTerser(int fieldId, int rep, int componentId, int subcomponentId, String value) {
-            Terser.set(obr, fieldId, rep, componentId, subcomponentId, value)
-        }
-
-        protected void encodeValue(int fieldId, int rep, int pieceId, String value) {
-            encodeValueViaTerser(
-                fieldId,
-                rep,
-                malform ? pieceId : 1,
-                malform ? 1 : pieceId,
-                value
-            )
-        }
-
-        protected void encodeNdlElement(int fieldId, List<Person> people) {
-            people.eachWithIndex { person, i ->
-                encodeValue(fieldId, i, 1, person.personIdentifier.toUpperCase())
-                encodeValue(fieldId, i, 2, person.familyNameAlphabetic.toUpperCase())
-                encodeValue(fieldId, i, 3, person.givenNameAlphabetic.toUpperCase())
-                encodeValue(fieldId, i, 4, person.middleInitial()?.toUpperCase())
-                if (person.getAssigningAuthority() != null) {
-                    encodeValue(fieldId, i, 9, person.getAssigningAuthority().getNamespaceId())
-                }
-                if (malform && fieldId < 34) {
-                    encodeValue(fieldId, i, 13, 'HOSP')
-                }
-            }
+        NameEncoder(RadiologyReport radReport, OBR baseSegment) {
+            doctorEncoder = radReport.getDoctorEncoder()
+            this.baseSegment = baseSegment
+            malform = radReport.malformInterpretersTechnician
         }
 
         protected void encodePrincipalResultInterpreter(Person person) {
-            encodeNdlElement(32, Collections.singletonList(person))
+            doctorEncoder.encode([person], baseSegment, 32, malform)
         }
 
-        protected void encodeAssistantResultInterpreter(List<Person> person) {
-            encodeNdlElement(33, person)
+        protected void encodeAssistantResultInterpreter(List<Person> people) {
+            doctorEncoder.encode(people, baseSegment, 33, malform)
         }
 
         protected void encodeTechnician(Person person) {
-            encodeNdlElement(34, Collections.singletonList(person))
+            doctorEncoder.encode([person], baseSegment, 34, malform)
+        }
+
+        protected void encodeTranscriptionist(Person person) {
+            doctorEncoder.encode([person], baseSegment, 35, malform)
         }
     }
 

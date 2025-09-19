@@ -4,8 +4,6 @@ import ca.uhn.hl7v2.model.v281.segment.MSH
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.util.TimeUtils
 
-import java.time.LocalDateTime
-
 class MshGenerator extends SegmentGenerator<MSH> {
 
     @Override

@@ -7,27 +7,22 @@ import edu.washu.tag.generator.metadata.Institution
 import edu.washu.tag.generator.metadata.NameCache
 import edu.washu.tag.generator.metadata.Person
 import edu.washu.tag.generator.metadata.RadiologyReport
-import edu.washu.tag.generator.metadata.reports.HistoricalRadiologyReport
+import edu.washu.tag.generator.metadata.reports.RadiologyReport2_4
 
 import java.time.format.DateTimeFormatter
 
-class HistoricalStudyReportGenerator extends CurrentStudyReportGenerator {
+class StudyReportGenerator2_4 extends CurrentStudyReportGenerator {
 
     static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern('LLL dd uuuu hh:mma') // TODO: technically there are 2 formats used, not just this one
 
     @Override
     protected void chooseInterpreters(RadiologyReport radReport, Institution institution, MessageRequirements messageRequirements) {
-        final List<Person> allInterpreters = NameCache.selectPhysicians(
-                institution,
-                messageRequirements.numAsstInterpreters + 1
-        )
-        radReport.setPrincipalInterpreter(allInterpreters[0])
-        radReport.setAssistantInterpreters(allInterpreters[1 .. -1])
+        chooseInterpretersWithPrimary(radReport, institution, messageRequirements)
     }
 
     @Override
     RadiologyReport initReport() {
-        return new HistoricalRadiologyReport()
+        return new RadiologyReport2_4()
     }
 
     static List<ObxGenerator> generateObx(RadiologyReport radiologyReport, String mainReportText) {

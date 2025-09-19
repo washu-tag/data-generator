@@ -51,7 +51,7 @@ class PersonGenerator<X> {
                     person.middleName(null)
                 }
                 if (derivedNationality == Nationality.AMERICAN && includeMdSuffix) {
-                    person.suffix('M.D.')
+                    person.degree('M.D.')
                 }
                 if (idGenerator != null) {
                     person.setPersonIdentifier(idGenerator.get())

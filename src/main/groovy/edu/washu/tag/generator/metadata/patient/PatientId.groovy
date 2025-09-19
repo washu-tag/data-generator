@@ -4,6 +4,7 @@ import ca.uhn.hl7v2.model.v281.datatype.CX
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import edu.washu.tag.generator.hl7.v2.model.HierarchicDesignator
+import edu.washu.tag.generator.metadata.Study
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.MINIMAL_CLASS,
@@ -28,8 +29,16 @@ trait PatientId {
     abstract String getIdentifierTypeCode()
 
     @JsonIgnore
+    abstract boolean isApplicableForStudy(Study study)
+
+    @JsonIgnore
     String expectedColumnName() {
-        getAssigningAuthority().namespaceId.toLowerCase() + '_' + getIdentifierTypeCode().toLowerCase()
+        final HierarchicDesignator aa = getAssigningAuthority()
+        if (aa == null) {
+            return null
+        } else {
+            return getAssigningAuthority().namespaceId.toLowerCase() + '_' + getIdentifierTypeCode().toLowerCase()
+        }
     }
 
 }

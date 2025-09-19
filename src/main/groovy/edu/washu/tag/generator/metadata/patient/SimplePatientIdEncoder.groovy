@@ -1,5 +1,6 @@
 package edu.washu.tag.generator.metadata.patient
 
+import edu.washu.tag.generator.hl7.v2.model.HierarchicDesignator
 import edu.washu.tag.generator.util.RandomGenUtils
 import edu.washu.tag.generator.util.SequentialIdGenerator
 
@@ -11,7 +12,10 @@ class SimplePatientIdEncoder implements PatientIdEncoder {
     SimplePatientIdEncoder(Class<? extends PatientId> patientIdClass, Integer baseId = RandomGenUtils.randomId(RandomGenUtils.DEFAULT_NUM_DIGITS)) {
         this.patientIdClass = patientIdClass
         idGenerator = new SequentialIdGenerator().currentId(baseId)
-        idGenerator.setPrefix(initPatientId().getAssigningAuthority().getNamespaceId())
+        final HierarchicDesignator hd = initPatientId().getAssigningAuthority()
+        if (hd != null) {
+            idGenerator.setPrefix(hd.getNamespaceId())
+        }
     }
 
     @Override

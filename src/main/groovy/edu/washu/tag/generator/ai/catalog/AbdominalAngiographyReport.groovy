@@ -59,7 +59,7 @@ class AbdominalAngiographyReport extends GeneratedReport<AbdominalAngiographyRep
 
     @Override
     ModernReportTextBuilder writeReportText2_7(ORU_R01 radReportMessage, RadiologyReport radiologyReport) {
-        final ModernReportTextBuilder textBuilder = new ModernReportTextBuilder()
+        final ModernReportTextBuilder textBuilder = new ModernReportTextBuilder(radiologyReport)
         addExamination(textBuilder)
         textBuilder.addSection('CLINICAL INDICATION', clinicalIndication)
         textBuilder.addSection('PROCEDURE', procedure)

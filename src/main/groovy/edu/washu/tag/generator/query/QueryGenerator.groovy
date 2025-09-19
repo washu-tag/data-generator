@@ -14,7 +14,7 @@ import edu.washu.tag.generator.metadata.enums.Race
 import edu.washu.tag.generator.metadata.enums.Sex
 import edu.washu.tag.generator.metadata.patient.EpicId
 import edu.washu.tag.generator.metadata.patient.MainId
-import edu.washu.tag.generator.metadata.reports.CurrentRadiologyReport
+import edu.washu.tag.generator.metadata.reports.RadiologyReport2_7
 import edu.washu.tag.generator.util.TimeUtils
 import edu.washu.tag.util.FileIOUtils
 import edu.washu.tag.validation.DateComparisonValidation
@@ -226,7 +226,7 @@ class QueryGenerator {
                         if (!report.includeObx) {
                             return null
                         }
-                        (report.hl7Version == CurrentRadiologyReport.CURRENT_VERSION ? currentObx : historicalObx).getEncodedStatus(report.orcStatus)
+                        (report.hl7Version == RadiologyReport2_7.CURRENT_VERSION ? currentObx : historicalObx).getEncodedStatus(report.orcStatus)
                     }).addCase(
                         new GroupedAggregationRadReportResult.Case(
                             'total_count',

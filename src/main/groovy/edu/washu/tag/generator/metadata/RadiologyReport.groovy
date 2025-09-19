@@ -12,10 +12,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import edu.washu.tag.generator.ai.GeneratedReport
 import edu.washu.tag.generator.hl7.v2.ReportVersion
+import edu.washu.tag.generator.hl7.v2.model.DoctorEncoder
 import edu.washu.tag.generator.hl7.v2.model.ReportStatus
+import edu.washu.tag.generator.hl7.v2.model.TransportationMode
+import edu.washu.tag.generator.hl7.v2.segment.ObxGenerator
 import edu.washu.tag.generator.metadata.enums.Race
 import edu.washu.tag.generator.metadata.patient.PatientId
-import edu.washu.tag.generator.util.RandomGenUtils
 
 import java.time.LocalDateTime
 
@@ -45,9 +47,10 @@ abstract class RadiologyReport {
     List<Person> assistantInterpreters
     ReportStatus orcStatus
     String reasonForStudy
+    String placerOrderNumberId
+    String placerOrderNumberNamespace
+    TransportationMode transportationMode
     @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.PROPERTY, property = 'type') GeneratedReport generatedReport
-    @JsonIgnore EI placerOrderNumber
-    @JsonIgnore EI fillerOrderNumber
     @JsonIgnore NULLDT deliverToLocation
     @JsonIgnore Parser parser
 
@@ -57,15 +60,17 @@ abstract class RadiologyReport {
     @JsonIgnore
     abstract ReportVersion getHl7Version()
 
-    void postProcess() {
-        final EI placerOrderNumber = new EI(null)
-        placerOrderNumber.getEi1_EntityIdentifier().setValue(RandomGenUtils.randomIdStr())
-        placerOrderNumber.getEi2_NamespaceID().setValue('SYS')
-        setPlacerOrderNumber(placerOrderNumber)
+    @JsonIgnore
+    abstract DoctorEncoder getDoctorEncoder()
 
-        final EI fillerOrderNumber = new EI(null)
-        fillerOrderNumber.getEi1_EntityIdentifier().setValue(study.accessionNumber)
-        setFillerOrderNumber(fillerOrderNumber)
+    @JsonIgnore
+    abstract ObxGenerator getBaseObxGenerator(String content)
+
+    @JsonIgnore
+    abstract String getObservationIdSuffixForAddendum()
+
+    void postProcess() {
+
     }
 
     @JsonIgnore
@@ -85,6 +90,21 @@ abstract class RadiologyReport {
     @JsonIgnore
     Person getEffectivePrincipalInterpreter() {
         principalInterpreter ?: assistantInterpreters[0]
+    }
+
+    @JsonIgnore
+    EI getPlacerOrderNumber() {
+        final EI placerOrderNumber = new EI(null)
+        placerOrderNumber.getEi1_EntityIdentifier().setValue(placerOrderNumberId)
+        placerOrderNumber.getEi2_NamespaceID().setValue(placerOrderNumberNamespace)
+        placerOrderNumber
+    }
+
+    @JsonIgnore
+    EI getFillerOrderNumber() {
+        final EI fillerOrderNumber = new EI(null)
+        fillerOrderNumber.getEi1_EntityIdentifier().setValue(study.accessionNumber)
+        fillerOrderNumber
     }
 
     private static HapiContext hapiContext() {

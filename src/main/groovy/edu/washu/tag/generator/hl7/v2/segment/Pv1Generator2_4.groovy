@@ -4,7 +4,7 @@ import ca.uhn.hl7v2.model.v281.datatype.CX
 import ca.uhn.hl7v2.model.v281.datatype.DTM
 import edu.washu.tag.generator.metadata.RadiologyReport
 
-class Pv1GeneratorHistorical extends Pv1Generator {
+class Pv1Generator2_4 extends Pv1Generator {
 
     @Override
     protected void encodeVisitNumber(RadiologyReport radiologyReport, CX visitNumber) {

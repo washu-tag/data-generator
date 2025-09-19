@@ -1,7 +1,5 @@
 package edu.washu.tag.generator.hl7.v2.segment
 
-import ca.uhn.hl7v2.model.Type
-import ca.uhn.hl7v2.model.v281.datatype.ST
 import ca.uhn.hl7v2.model.v281.segment.OBX
 import ca.uhn.hl7v2.util.Terser
 import edu.washu.tag.generator.hl7.v2.model.ReportStatus
@@ -17,56 +15,49 @@ class ObxGenerator extends SegmentGenerator<OBX> {
     String setId
     Obx5Provider content
     String observationId
+    String observationIdSuffix
     String observationSubId
+    boolean includeTechnician = true
+    public static final String IMPRESSION_SUFFIX = 'IMP'
 
     ObxGenerator() {
 
     }
 
-    static List<ObxGenerator> forGeneralDescription(String content) {
-        LineWrapper.splitLongLines(content).collect { line ->
-            new ObxGenerator()
-                .content(line)
-                .observationId('GDT')
-                .observationSubId('1')
-        }
+    static List<ObxGenerator> forAddendum(String content, RadiologyReport radiologyReport) {
+        forKnownSection(radiologyReport.getObservationIdSuffixForAddendum(), content, radiologyReport)
     }
 
-    static List<ObxGenerator> forImpression(String content) {
-        LineWrapper.splitLongLines(content).collect { line ->
-            new ObxGenerator()
-                .content(line)
-                .observationId('IMP')
-                .observationSubId('2')
-        }
+    static List<ObxGenerator> forGeneralDescription(String content, RadiologyReport radiologyReport) {
+        forKnownSection('GDT', content, radiologyReport)
     }
 
-    ObxGenerator content(String contentVal) {
-        content(new SingleValueObx5Provider(contentVal) {
-            @Override
-            Type resolveType(OBX baseSegment) {
-                final ST st = new ST(baseSegment.getMessage())
-                st.setValue(contentVal)
-                st
-            }
-        })
+    static List<ObxGenerator> forImpression(String content, RadiologyReport radiologyReport) {
+        forKnownSection(IMPRESSION_SUFFIX, content, radiologyReport)
+    }
+
+    static List<ObxGenerator> forTechnicianNote(String content, RadiologyReport radiologyReport) {
+        forKnownSection('TCM', content, radiologyReport)
+    }
+
+    static List<ObxGenerator> forKnownSection(String sectionSuffix, String content, RadiologyReport radiologyReport) {
+        LineWrapper.splitLongLines(content).collect { line ->
+            radiologyReport.getBaseObxGenerator(line).observationIdSuffix(sectionSuffix)
+        }
     }
 
     @Override
     void generateSegment(RadiologyReport radReport, OBX baseSegment) {
         baseSegment.getObx1_SetIDOBX().setValue(setId)
         baseSegment.getObx2_ValueType().setValue(content.getValueType(baseSegment))
-        encodeObservationId(baseSegment)
+        baseSegment.getObx3_ObservationIdentifier().getCwe1_Identifier().setValue(observationId)
+        Terser.set(baseSegment, 3, 0, 1, 2, observationIdSuffix)
         baseSegment.getObx4_ObservationSubID().setValue(observationSubId)
         content.encodeObx5(baseSegment)
         baseSegment.getObx11_ObservationResultStatus().setValue(getEncodedStatus(radReport.orcStatus))
-        if (radReport.technician != null) {
+        if (includeTechnician && radReport.technician != null) {
             encodeResponsibleObserver(radReport.technician, baseSegment)
         }
-    }
-
-    protected void encodeObservationId(OBX baseSegment) {
-        Terser.set(baseSegment, 3, 0, 1, 2, observationId)
     }
 
     String getEncodedStatus(ReportStatus status) {
@@ -76,40 +67,5 @@ class ObxGenerator extends SegmentGenerator<OBX> {
     protected void encodeResponsibleObserver(Person technician, OBX baseSegment) {
         technician.toXcn(baseSegment.getObx16_ResponsibleObserver(0), true)
     }
-
-    abstract class Obx5Provider {
-        abstract String getValueType(OBX baseSegment)
-
-        abstract void encodeObx5(OBX baseSegment)
-    }
-
-    protected abstract class SingleValueObx5Provider extends Obx5Provider {
-        protected final String content
-        private Type resolvedType
-
-        SingleValueObx5Provider(String content) {
-            this.content = content
-        }
-
-        private void ensureResolved(OBX baseSegment) {
-            if (resolvedType == null) {
-                resolvedType = resolveType(baseSegment)
-            }
-        }
-
-        abstract Type resolveType(OBX baseSegment)
-
-        @Override
-        String getValueType(OBX baseSegment) {
-            ensureResolved(baseSegment)
-            resolvedType.class.simpleName
-        }
-
-        @Override
-        void encodeObx5(OBX baseSegment) {
-            baseSegment.getObx5_ObservationValue(0).setData(resolvedType)
-        }
-    }
-
 
 }

@@ -1,6 +1,7 @@
 package edu.washu.tag.generator.hl7.v2
 
 import edu.washu.tag.generator.hl7.v2.model.ReportStatus
+import edu.washu.tag.generator.hl7.v2.model.TransportationMode
 import groovy.transform.builder.Builder
 import groovy.transform.builder.SimpleStrategy
 
@@ -13,6 +14,7 @@ class MessageRequirements {
     boolean specifyAddress = true
     boolean extendedPid = true
     ReportStatus orcStatus = null
+    TransportationMode transportationMode = null
     String reasonForStudy = 'Chest pain'
     boolean malformObrInterpretersAndTech = true
     int numAsstInterpreters = 1

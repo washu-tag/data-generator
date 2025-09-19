@@ -22,7 +22,7 @@ class Instance implements DicomEncoder, PrivateElementContainer {
         final Attributes attributes = new Attributes()
 
         attributes.setSpecificCharacterSet(study.characterSets as String[])
-        patient.encode(attributes)
+        patient.encode(study, attributes)
         study.encode(attributes)
         series.encode(attributes)
         encodePrivateElements(attributes)

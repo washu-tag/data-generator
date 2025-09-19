@@ -4,15 +4,15 @@ import ca.uhn.hl7v2.model.v281.datatype.CWE
 import ca.uhn.hl7v2.model.v281.segment.OBR
 import ca.uhn.hl7v2.util.DeepCopy
 import ca.uhn.hl7v2.util.Terser
+import edu.washu.tag.generator.hl7.v2.model.TransportationMode
 import edu.washu.tag.generator.metadata.CodedTriplet
-import edu.washu.tag.generator.metadata.Person
 import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.util.TimeUtils
 
 import java.time.LocalDateTime
 
-class ObrGeneratorHistorical extends ObrGenerator {
+class ObrGenerator2_4 extends ObrGenerator {
     
     private static final String POWERSCRIBE = 'PSCRIB'
 
@@ -21,7 +21,7 @@ class ObrGeneratorHistorical extends ObrGenerator {
         final LocalDateTime reportTime = radReport.reportDateTime
         final CodedTriplet procedureCode = ProcedureCode.lookup(radReport.study.procedureCodeId).codedTriplet
         final String numericProcedureCode = procedureCode.codeValue.replaceAll('\\D', '')
-        final String procedureText = "${numericProcedureCode} ${procedureCode.codeMeaning}"
+        final String procedureText = "${numericProcedureCode} ${procedureCode.codeMeaning}".trim()
 
         DeepCopy.copy(radReport.placerOrderNumber, baseSegment.getObr2_PlacerOrderNumber())
         DeepCopy.copy(radReport.fillerOrderNumber, baseSegment.getObr3_FillerOrderNumber())
@@ -48,32 +48,30 @@ class ObrGeneratorHistorical extends ObrGenerator {
         Terser.set(baseSegment, 27, 0, 6, 1, 'U')
         Terser.set(baseSegment, 27, 0, 8, 1, 'URGENT')
         baseSegment.getObr28_ResultCopiesTo(0).getXcn1_PersonIdentifier().setValue('       ')
+        baseSegment.getObr30_TransportationMode().setValue(serializeTransportationMode(radReport))
 
         addReasonForStudy(radReport, baseSegment)
 
-        final NameEncoderHistorical nameEncoderHistorical = new NameEncoderHistorical(baseSegment, radReport.malformInterpretersTechnician)
-        nameEncoderHistorical.encodePrincipalResultInterpreter(radReport.principalInterpreter)
-        nameEncoderHistorical.encodeAssistantResultInterpreter(radReport.assistantInterpreters)
+        final NameEncoder nameEncoder = new NameEncoder(radReport, baseSegment)
+        nameEncoder.encodePrincipalResultInterpreter(radReport.principalInterpreter)
+        nameEncoder.encodeAssistantResultInterpreter(radReport.assistantInterpreters)
 
         baseSegment.getObr35_Transcriptionist(0).getNdl1_Name().getCnn1_IDNumber().setValue(POWERSCRIBE)
         baseSegment.getObr44_ProcedureCode().getCne1_Identifier().setValue(numericProcedureCode)
         // TODO: could implement OBR-45
     }
 
-    private class NameEncoderHistorical extends ObrGenerator.NameEncoder {
-        private NameEncoderHistorical(OBR obr, boolean malform) {
-            super(obr, malform)
+    // The accession number check is because I wanted to malform the data sometimes to match the real data
+    // but without a new source of randomness
+    private String serializeTransportationMode(RadiologyReport radiologyReport) {
+        final TransportationMode transportationMode = radiologyReport.transportationMode
+        if (transportationMode == null) {
+            return '{}'
         }
-
-        @Override
-        protected void encodeNdlElement(int fieldId, List<Person> people) {
-            super.encodeNdlElement(fieldId, people)
-            people.eachWithIndex { person, i ->
-                encodeValue(fieldId, i, 7, 'M.D.')
-                encodeValue(fieldId, i, 9, '')
-                encodeValue(fieldId, i, 13, '')
-            }
+        if (transportationMode == TransportationMode.PORTABLE && radiologyReport.study.accessionNumber.endsWith('1')) {
+            return 'port'
         }
+        return transportationMode.serialized2_4
     }
 
 }

@@ -137,6 +137,7 @@ class PopulationGenerator {
         final GenerationContext generationContext = new GenerationContext(
             specificationParameters: specificationParameters,
             patientIdEncoders: idOffsets.getPatientIdEncodersFromOffset(batchRequest.patientOffset),
+            legacyStandaloneId: idOffsets.legacyStandaloneIdOffset,
             studyCountOverride: 0
         )
         int generatedStudies = 0

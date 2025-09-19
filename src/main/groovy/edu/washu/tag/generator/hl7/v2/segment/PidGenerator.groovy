@@ -17,29 +17,62 @@ class PidGenerator extends SegmentGenerator<PID> {
     @Override
     void generateSegment(RadiologyReport radReport, PID baseSegment) {
         final Patient patient = radReport.patient
-        final Person patientName = patient.patientName.nameTypeCode('D') // code for 'customary name'
-        baseSegment.getPid1_SetIDPID().setValue('1')
+        final Person patientName = patient.patientName
+
+        addSetId(baseSegment)
+        addLegacyPatientId(baseSegment, patient)
 
         radReport.patientIds.eachWithIndex { patientId, index ->
             patientId.encodeId(baseSegment.getPid3_PatientIdentifierList(index))
         }
 
-        patientName.toXpn(baseSegment.getPid5_PatientName(0), true)
+        addPatientName(baseSegment, patientName)
 
         addDob(patient, baseSegment.getPid7_DateTimeOfBirth())
 
         patient.sex.toCwe(baseSegment.getPid8_AdministrativeSex())
-        if (radReport.includeAlias) {
-            Terser.set(baseSegment, 9, 0, 1, 1, patientName.familyNameAlphabetic.toUpperCase())
-            Terser.set(baseSegment, 9, 0, 2, 1, patientName.givenNameAlphabetic.toUpperCase())
-        }
+        addAlias(patientName, radReport, baseSegment)
 
         final Race race = radReport.race
         if (race != null) {
             addRace(race, baseSegment.getPid10_Race(0).getCwe1_Identifier())
         }
 
-        final XAD patientAddress = baseSegment.getPid11_PatientAddress(0)
+        addPatientAddress(radReport, baseSegment.getPid11_PatientAddress(0))
+
+        encodeLateFields(radReport, baseSegment)
+    }
+
+    protected void addSetId(PID baseSegment) {
+        baseSegment.getPid1_SetIDPID().setValue('1')
+    }
+
+    protected void addLegacyPatientId(PID baseSegment, Patient patient) {
+        // not used beyond 2.3
+    }
+
+    protected void addPatientName(PID baseSegment, Person patientName) {
+        patientName.nameTypeCode('D') // code for 'customary name'
+        patientName.toXpn(baseSegment.getPid5_PatientName(0), true)
+        patientName.nameTypeCode(null)
+    }
+
+    protected void addDob(Patient patient, DTM dobElement) {
+        dobElement.setValue(TimeUtils.toHl7(patient.getDateOfBirth()))
+    }
+
+    protected void addRace(Race race, ST raceElement) {
+        raceElement.setValue(race.getHl7v27Encoding())
+    }
+
+    protected void addAlias(Person patientName, RadiologyReport radReport, PID baseSegment) {
+        if (radReport.includeAlias) {
+            Terser.set(baseSegment, 9, 0, 1, 1, patientName.familyNameAlphabetic.toUpperCase())
+            Terser.set(baseSegment, 9, 0, 2, 1, patientName.givenNameAlphabetic.toUpperCase())
+        }
+    }
+
+    protected void addPatientAddress(RadiologyReport radReport, XAD patientAddress) {
         if (radReport.specifyAddress) {
             patientAddress.getXad1_StreetAddress().getSad1_StreetOrMailingAddress().setValue('123 STREET')
             patientAddress.getXad3_City().setValue('CITY CITY')
@@ -49,16 +82,6 @@ class PidGenerator extends SegmentGenerator<PID> {
         }
         patientAddress.getXad6_Country().setValue('USA')
         patientAddress.getXad7_AddressType().setValue('L')
-
-        encodeLateFields(radReport, baseSegment)
-    }
-
-    protected void addDob(Patient patient, DTM dobElement) {
-        dobElement.setValue(TimeUtils.toHl7(patient.getDateOfBirth()))
-    }
-
-    protected void addRace(Race race, ST raceElement) {
-        raceElement.setValue(race.getHl7v27Encoding())
     }
 
     protected void encodeLateFields(RadiologyReport radReport, PID baseSegment) {

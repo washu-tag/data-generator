@@ -13,6 +13,7 @@ class GenerationContext {
     int studyCountOverride
     int studyCountMaximum
     List<PatientIdEncoder> patientIdEncoders
+    int legacyStandaloneId
 
     int calculateStudyCountForCurrentPatient() {
         if (studyCountOverride > 0) {
@@ -22,6 +23,12 @@ class GenerationContext {
         } else {
             specificationParameters.chooseNumberOfStudies(currentAverageStudiesPerPatient)
         }
+    }
+
+    String nextLegacyStandaloneId() {
+        final String id = String.valueOf(legacyStandaloneId)
+        legacyStandaloneId++
+        id
     }
 
     Protocol chooseProtocol(Patient patient) {

@@ -10,7 +10,7 @@ import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.enums.Race
 import edu.washu.tag.generator.util.TimeUtils
 
-class PidGeneratorHistorical extends PidGenerator {
+class PidGenerator2_4 extends PidGenerator {
 
     @Override
     protected void addDob(Patient patient, DTM dobElement) {

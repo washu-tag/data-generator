@@ -7,7 +7,6 @@ import ca.uhn.hl7v2.model.v281.segment.OBX
 import ca.uhn.hl7v2.util.Terser
 import edu.washu.tag.generator.hl7.v2.model.ReportStatus
 import edu.washu.tag.generator.metadata.Person
-import edu.washu.tag.generator.metadata.reports.CurrentRadiologyReport
 import edu.washu.tag.generator.util.LineWrapper
 
 class ObxGeneratorHistorical extends ObxGenerator {
@@ -33,7 +32,7 @@ class ObxGeneratorHistorical extends ObxGenerator {
                 }
             })
         } else {
-            setContent(new ObxGenerator.SingleValueObx5Provider(content) {
+            setContent(new SingleValueObx5Provider(content) {
                 @Override
                 Type resolveType(OBX baseSegment) {
                     final RP obx5 = new RP(baseSegment.getMessage())
@@ -44,11 +43,6 @@ class ObxGeneratorHistorical extends ObxGenerator {
                 }
             })
         }
-    }
-
-    @Override
-    protected void encodeObservationId(OBX baseSegment) {
-        baseSegment.getObx3_ObservationIdentifier().getCwe1_Identifier().setValue(observationId)
     }
 
     @Override

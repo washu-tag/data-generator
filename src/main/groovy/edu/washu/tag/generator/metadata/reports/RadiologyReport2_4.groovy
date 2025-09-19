@@ -3,10 +3,13 @@ package edu.washu.tag.generator.metadata.reports
 import ca.uhn.hl7v2.parser.Parser
 import ca.uhn.hl7v2.parser.PipeParser
 import edu.washu.tag.generator.hl7.v2.ReportVersion
+import edu.washu.tag.generator.hl7.v2.model.DoctorEncoder
+import edu.washu.tag.generator.hl7.v2.model.DoctorEncoderLegacy
 import edu.washu.tag.generator.hl7.v2.segment.*
 
-class HistoricalRadiologyReport extends CurrentRadiologyReport {
+class RadiologyReport2_4 extends RadiologyReport2_7 {
 
+    private static final DoctorEncoder doctorEncoder = new DoctorEncoderLegacy()
     private static final Parser cachedParser = cacheParser()
 
     @Override
@@ -15,23 +18,28 @@ class HistoricalRadiologyReport extends CurrentRadiologyReport {
     }
 
     @Override
+    DoctorEncoder getDoctorEncoder() {
+        doctorEncoder
+    }
+
+    @Override
     protected PidGenerator getPidGenerator() {
-        new PidGeneratorHistorical()
+        new PidGenerator2_4()
     }
 
     @Override
     protected Pv1Generator getPv1Generator() {
-        new Pv1GeneratorHistorical()
+        new Pv1Generator2_4()
     }
 
     @Override
     protected ObrGenerator getObrGenerator() {
-        new ObrGeneratorHistorical()
+        new ObrGenerator2_4()
     }
 
     @Override
-    protected boolean includeOrc() {
-        false
+    protected OrcGenerator getOrcGenerator() {
+        null
     }
 
     @Override

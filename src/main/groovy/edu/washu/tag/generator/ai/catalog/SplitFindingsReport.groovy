@@ -80,7 +80,7 @@ class SplitFindingsReport extends GeneratedReport<SplitFindingsReport> implement
 
     @Override
     ModernReportTextBuilder writeReportText2_7(ORU_R01 radReportMessage, RadiologyReport radiologyReport) {
-        final ModernReportTextBuilder textBuilder = new ModernReportTextBuilder()
+        final ModernReportTextBuilder textBuilder = new ModernReportTextBuilder(radiologyReport)
         addExamination(textBuilder, SectionInternalDelimiter.SPACE)
         addHistory(textBuilder, SectionInternalDelimiter.SPACE)
         addTechnique(textBuilder, SectionInternalDelimiter.SPACE)

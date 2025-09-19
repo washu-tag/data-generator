@@ -42,7 +42,7 @@ class CombinedFindingsImpressionReport extends GeneratedReport<CombinedFindingsI
 
     @Override
     ModernReportTextBuilder writeReportText2_7(ORU_R01 radReportMessage, RadiologyReport radiologyReport) {
-        final ModernReportTextBuilder textBuilder = new ModernReportTextBuilder()
+        final ModernReportTextBuilder textBuilder = new ModernReportTextBuilder(radiologyReport)
         addExamination(textBuilder)
         addHistory(textBuilder, SectionInternalDelimiter.SPACE)
         textBuilder.beginImpression()

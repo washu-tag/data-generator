@@ -13,6 +13,11 @@ class FixedSampleReportGenerator extends CyclicVariedGenerator {
     private String findings
     private String impression
 
+    FixedSampleReportGenerator() {
+        setFindingsFile(findingsFile)
+        setImpressionsFile(impressionFile)
+    }
+
     @Override
     protected List<PatientOutput> formBaseReports(List<Patient> patients, boolean temporalHeartbeat) {
         patients.collect { patient ->
