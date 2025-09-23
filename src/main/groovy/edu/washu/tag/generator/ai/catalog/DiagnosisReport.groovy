@@ -29,6 +29,11 @@ class DiagnosisReport extends GeneratedReport<DiagnosisReport> implements
     }
 
     @Override
+    void preserveState(DiagnosisReport destination) {
+        destination.setDesignator(designator)
+    }
+
+    @Override
     ModernReportTextBuilder writeReportText2_7(ORU_R01 radReportMessage, RadiologyReport radiologyReport) {
         final ModernReportTextBuilder obxManager = new ModernReportTextBuilder(radiologyReport)
         addExamination(obxManager)
