@@ -6,7 +6,7 @@ import ca.uhn.hl7v2.model.v281.message.ORU_R01
 import ca.uhn.hl7v2.util.Terser
 import edu.washu.tag.generator.metadata.RadiologyReport
 
-class ZpfGenerator extends NonstandardSegmentGenerator {
+class ZpfGenerator extends NonstandardSegmentGenerator<GenericSegment> {
 
     @Override
     String getSegmentName() {

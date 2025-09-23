@@ -12,7 +12,8 @@ class ReportRegistry {
         CombinedFindingsImpressionReport,
         AbdominalAngiographyReport,
         AddendedReport,
-        TechnicianNoteReport
+        TechnicianNoteReport,
+        DiagnosisReport
     ]
     static final Map<Class<? extends GeneratedReport>, GeneratedReport> reportInstances = generableReportClasses.collectEntries { reportClass ->
         [(reportClass): reportClass.getDeclaredConstructor().newInstance()]
