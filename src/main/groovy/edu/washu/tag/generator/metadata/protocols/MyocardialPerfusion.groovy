@@ -1,6 +1,7 @@
 package edu.washu.tag.generator.metadata.protocols
 
 import edu.washu.tag.generator.metadata.CodedTriplet
+import edu.washu.tag.generator.metadata.GeneralizedProcedure
 import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.Study
 import org.apache.commons.math3.distribution.EnumeratedDistribution
@@ -45,6 +46,11 @@ class MyocardialPerfusion extends Protocol {
     @Override
     ProcedureCode getProcedureCode(BodyPart bodyPart) {
         ProcedureCode.lookup('myocardial perf')
+    }
+
+    @Override
+    GeneralizedProcedure getGeneralizedProcedure() {
+        GeneralizedProcedure.NM
     }
 
     @Override

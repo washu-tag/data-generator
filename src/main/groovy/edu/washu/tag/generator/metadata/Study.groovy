@@ -36,6 +36,7 @@ class Study implements DicomEncoder, PrivateElementContainer {
     RadiologyReport radReport
     String simpleDescription
     String procedureCodeId
+    GeneralizedProcedure generalizedProcedure
     BodyPart bodyPartExamined // TODO: this is a simplifying assumption. This is really a series-level field
     @JsonIgnore Patient patient
     @JsonIgnore String ethnicGroup // Yes, this is a patient field, but we want the value to be inconsistently encoded *across studies*, but consistent within a study

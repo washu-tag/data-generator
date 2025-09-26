@@ -1,6 +1,7 @@
 package edu.washu.tag.generator.metadata.protocols
 
 import edu.washu.tag.generator.metadata.Equipment
+import edu.washu.tag.generator.metadata.GeneralizedProcedure
 import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.Protocol
 import edu.washu.tag.generator.metadata.SeriesType
@@ -31,6 +32,11 @@ class XRayAngiography extends Protocol {
     @Override
     ProcedureCode getProcedureCode(BodyPart bodyPart) {
         ProcedureCode.lookup('xray angio')
+    }
+
+    @Override
+    GeneralizedProcedure getGeneralizedProcedure() {
+        GeneralizedProcedure.IR
     }
 
     @Override

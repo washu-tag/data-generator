@@ -98,6 +98,9 @@ class CyclicVariedGptGenerator extends CyclicVariedGenerator {
             if (generatedReport == null) {
                 return false
             }
+            if (!generatedReport.validateReport()) {
+                return false
+            }
         }
         return true
     }

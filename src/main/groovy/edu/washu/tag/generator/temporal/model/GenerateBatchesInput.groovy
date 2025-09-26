@@ -12,5 +12,6 @@ class GenerateBatchesInput {
     IdOffsets idOffsets
     BatchChunk batchChunk
     String outputDir
+    int concurrentExecution
 
 }

@@ -1,5 +1,6 @@
 package edu.washu.tag.generator.metadata.protocols
 
+import edu.washu.tag.generator.metadata.GeneralizedProcedure
 import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.Study
 import org.apache.commons.math3.distribution.EnumeratedDistribution
@@ -63,6 +64,11 @@ class MriComplexProtocol extends Protocol {
     @Override
     ProcedureCode getProcedureCode(BodyPart bodyPart) {
         ProcedureCode.lookup("mri ${bodyPart.codeMeaning.toLowerCase()} w/wo")
+    }
+
+    @Override
+    GeneralizedProcedure getGeneralizedProcedure() {
+        GeneralizedProcedure.MRI
     }
 
     @Override

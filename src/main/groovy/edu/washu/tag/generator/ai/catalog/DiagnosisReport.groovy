@@ -29,6 +29,11 @@ class DiagnosisReport extends GeneratedReport<DiagnosisReport> implements
     }
 
     @Override
+    Boolean validateReport() {
+        pruneCodes()
+    }
+
+    @Override
     void preserveState(DiagnosisReport destination) {
         destination.setDesignator(designator)
     }

@@ -1,5 +1,6 @@
 package edu.washu.tag.generator.metadata.protocols
 
+import edu.washu.tag.generator.metadata.GeneralizedProcedure
 import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.Study
 import org.apache.commons.math3.distribution.EnumeratedDistribution
@@ -41,6 +42,11 @@ class AnteroposteriorCr extends Protocol {
             case BodyPart.ABDOMEN -> ProcedureCode.lookup('abdomen xray 1 view')
             default -> throw new UnsupportedOperationException("Unsupported body part: ${bodyPart}")
         }
+    }
+
+    @Override
+    GeneralizedProcedure getGeneralizedProcedure() {
+        GeneralizedProcedure.XR
     }
 
     @Override

@@ -10,6 +10,7 @@ class BatchHandlerActivityInput {
     GenerateDatasetInput datasetInput
     File nameCachePath
     IdOffsets idOffsets
+    int concurrentExecution
     BatchRequest batchRequest
 
 }

@@ -77,6 +77,8 @@ abstract class Protocol implements Randomizeable {
 
     abstract ProcedureCode getProcedureCode(BodyPart bodyPart)
 
+    abstract GeneralizedProcedure getGeneralizedProcedure()
+
     boolean isApplicableFor(Patient patient) {
         true
     }
@@ -104,6 +106,7 @@ abstract class Protocol implements Randomizeable {
         final BodyPart bodyPartExamined = bodyParts ? RandomGenUtils.randomListEntry(bodyParts) : null
         study.setSimpleDescription(getSimpleDescription(bodyPartExamined))
         study.setProcedureCodeId(getProcedureCode(bodyPartExamined)?.id)
+        study.setGeneralizedProcedure(getGeneralizedProcedure())
         Equipment primaryScanner = null
         seriesTypes*.seriesBundling().unique().each { bundling ->
             final List<SeriesType> seriesTypesForBundle = seriesTypes.findAll { seriesType ->

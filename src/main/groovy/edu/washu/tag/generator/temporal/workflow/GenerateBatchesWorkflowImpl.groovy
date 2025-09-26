@@ -37,6 +37,7 @@ class GenerateBatchesWorkflowImpl implements GenerateBatchWorkflow {
                     generateBatchInput.datasetInput,
                     generateBatchInput.nameCachePath,
                     generateBatchInput.idOffsets,
+                    generateBatchInput.concurrentExecution,
                     batchRequest
                 )
             ) // synchronous to process a whole batch before moving on

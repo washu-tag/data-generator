@@ -39,6 +39,11 @@ class MriSpecializedBrain extends Protocol {
     }
 
     @Override
+    GeneralizedProcedure getGeneralizedProcedure() {
+        GeneralizedProcedure.MRI
+    }
+
+    @Override
     String getStudyDescription(Equipment scanner, Study study) {
         studyDescriptionRandomizer.sample()
     }

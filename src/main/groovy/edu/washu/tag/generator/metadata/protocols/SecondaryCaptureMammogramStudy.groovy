@@ -1,6 +1,7 @@
 package edu.washu.tag.generator.metadata.protocols
 
 import edu.washu.tag.generator.metadata.CodedTriplet
+import edu.washu.tag.generator.metadata.GeneralizedProcedure
 import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.Study
 import org.apache.commons.math3.distribution.EnumeratedDistribution
@@ -38,6 +39,11 @@ class SecondaryCaptureMammogramStudy extends SecondaryCaptureStudy {
     @Override
     ProcedureCode getProcedureCode(BodyPart bodyPart) {
         ProcedureCode.lookup('outside mg')
+    }
+
+    @Override
+    GeneralizedProcedure getGeneralizedProcedure() {
+        GeneralizedProcedure.MAMMO
     }
 
     @Override

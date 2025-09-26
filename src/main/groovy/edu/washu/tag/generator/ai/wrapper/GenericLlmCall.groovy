@@ -6,6 +6,7 @@ import com.openai.errors.OpenAIInvalidDataException
 import com.openai.errors.OpenAIIoException
 import com.openai.models.responses.StructuredResponse
 import com.openai.models.responses.StructuredResponseCreateParams
+import com.openai.models.responses.StructuredResponseOutputMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -52,10 +53,13 @@ class GenericLlmCall<T, S extends GenericLlmCall<T, S>> {
             try {
                 logger.info('Calling LLM...')
                 final StructuredResponse<T> completion = client.responses().create(prompt, requestOptions)
-                if (completion.output().size() > 1) {
+                final List<StructuredResponseOutputMessage<T>> responseItems = completion.output().findResults {
+                    it.message().isPresent() ? it.message().get() : null
+                }
+                if (responseItems.size() > 1) {
                     logger.warn('LLM response included multiple output items')
                 }
-                final T output = completion.output()[0].message().get().content()[0].outputText().get() // why is the API like this?
+                final T output = responseItems[0].content()[0].outputText().get()
 
                 if (responseValidator == null) {
                     return output

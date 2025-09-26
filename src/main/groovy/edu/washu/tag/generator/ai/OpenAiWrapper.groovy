@@ -9,6 +9,7 @@ import edu.washu.tag.generator.ai.wrapper.ArrayWrapperLlmCall
 import edu.washu.tag.generator.ai.wrapper.GenericLlmCall
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.Study
+import edu.washu.tag.generator.util.StringReplacements
 import edu.washu.tag.generator.util.TimeUtils
 import edu.washu.tag.util.FileIOUtils
 import org.slf4j.Logger
@@ -22,6 +23,7 @@ class OpenAiWrapper {
     private static final String BASE_RAD_CONTEXT = FileIOUtils.readResource('rad_context.txt')
     private static final String BASE_RAD_CONTEXT_SINGULAR = FileIOUtils.readResource('rad_context_singular.txt')
     private static final String BASE_RAD_PROMPT = FileIOUtils.readResource('rad_prompt.txt')
+        .replace(StringReplacements.DIAG_PROMPT, new ClassicReport().diagnosisPrompt())
     private static final String BASE_RAD_PROMPT_SINGULAR = FileIOUtils.readResource('rad_prompt_singular.txt')
     private static final ObjectMapper objectMapper = new ObjectMapper()
 

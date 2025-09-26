@@ -45,6 +45,11 @@ class MriMinimalProtocol extends Protocol {
     }
 
     @Override
+    GeneralizedProcedure getGeneralizedProcedure() {
+        GeneralizedProcedure.MRI
+    }
+
+    @Override
     String getSimpleDescription(BodyPart bodyPart) {
         "${bodyPart.dicomRepresentation.toLowerCase()} MRI"
     }

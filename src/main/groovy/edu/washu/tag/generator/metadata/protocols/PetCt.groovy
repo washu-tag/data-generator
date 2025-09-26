@@ -1,6 +1,7 @@
 package edu.washu.tag.generator.metadata.protocols
 
 import edu.washu.tag.generator.metadata.Equipment
+import edu.washu.tag.generator.metadata.GeneralizedProcedure
 import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.SeriesType
 import edu.washu.tag.generator.metadata.Study
@@ -58,6 +59,11 @@ class PetCt extends PetStudy {
             case BodyPart.WHOLEBODY -> ProcedureCode.lookup('petct wholebody')
             default -> throw new UnsupportedOperationException("Unsupported body part ${bodyPart}")
         }
+    }
+
+    @Override
+    GeneralizedProcedure getGeneralizedProcedure() {
+        GeneralizedProcedure.PET
     }
 
     @Override

@@ -1,5 +1,6 @@
 package edu.washu.tag.generator
 
+import edu.washu.tag.generator.ai.catalog.CodeCache
 import edu.washu.tag.generator.metadata.NameCache
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.patient.*
@@ -39,6 +40,7 @@ class PopulationGenerator {
 
         final NameCache nameCache = NameCache.initInstance()
         final IdOffsets idOffsets = new IdOffsets()
+        CodeCache.initializeCache(1)
 
         final List<BatchRequest> batchRequests = generator.chunkRequest()[0].resolveToBatches()
         final String batchFulfillment = batchRequests.size() > 1 ? "split into ${batchRequests.size()} batches" : 'fulfilled in a single batch'

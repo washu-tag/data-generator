@@ -38,6 +38,11 @@ class SingleViewXRay extends Protocol {
     }
 
     @Override
+    GeneralizedProcedure getGeneralizedProcedure() {
+        GeneralizedProcedure.XR
+    }
+
+    @Override
     String getSimpleDescription(BodyPart bodyPart) {
         "${bodyPart.dicomRepresentation.toLowerCase()} X-ray"
     }

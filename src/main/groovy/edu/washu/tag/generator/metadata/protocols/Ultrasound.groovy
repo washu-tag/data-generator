@@ -2,6 +2,7 @@ package edu.washu.tag.generator.metadata.protocols
 
 import edu.washu.tag.generator.metadata.CodedTriplet
 import edu.washu.tag.generator.metadata.Equipment
+import edu.washu.tag.generator.metadata.GeneralizedProcedure
 import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.Protocol
 import edu.washu.tag.generator.metadata.SeriesType
@@ -29,6 +30,11 @@ class Ultrasound extends Protocol {
     @Override
     ProcedureCode getProcedureCode(BodyPart bodyPart) {
         ProcedureCode.lookup('ultrasound')
+    }
+
+    @Override
+    GeneralizedProcedure getGeneralizedProcedure() {
+        GeneralizedProcedure.US
     }
 
     @Override

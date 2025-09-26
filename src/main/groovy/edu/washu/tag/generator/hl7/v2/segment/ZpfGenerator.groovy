@@ -21,8 +21,8 @@ class ZpfGenerator extends NonstandardSegmentGenerator<GenericSegment> {
     @Override
     void generateSegment(RadiologyReport radReport, GenericSegment baseSegment) {
         Terser.set(baseSegment, 1, 0, 1, 1, '1')
-        Terser.set(baseSegment, 2, 0, 1, 1, '10')
-        Terser.set(baseSegment, 2, 0, 2, 1, 'IMG XR PROCEDURES') // TODO: don't hardcode for other modalities
+        Terser.set(baseSegment, 2, 0, 1, 1, radReport.study.generalizedProcedure.code)
+        Terser.set(baseSegment, 2, 0, 2, 1, radReport.study.generalizedProcedure.meaning)
     }
 
     @Override

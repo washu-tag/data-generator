@@ -1,4 +1,3 @@
 Please provide reports of the images, not being afraid to use technological jargon. Include a good deal of variance in your prose.
 Be brief in the examination section. The findings and impressions should be significantly detailed. When comparing to a previous report, include the date explicitly.
-Do not skip any patients or studies in your output. The diagnosis can be either an existing condition that would cause the patient to get the the particular type of imaging done or a diagnosis determined by the radiologist in the report.
-The codes used for both the code and codeMeaning must come from ICD-10. Do not invent codes outside of the ICD-10 standard. The patients with imaging studies you are assessing are what follows.
+Do not skip any patients or studies in your output. %DIAGNOSIS_PROMPT% The patients with imaging studies you are assessing are what follows.

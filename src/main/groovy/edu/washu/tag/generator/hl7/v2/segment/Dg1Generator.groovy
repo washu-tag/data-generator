@@ -4,7 +4,8 @@ import ca.uhn.hl7v2.model.AbstractGroup
 import ca.uhn.hl7v2.model.v281.datatype.CWE
 import ca.uhn.hl7v2.model.v281.message.ORU_R01
 import ca.uhn.hl7v2.model.v281.segment.DG1
-import edu.washu.tag.generator.ai.catalog.attribute.DiagnosisCode
+import edu.washu.tag.generator.ai.catalog.CodeCache
+import edu.washu.tag.generator.ai.catalog.attribute.DiagnosisCodeDesignator
 import edu.washu.tag.generator.metadata.RadiologyReport
 
 class Dg1Generator extends NonstandardSegmentGenerator<DG1> {
@@ -21,10 +22,10 @@ class Dg1Generator extends NonstandardSegmentGenerator<DG1> {
      */
 
     int index
-    DiagnosisCode code
-    String designator
+    String code
+    DiagnosisCodeDesignator designator
 
-    Dg1Generator(int index, DiagnosisCode code, String designator) {
+    Dg1Generator(int index, String code, DiagnosisCodeDesignator designator) {
         this.index = index
         this.code = code
         this.designator = designator
@@ -52,13 +53,15 @@ class Dg1Generator extends NonstandardSegmentGenerator<DG1> {
 
     @Override
     void generateSegment(RadiologyReport radReport, DG1 baseSegment) {
+        final String codeMeaning = CodeCache.lookupCode(designator, code)
+
         baseSegment.getDg11_SetIDDG1().setValue(String.valueOf(index + 1))
-        baseSegment.getDg12_DiagnosisCodingMethod().setValue(designator)
+        baseSegment.getDg12_DiagnosisCodingMethod().setValue(designator.hl7Representation)
         final CWE codeCwe = baseSegment.getDg13_DiagnosisCodeDG1()
-        codeCwe.getCwe1_Identifier().setValue(code.code)
-        codeCwe.getCwe2_Text().setValue(code.codeMeaning)
-        codeCwe.getCwe3_NameOfCodingSystem().setValue(designator)
-        baseSegment.getDg14_DiagnosisDescription().setValue(code.codeMeaning)
+        codeCwe.getCwe1_Identifier().setValue(code)
+        codeCwe.getCwe2_Text().setValue(codeMeaning)
+        codeCwe.getCwe3_NameOfCodingSystem().setValue(designator.hl7Representation)
+        baseSegment.getDg14_DiagnosisDescription().setValue(codeMeaning)
     }
 
 }
