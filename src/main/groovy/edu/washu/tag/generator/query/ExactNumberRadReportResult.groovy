@@ -6,13 +6,14 @@ import edu.washu.tag.validation.ExpectedQueryResult
 import edu.washu.tag.validation.LoggableValidation
 
 import java.util.function.Function
+import java.util.function.Predicate
 
 class ExactNumberRadReportResult extends ExpectedRadReportQueryProcessor {
 
     int expectedNumResults = 0
     LoggableValidation additionalValidation
 
-    ExactNumberRadReportResult(Function<RadiologyReport, Boolean> inclusionCriteria) {
+    ExactNumberRadReportResult(Predicate<RadiologyReport> inclusionCriteria) {
         this.inclusionCriteria = inclusionCriteria
     }
 

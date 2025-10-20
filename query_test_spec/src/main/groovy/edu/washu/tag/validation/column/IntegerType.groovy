@@ -2,8 +2,6 @@ package edu.washu.tag.validation.column
 
 import org.apache.spark.sql.Row
 
-import java.time.Instant
-
 class IntegerType extends ColumnType<String> {
 
     IntegerType(String columnName) {
@@ -16,7 +14,7 @@ class IntegerType extends ColumnType<String> {
 
     @Override
     String readValue(Row row, int index) {
-        String.valueOf(row.getInt(index))
+        row.isNullAt(index) ? null : String.valueOf(row.getInt(index))
     }
 
 }

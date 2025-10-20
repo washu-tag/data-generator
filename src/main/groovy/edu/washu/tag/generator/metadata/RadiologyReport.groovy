@@ -2,8 +2,11 @@ package edu.washu.tag.generator.metadata
 
 import ca.uhn.hl7v2.DefaultHapiContext
 import ca.uhn.hl7v2.HapiContext
+import ca.uhn.hl7v2.model.Type
+import ca.uhn.hl7v2.model.Varies
 import ca.uhn.hl7v2.model.v281.datatype.EI
 import ca.uhn.hl7v2.model.v281.datatype.NULLDT
+import ca.uhn.hl7v2.model.v281.datatype.RP
 import ca.uhn.hl7v2.model.v281.message.ORU_R01
 import ca.uhn.hl7v2.parser.Parser
 import ca.uhn.hl7v2.util.idgenerator.UUIDGenerator
@@ -19,7 +22,9 @@ import edu.washu.tag.generator.hl7.v2.segment.ObxGenerator
 import edu.washu.tag.generator.metadata.enums.Race
 import edu.washu.tag.generator.metadata.patient.PatientId
 
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.MINIMAL_CLASS,
@@ -87,6 +92,25 @@ abstract class RadiologyReport {
         baseReport
     }
 
+    // Not very efficient, but shouldn't need to happen at scale
+    @JsonIgnore
+    String getReportTextForQueryExport() {
+        final HapiContext hapiContext = hapiContext()
+        final ORU_R01 baseReport = hapiContext.newMessage(ORU_R01)
+        generatedReport.addObx(baseReport, this, getHl7Version())
+        baseReport.PATIENT_RESULT.ORDER_OBSERVATION.getOBSERVATIONAll().collect { observation ->
+            observation.OBX.getObx5_ObservationValue().collect { Varies obx5 ->
+                final Type data = obx5.data
+                if (data instanceof RP) {
+                    final String asString = data.toString()
+                    asString.substring(3, asString.length() - 1) // Strip out RP[ ... ]
+                } else {
+                    data.toString()
+                }
+            }.join('\n')
+        }.join('\n')
+    }
+
     @JsonIgnore
     Person getEffectivePrincipalInterpreter() {
         principalInterpreter ?: assistantInterpreters[0]
@@ -105,6 +129,17 @@ abstract class RadiologyReport {
         final EI fillerOrderNumber = new EI(null)
         fillerOrderNumber.getEi1_EntityIdentifier().setValue(study.accessionNumber)
         fillerOrderNumber
+    }
+
+    @JsonIgnore
+    Integer inferPatientAge() {
+        final LocalDate dob = patient.dateOfBirth
+        final LocalDateTime studyDateTime = study.studyDateTime()
+        if (dob == null || studyDateTime == null) {
+            null
+        } else {
+            ChronoUnit.YEARS.between(dob, studyDateTime)
+        }
     }
 
     private static HapiContext hapiContext() {

@@ -6,19 +6,33 @@ import edu.washu.tag.validation.ExpectedQueryResult
 import edu.washu.tag.validation.column.ColumnType
 
 import java.util.function.Function
+import java.util.function.Predicate
 
 class FirstMatchingReportsRadReportResult extends ExpectedRadReportQueryProcessor {
 
-    int numReportsToMatch = 0
     Function<RadiologyReport, Map<String, String>> columnExtractions = { [:] }
     Set<ColumnType<?>> columnTypes = []
-    ExactRowsResult expectation = new ExactRowsResult(uniqueIdColumnName: QueryGenerator.COLUMN_MESSAGE_CONTROL_ID)
+    ExactRowsResult expectation = new ExactRowsResult(uniqueIdColumnName: QueryUtils.COLUMN_MESSAGE_CONTROL_ID)
     private int currentNumMatched = 0
+    private final int numReportsToMatchPerCriterion
+    private final int totalNumReportsToMatch
 
-    FirstMatchingReportsRadReportResult(int numReportsToMatch, Function<RadiologyReport, Boolean> matchCriteria) {
-        this.numReportsToMatch = numReportsToMatch
+    FirstMatchingReportsRadReportResult(int numReportsToMatchPerCriterion, Predicate<RadiologyReport> matchCriteria) {
+        this(numReportsToMatchPerCriterion, [matchCriteria])
+    }
+
+    FirstMatchingReportsRadReportResult(int numReportsToMatchPerCriterion, List<Predicate<RadiologyReport>> matchCriteria) {
+        this.numReportsToMatchPerCriterion = numReportsToMatchPerCriterion
+        totalNumReportsToMatch = numReportsToMatchPerCriterion * matchCriteria.size()
         inclusionCriteria = { RadiologyReport radiologyReport ->
-            matchCriteria.apply(radiologyReport) && currentNumMatched++ < numReportsToMatch
+            if (currentNumMatched >= totalNumReportsToMatch) {
+                false
+            } else if (matchCriteria[currentNumMatched / numReportsToMatchPerCriterion].test(radiologyReport)) {
+                currentNumMatched++
+                true
+            } else {
+                false
+            }
         }
     }
 

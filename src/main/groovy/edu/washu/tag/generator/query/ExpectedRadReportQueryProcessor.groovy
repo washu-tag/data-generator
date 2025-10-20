@@ -6,11 +6,12 @@ import edu.washu.tag.generator.BatchSpecification
 import edu.washu.tag.generator.metadata.RadiologyReport
 
 import java.util.function.Function
+import java.util.function.Predicate
 
 abstract class ExpectedRadReportQueryProcessor implements QuerySourceDataProcessor<BatchSpecification> {
 
     @JsonIgnore
-    Function<RadiologyReport, Boolean> inclusionCriteria
+    Predicate<RadiologyReport> inclusionCriteria
 
     @JsonIgnore
     List<String> matchedReportIds = []
@@ -22,7 +23,7 @@ abstract class ExpectedRadReportQueryProcessor implements QuerySourceDataProcess
                 final RadiologyReport radiologyReport = study.radReport
                 radiologyReport.setPatient(patient)
                 radiologyReport.setStudy(study)
-                if (inclusionCriteria.apply(radiologyReport)) {
+                if (inclusionCriteria.test(radiologyReport)) {
                     includeReport(radiologyReport)
                     matchedReportIds << radiologyReport.messageControlId
                 }

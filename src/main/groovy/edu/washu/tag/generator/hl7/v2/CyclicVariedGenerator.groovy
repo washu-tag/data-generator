@@ -6,6 +6,8 @@ import edu.washu.tag.generator.hl7.v2.model.ReportStatus
 import edu.washu.tag.generator.hl7.v2.model.TransportationMode
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.Study
+import edu.washu.tag.generator.metadata.patient.EmpiId
+import edu.washu.tag.generator.metadata.patient.PatientId
 
 abstract class CyclicVariedGenerator extends ReportGenerator {
 
@@ -28,7 +30,6 @@ abstract class CyclicVariedGenerator extends ReportGenerator {
             patient.studies.each { study ->
                 final MessageRequirements messageRequirements = new MessageRequirements()
                     .extendedPid(overallReportIndex % 2 == 0)
-                    .numPatientIds(1 + (overallReportIndex % 2))
                     .orcStatus(assignStatus())
                     .includeObx(overallReportIndex % 17 != 0)
                     .raceUnavailable(overallReportIndex % 31 == 0)
@@ -47,6 +48,14 @@ abstract class CyclicVariedGenerator extends ReportGenerator {
                     )
                 )
                 overallReportIndex++
+            }
+            if (patient.studies.any { it.radReport.hl7Version == ReportVersion.V2_3 }) {
+                final PatientId mpi = new EmpiId(idNumber: patient.legacyPatientId)
+                patient.studies*.radReport.each { radReport ->
+                    if (radReport.hl7Version == ReportVersion.V2_7) {
+                        radReport.patientIds << mpi
+                    }
+                }
             }
             patientIndex++
         }

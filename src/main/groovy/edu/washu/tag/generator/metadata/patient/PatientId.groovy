@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import edu.washu.tag.generator.hl7.v2.model.HierarchicDesignator
 import edu.washu.tag.generator.metadata.Study
 
+import java.util.concurrent.ThreadLocalRandom
+
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.MINIMAL_CLASS,
         include = JsonTypeInfo.As.PROPERTY,
@@ -17,8 +19,15 @@ trait PatientId {
 
     CX encodeId(CX emptyDataStore) {
         emptyDataStore.getCx1_IDNumber().setValue(idNumber)
-        getAssigningAuthority().toHd(emptyDataStore.getCx4_AssigningAuthority())
+        emptyDataStore.getCx2_IdentifierCheckDigit().setValue(
+            getIdentifierCheckDigit()
+        )
+        emptyDataStore.getCx3_CheckDigitScheme().setValue(
+            getCheckDigitScheme()
+        )
+        getAssigningAuthority()?.toHd(emptyDataStore.getCx4_AssigningAuthority())
         emptyDataStore.getCx5_IdentifierTypeCode().setValue(getIdentifierTypeCode())
+        getAssigningFacility()?.toHd(emptyDataStore.getCx6_AssigningFacility())
         emptyDataStore
     }
 
@@ -32,12 +41,27 @@ trait PatientId {
     abstract boolean isApplicableForStudy(Study study)
 
     @JsonIgnore
+    String getIdentifierCheckDigit() {
+        null
+    }
+
+    @JsonIgnore
+    String getCheckDigitScheme() {
+        null
+    }
+
+    @JsonIgnore
+    HierarchicDesignator getAssigningFacility() {
+        null
+    }
+
+    @JsonIgnore
     String expectedColumnName() {
-        final HierarchicDesignator aa = getAssigningAuthority()
-        if (aa == null) {
-            return null
+        final HierarchicDesignator authority = getAssigningAuthority()
+        if (authority != null) {
+            authority.namespaceId.toLowerCase() + '_' + getIdentifierTypeCode().toLowerCase()
         } else {
-            return getAssigningAuthority().namespaceId.toLowerCase() + '_' + getIdentifierTypeCode().toLowerCase()
+            "legacy_patient_id_${getAssigningFacility().namespaceId.toLowerCase()}"
         }
     }
 

@@ -13,7 +13,7 @@ class OrcGenerator2_3 extends OrcGenerator {
       Observations from real data to explain the choices made here:
 
       * Overall, this segment is much more sparse than in 2.7
-      * PID-2 through PID-8 are empty, unlike in 2.7
+      * ORC-2 through ORC-8 are empty, unlike in 2.7
       * ORC-10 is usually an odd value that looks like a placeholder for unknown. I'm going to use a similar but not
         identical placeholder: ^UnkPERSON^UnkPERSON^^^^
       * There is nothing beyond ORC-12

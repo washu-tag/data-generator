@@ -11,7 +11,7 @@ class FirstPatientsRadReportResult extends ExpectedRadReportQueryProcessor {
     int numPatientsToMatch = 0
     List<String> matchedPatients = []
     Function<RadiologyReport, Map<String, String>> columnExtractions = { [:] }
-    ExactRowsResult expectation = new ExactRowsResult(uniqueIdColumnName: QueryGenerator.COLUMN_MESSAGE_CONTROL_ID)
+    ExactRowsResult expectation = new ExactRowsResult(uniqueIdColumnName: QueryUtils.COLUMN_MESSAGE_CONTROL_ID)
 
     FirstPatientsRadReportResult() {
         inclusionCriteria = { RadiologyReport radiologyReport ->

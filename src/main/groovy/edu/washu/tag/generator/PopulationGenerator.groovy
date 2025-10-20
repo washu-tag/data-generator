@@ -1,9 +1,13 @@
 package edu.washu.tag.generator
 
+import edu.washu.tag.generator.ai.catalog.ClassicReport
 import edu.washu.tag.generator.ai.catalog.CodeCache
 import edu.washu.tag.generator.metadata.NameCache
 import edu.washu.tag.generator.metadata.Patient
+import edu.washu.tag.generator.metadata.RadiologyReport
+import edu.washu.tag.generator.metadata.Study
 import edu.washu.tag.generator.metadata.patient.*
+import edu.washu.tag.generator.query.QueryUtils
 import edu.washu.tag.generator.util.RandomGenUtils
 import edu.washu.tag.generator.util.SequentialIdGenerator
 import edu.washu.tag.util.FileIOUtils
@@ -113,6 +117,23 @@ class PopulationGenerator {
 
         if (specificationParameters.generateRadiologyReports) {
             specificationParameters.reportGeneratorImplementation.generateReportsForPatients(batchSpecification.patients, false)
+        }
+
+        if (generateTestQueries) {
+            final Closure<RadiologyReport> firstReportWithText = {
+                for (Patient patient : batchSpecification.patients) {
+                    for (Study study : patient.studies) {
+                        final RadiologyReport radiologyReport = study.radReport
+                        if (radiologyReport.includeObx && radiologyReport.generatedReport instanceof ClassicReport) {
+                            return radiologyReport
+                        }
+                    }
+                }
+                throw new RuntimeException('Should not happen')
+            }
+            final RadiologyReport radiologyReport = firstReportWithText.call()
+            final ClassicReport generatedReport = radiologyReport.generatedReport as ClassicReport
+            generatedReport.setFindings(QueryUtils.SPECIAL_CHAR_INSERT + generatedReport.findings)
         }
 
         batchSpecification.writeToFile()

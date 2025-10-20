@@ -5,6 +5,7 @@ import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.validation.ExpectedQueryResult
 import edu.washu.tag.validation.GroupedAggregationResult
 import java.util.function.Function
+import java.util.function.Predicate
 
 class GroupedAggregationRadReportResult extends ExpectedRadReportQueryProcessor {
 
@@ -13,7 +14,7 @@ class GroupedAggregationRadReportResult extends ExpectedRadReportQueryProcessor 
     List<Case> cases = []
     private Function<RadiologyReport, String> primaryColumnDerivation
 
-    GroupedAggregationRadReportResult(Function<RadiologyReport, Boolean> inclusionCriteria) {
+    GroupedAggregationRadReportResult(Predicate<RadiologyReport> inclusionCriteria) {
         this.inclusionCriteria = inclusionCriteria
     }
 
@@ -47,7 +48,7 @@ class GroupedAggregationRadReportResult extends ExpectedRadReportQueryProcessor 
                 }
             })
         cases.each { caseVal ->
-            if (caseVal.aggregationCriteria.apply(radiologyReport)) {
+            if (caseVal.aggregationCriteria.test(radiologyReport)) {
                 row.put(caseVal.name, row[caseVal.name] + 1)
             }
         }
@@ -63,9 +64,9 @@ class GroupedAggregationRadReportResult extends ExpectedRadReportQueryProcessor 
 
     static class Case implements Serializable {
         String name
-        @JsonIgnore Function<RadiologyReport, Boolean> aggregationCriteria
+        @JsonIgnore Predicate<RadiologyReport> aggregationCriteria
 
-        Case(String name, Function<RadiologyReport, Boolean> aggregationCriteria) {
+        Case(String name, Predicate<RadiologyReport> aggregationCriteria) {
             this.name = name
             this.aggregationCriteria = aggregationCriteria
         }
