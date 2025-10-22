@@ -23,27 +23,32 @@ class ExactRowsResult implements ExpectedQueryResult {
         assertThat(result.select(uniqueIdColumnName).as(Encoders.STRING()).collectAsList())
             .as('unique keys')
             .hasSameElementsAs(rowAssertions.keySet())
-        result.foreach(new ForeachFunction<Row>() {
-            @Override
-            void call(Row row) throws Exception {
-                final String uniqueId = row.getString(row.fieldIndex(uniqueIdColumnName))
-                rowAssertions.get(uniqueId).each { columnName, expectedValue ->
-                    final int columnIndex = row.fieldIndex(columnName)
-                    final ColumnType<?> existingMapping = columnTypes.find { columnType ->
-                        columnType.columnName == columnName
-                    }
-                    if (existingMapping != null) {
-                        assertThat(existingMapping.readValue(row, columnIndex))
-                            .as(columnName)
-                            .isEqualTo(expectedValue)
-                    } else {
-                        assertThat(row.getString(row.fieldIndex(columnName)))
-                            .as(columnName)
-                            .isEqualTo(expectedValue)
-                    }
+        result.foreach(new RowValidationFunction())
+    }
+
+    private class RowValidationFunction implements ForeachFunction<Row> {
+        private static final Logger functionLogger = LoggerFactory.getLogger(RowValidationFunction)
+
+        @Override
+        void call(Row row) throws Exception {
+            final String uniqueId = row.getString(row.fieldIndex(uniqueIdColumnName))
+            rowAssertions.get(uniqueId).each { columnName, expectedValue ->
+                functionLogger.info("Validating value for column ${columnName}")
+                final int columnIndex = row.fieldIndex(columnName)
+                final ColumnType<?> existingMapping = columnTypes.find { columnType ->
+                    columnType.columnName == columnName
+                }
+                if (existingMapping != null) {
+                    assertThat(existingMapping.readValue(row, columnIndex))
+                        .as(columnName)
+                        .isEqualTo(expectedValue)
+                } else {
+                    assertThat(row.getString(row.fieldIndex(columnName)))
+                        .as(columnName)
+                        .isEqualTo(expectedValue)
                 }
             }
-        })
+        }
     }
 
 }
