@@ -10,6 +10,7 @@ import edu.washu.tag.generator.metadata.Study
 import edu.washu.tag.generator.metadata.enums.Race
 import edu.washu.tag.generator.metadata.institutions.ChestertonAdamsHospital
 import edu.washu.tag.generator.metadata.patient.PatientId
+import edu.washu.tag.generator.metadata.reports.RadiologyReport2_4
 import edu.washu.tag.generator.metadata.reports.RadiologyReport2_7
 import edu.washu.tag.generator.util.RandomGenUtils
 import edu.washu.tag.generator.util.SequentialIdGenerator
@@ -47,7 +48,7 @@ class CurrentStudyReportGenerator extends StudyReportGenerator {
         }
         radReport.setVisitNumber(visitIdGenerator.get())
         radReport.setOrderingProvider(NameCache.selectPhysician(procedureInstitution))
-        radReport.setOrcStatus(messageRequirements.orcStatus)
+        setOrcStatus(radReport, messageRequirements)
         radReport.setReasonForStudy(messageRequirements.reasonForStudy)
         radReport.setTransportationMode(messageRequirements.transportationMode)
         setOrderPlacerNumber(radReport)
@@ -86,6 +87,13 @@ class CurrentStudyReportGenerator extends StudyReportGenerator {
         )
         radReport.setPrincipalInterpreter(allInterpreters[0])
         radReport.setAssistantInterpreters(allInterpreters[1 .. -1])
+    }
+
+    protected void setOrcStatus(RadiologyReport radReport, MessageRequirements messageRequirements) {
+        radReport.setOrcStatus(messageRequirements.orcStatus)
+        if (radReport instanceof RadiologyReport2_4) {
+            radReport.setStatusInHeader(radReport.orcStatus.randomizeTitle())
+        }
     }
 
     protected void setOrderPlacerNumber(RadiologyReport radReport) {

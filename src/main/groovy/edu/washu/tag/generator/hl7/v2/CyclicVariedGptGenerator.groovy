@@ -5,6 +5,7 @@ import edu.washu.tag.generator.ai.OpenAiWrapper
 import edu.washu.tag.generator.ai.PatientOutput
 import edu.washu.tag.generator.ai.catalog.ReportRegistry
 import edu.washu.tag.generator.metadata.Patient
+import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.Study
 import io.temporal.activity.Activity
 import org.slf4j.Logger
@@ -75,6 +76,16 @@ class CyclicVariedGptGenerator extends CyclicVariedGenerator {
             heartbeatAndLog("Generated customized reports for patient [${index + 1}/${customPatients.size()}]")
         }
         patientOutputs
+    }
+
+    @Override
+    protected overwriteReport(RadiologyReport reportToOverwrite, Class<? extends GeneratedReport> reportClass) {
+        reportToOverwrite.setGeneratedReport(
+            openAiWrapper.generateReportsForPatient(
+                reportToOverwrite.study.patient,
+                [(reportToOverwrite.study): reportClass]
+            ).generatedReports[0]
+        )
     }
 
     private List<Patient> prepareSublist(List<Patient> patients) {

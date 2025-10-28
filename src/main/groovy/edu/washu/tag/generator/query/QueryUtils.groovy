@@ -8,6 +8,7 @@ import edu.washu.tag.generator.hl7.v2.ReportVersion
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.enums.Sex
 
+import java.util.function.Function
 import java.util.function.Predicate
 
 class QueryUtils {
@@ -20,13 +21,28 @@ class QueryUtils {
     public static final String COLUMN_MESSAGE_CONTROL_ID = 'message_control_id'
     public static final String COLUMN_REPORT_STATUS = 'report_status'
     public static final String COLUMN_MESSAGE_DT = 'message_dt'
+    public static final String COLUMN_PATIENT_IDS = 'patient_ids'
+
+    public static final Predicate<RadiologyReport> REPORTS_WITH_CONTENT = { RadiologyReport radiologyReport ->
+        radiologyReport.includeObx
+    }
 
     public static final List<Predicate<RadiologyReport>> classicReportsWithContentAndVersions = ReportVersion.values().collect { ReportVersion version ->
         classicReportWithContentAndVersion(version)
     }
 
+    static Predicate<RadiologyReport> reportOfClassWithContentAndVersion(Class<? extends GeneratedReport> reportClass, ReportVersion version) {
+        reportOfClass(reportClass).and(reportOfVersion(version)).and(REPORTS_WITH_CONTENT)
+    }
+
     static Predicate<RadiologyReport> classicReportWithContentAndVersion(ReportVersion version) {
-        reportOfClass(ClassicReport).and({ it.includeObx && it.hl7Version == version })
+        reportOfClassWithContentAndVersion(ClassicReport, version)
+    }
+
+    static Predicate<RadiologyReport> reportOfVersion(ReportVersion version) {
+        { RadiologyReport radiologyReport ->
+            radiologyReport.hl7Version == version
+        }
     }
 
     static Predicate<RadiologyReport> reportOfClass(Class<? extends GeneratedReport> reportClass) {
@@ -61,6 +77,22 @@ class QueryUtils {
         final String reportIds = (query.querySourceDataProcessor as ExpectedRadReportQueryProcessor)
             .matchedReportIds.collect { "'${it}'".toString() }.join(', ')
         query.setSql("SELECT ${select} FROM ${TABLE_NAME} WHERE ${COLUMN_MESSAGE_CONTROL_ID} IN (${reportIds})")
+    }
+
+    static <X> String serializeArrayOfStruct(List<X> inputs, Function<X, String> objectSerializer) {
+        final String serializedObjects = inputs.collect { input ->
+            "[${objectSerializer.apply(input)}]"
+        }.join(', ')
+        "[${serializedObjects}]"
+    }
+
+    static <X> String serializeArrayOfStructByProperties(List<X> inputs, Function<X, List<String>> objectComponents) {
+        serializeArrayOfStruct(
+            inputs,
+            { input ->
+                objectComponents.apply(input).collect { it ?: '' }.join(',')
+            }
+        )
     }
 
 }

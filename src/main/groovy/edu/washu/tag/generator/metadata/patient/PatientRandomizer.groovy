@@ -1,5 +1,6 @@
 package edu.washu.tag.generator.metadata.patient
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import org.apache.commons.math3.distribution.BetaDistribution
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.distribution.NormalDistribution
@@ -11,7 +12,14 @@ import edu.washu.tag.generator.metadata.enums.Nationality
 import edu.washu.tag.generator.metadata.module.patient.PatientModule
 import edu.washu.tag.generator.util.RandomGenUtils
 
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.MINIMAL_CLASS,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = 'type'
+)
 abstract class PatientRandomizer {
+
+    Integer randomizerWeight
 
     public static final EnumeratedDistribution<Race> raceDistribution = raceRandomizer()
     public static final RealDistribution heightModDistribution = new NormalDistribution(0, 1)

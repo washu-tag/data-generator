@@ -8,6 +8,8 @@ import ca.uhn.hl7v2.model.v281.datatype.EI
 import ca.uhn.hl7v2.model.v281.datatype.NULLDT
 import ca.uhn.hl7v2.model.v281.datatype.RP
 import ca.uhn.hl7v2.model.v281.message.ORU_R01
+import ca.uhn.hl7v2.model.v281.segment.MSH
+import ca.uhn.hl7v2.model.v281.segment.OBX
 import ca.uhn.hl7v2.parser.Parser
 import ca.uhn.hl7v2.util.idgenerator.UUIDGenerator
 import ca.uhn.hl7v2.validation.impl.ValidationContextImpl
@@ -18,6 +20,7 @@ import edu.washu.tag.generator.hl7.v2.ReportVersion
 import edu.washu.tag.generator.hl7.v2.model.DoctorEncoder
 import edu.washu.tag.generator.hl7.v2.model.ReportStatus
 import edu.washu.tag.generator.hl7.v2.model.TransportationMode
+import edu.washu.tag.generator.hl7.v2.segment.MshGenerator
 import edu.washu.tag.generator.hl7.v2.segment.ObxGenerator
 import edu.washu.tag.generator.metadata.enums.Race
 import edu.washu.tag.generator.metadata.patient.PatientId
@@ -25,6 +28,7 @@ import edu.washu.tag.generator.metadata.patient.PatientId
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.function.Predicate
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.MINIMAL_CLASS,
@@ -94,20 +98,27 @@ abstract class RadiologyReport {
 
     // Not very efficient, but shouldn't need to happen at scale
     @JsonIgnore
-    String getReportTextForQueryExport() {
+    String getReportTextForQueryExport(Predicate<OBX> obxFilter = { true }) {
         final HapiContext hapiContext = hapiContext()
         final ORU_R01 baseReport = hapiContext.newMessage(ORU_R01)
+        final MSH msh = baseReport.getMSH()
+        new MshGenerator().generateSegment(this, msh)
         generatedReport.addObx(baseReport, this, getHl7Version())
-        baseReport.PATIENT_RESULT.ORDER_OBSERVATION.getOBSERVATIONAll().collect { observation ->
-            observation.OBX.getObx5_ObservationValue().collect { Varies obx5 ->
-                final Type data = obx5.data
-                if (data instanceof RP) {
-                    final String asString = data.toString()
-                    asString.substring(3, asString.length() - 1) // Strip out RP[ ... ]
-                } else {
-                    data.toString()
-                }
-            }.join('\n')
+        baseReport.PATIENT_RESULT.ORDER_OBSERVATION.getOBSERVATIONAll().findResults { observation ->
+            final OBX obx = observation.OBX
+            if (obxFilter.test(obx)) {
+                obx.getObx5_ObservationValue().collect { Varies obx5 ->
+                    final Type data = obx5.data
+                    if (data instanceof RP) {
+                        final String asString = data.toString()
+                        asString.substring(3, asString.length() - 1) // Strip out RP[ ... ]
+                    } else {
+                        data.toString()
+                    }
+                }.join('\n')
+            } else {
+                null
+            }
         }.join('\n')
     }
 

@@ -1,13 +1,18 @@
 package edu.washu.tag.generator.hl7.v2
 
+import edu.washu.tag.generator.CustomGeneratedReportGuarantee
 import edu.washu.tag.generator.ai.GeneratedReport
 import edu.washu.tag.generator.ai.PatientOutput
+import edu.washu.tag.generator.ai.catalog.ClassicReport
 import edu.washu.tag.generator.hl7.v2.model.ReportStatus
 import edu.washu.tag.generator.hl7.v2.model.TransportationMode
 import edu.washu.tag.generator.metadata.Patient
+import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.Study
 import edu.washu.tag.generator.metadata.patient.EmpiId
 import edu.washu.tag.generator.metadata.patient.PatientId
+import io.temporal.workflow.Workflow
+import org.slf4j.Logger
 
 abstract class CyclicVariedGenerator extends ReportGenerator {
 
@@ -17,9 +22,10 @@ abstract class CyclicVariedGenerator extends ReportGenerator {
     private static final StudyReportGenerator reportGenerator2_4 = new StudyReportGenerator2_4()
     private static final StudyReportGenerator reportGenerator2_3 = new StudyReportGenerator2_3()
     private static final List<StudyReportGenerator> reportGenerators = [currentReportGenerator, reportGenerator2_4]
+    private static final Logger logger = Workflow.getLogger(CyclicVariedGenerator)
 
     @Override
-    void generateReportsForPatients(List<Patient> patients, boolean temporalHeartbeat) {
+    void generateReportsForPatients(List<Patient> patients, boolean temporalHeartbeat, List<CustomGeneratedReportGuarantee> reportGuarantees = []) {
         final List<PatientOutput> output = formBaseReports(patients, temporalHeartbeat)
 
         patients.each { patient ->
@@ -49,6 +55,31 @@ abstract class CyclicVariedGenerator extends ReportGenerator {
                 )
                 overallReportIndex++
             }
+            patientIndex++
+        }
+
+        reportGuarantees.each { reportGuarantee ->
+            reportGuarantee.reportVersions.each { reportVersion ->
+                if (!reportGuaranteeSatisfied(patients, reportGuarantee.reportClass, reportVersion)) {
+                    logger.info("Could not find an example of ${reportGuarantee.reportClass.simpleName} with version ${reportVersion.hl7Version}. " +
+                        'Overwriting an existing report...')
+                    overwriteReport(
+                        findOverrideableReport(patients, reportVersion),
+                        reportGuarantee.reportClass
+                    )
+                } else {
+                    logger.info("Found an example of ${reportGuarantee.reportClass.simpleName} with version ${reportVersion.hl7Version}")
+                }
+            }
+        }
+
+        patients.each { patient ->
+            patient.studies.each { study ->
+                study.radReport.generatedReport.postprocessReport(study.radReport)
+            }
+        }
+
+        patients.each { patient ->
             if (patient.studies.any { it.radReport.hl7Version == ReportVersion.V2_3 }) {
                 final PatientId mpi = new EmpiId(idNumber: patient.legacyPatientId)
                 patient.studies*.radReport.each { radReport ->
@@ -57,11 +88,12 @@ abstract class CyclicVariedGenerator extends ReportGenerator {
                     }
                 }
             }
-            patientIndex++
         }
     }
 
     protected abstract List<PatientOutput> formBaseReports(List<Patient> patient, boolean temporalHeartbeat)
+
+    protected abstract overwriteReport(RadiologyReport reportToOverwrite, Class<? extends GeneratedReport> reportClass)
 
     protected ReportStatus assignStatus() {
         switch (overallReportIndex % 3) {
@@ -100,6 +132,27 @@ abstract class CyclicVariedGenerator extends ReportGenerator {
                 generator.checkReportCompatibility(generatedReport)
             }
         }
+    }
+
+    protected boolean reportGuaranteeSatisfied(List<Patient> patients, Class<? extends GeneratedReport> reportClass, ReportVersion reportVersion) {
+        patients.any { patient ->
+            patient.studies.any { study ->
+                final RadiologyReport radiologyReport = study.radReport
+                reportClass.isInstance(radiologyReport.generatedReport) && radiologyReport.hl7Version == reportVersion
+            }
+        }
+    }
+
+    protected RadiologyReport findOverrideableReport(List<Patient> patients, ReportVersion reportVersion) {
+        for (Patient patient : patients) {
+            for (Study study : patient.studies) {
+                final RadiologyReport report = study.radReport
+                if (report.includeObx && report.generatedReport instanceof ClassicReport && report.hl7Version == reportVersion) {
+                    return report
+                }
+            }
+        }
+        throw new RuntimeException('Could not find a report to overwrite')
     }
 
 }

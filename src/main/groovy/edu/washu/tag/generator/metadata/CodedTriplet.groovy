@@ -1,7 +1,5 @@
 package edu.washu.tag.generator.metadata
 
-import groovy.transform.builder.Builder
-import groovy.transform.builder.SimpleStrategy
 import org.dcm4che3.data.Attributes
 import org.dcm4che3.data.Tag
 import org.dcm4che3.data.VR

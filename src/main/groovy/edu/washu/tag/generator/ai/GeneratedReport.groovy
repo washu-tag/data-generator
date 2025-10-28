@@ -49,6 +49,10 @@ abstract class GeneratedReport<T extends GeneratedReport<T>> {
 
     }
 
+    void postprocessReport(RadiologyReport radiologyReport) {
+
+    }
+
     final void addObx(ORU_R01 radReportMessage, RadiologyReport radiologyReport, ReportVersion reportVersion) {
         if (!(reportVersion in supportedVersions())) {
             throwVersion(reportVersion)

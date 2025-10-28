@@ -5,6 +5,7 @@ import edu.washu.tag.TestQuery
 import edu.washu.tag.TestQuerySuite
 import edu.washu.tag.generator.BatchSpecification
 import edu.washu.tag.generator.query.test.AllReports
+import edu.washu.tag.generator.query.test.Diagnoses
 import edu.washu.tag.generator.query.test.DobGreater
 import edu.washu.tag.generator.query.test.ExtendedMetadata
 import edu.washu.tag.generator.query.test.NullMessageDt
@@ -15,6 +16,7 @@ import edu.washu.tag.generator.query.test.ReportStatusCount
 import edu.washu.tag.generator.query.test.ReportText
 import edu.washu.tag.generator.query.test.SexAndRaceListInclusion
 import edu.washu.tag.generator.query.test.SexEquals
+import edu.washu.tag.generator.query.test.SuffixInferredReportSections
 import edu.washu.tag.generator.query.test.UidMissing
 import edu.washu.tag.generator.util.TimeUtils
 
@@ -42,7 +44,9 @@ class QueryGenerator {
         new PatientIdQuery(),
         new AllReports(),
         new NullMessageDt(),
-        new ReportText()
+        new ReportText(),
+        new SuffixInferredReportSections(),
+        new Diagnoses()
     ]
 
     void processData(BatchSpecification batchSpecification) {

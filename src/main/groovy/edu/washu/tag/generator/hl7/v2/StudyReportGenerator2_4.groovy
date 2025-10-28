@@ -31,7 +31,7 @@ class StudyReportGenerator2_4 extends CurrentStudyReportGenerator {
 
         final Person principalInterpreter = radiologyReport.getEffectivePrincipalInterpreter()
         obxGenerators << new ObxGeneratorHistorical(
-            "${principalInterpreter.formatFirstLast().toUpperCase()}, M.D.~~~~********${radiologyReport.orcStatus.randomizeTitle()}********~~~ "
+            "${principalInterpreter.formatFirstLast().toUpperCase()}, M.D.~~~~********${(radiologyReport as RadiologyReport2_4).statusInHeader}********~~~ "
         ).setId('1')
 
         obxGenerators.add(

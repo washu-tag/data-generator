@@ -22,6 +22,14 @@ class AddendedReport extends GeneratedReport<AddendedReport> implements
     @JsonPropertyDescription('Information added to correct one of the other sections of the report')
     String addendum
 
+    @JsonPropertyDescription('Ignored') // we don't want GPT setting this, but do need it serialized in JSON
+    AddendumFormat addendumFormat
+
+    @JsonIgnore
+    String formatAddendum() {
+        addendumFormat.format(addendum)
+    }
+
     @Override
     List<ReportVersion> supportedVersions() {
         [ReportVersion.V2_3, ReportVersion.V2_4, ReportVersion.V2_7]
@@ -36,6 +44,11 @@ class AddendedReport extends GeneratedReport<AddendedReport> implements
     }
 
     @Override
+    void postprocessReport(RadiologyReport radiologyReport) {
+        addendumFormat = AddendumFormat.randomize(radiologyReport.hl7Version == ReportVersion.V2_4)
+    }
+
+    @Override
     ModernReportTextBuilder writeReportText2_3(ORU_R01 radReportMessage, RadiologyReport radiologyReport) {
         writeReportText2_7(radReportMessage, radiologyReport)
     }
@@ -45,14 +58,14 @@ class AddendedReport extends GeneratedReport<AddendedReport> implements
         final HistoricalReportTextBuilder textBuilder = new HistoricalReportTextBuilder(radiologyReport, this)
         addFindings(textBuilder)
         addImpression(textBuilder)
-        textBuilder.add(AddendumFormat.randomize(true).format(addendum))
+        textBuilder.add(formatAddendum())
     }
 
     @Override
     ModernReportTextBuilder writeReportText2_7(ORU_R01 radReportMessage, RadiologyReport radiologyReport) {
         final ModernReportTextBuilder obxManager = new ModernReportTextBuilder(radiologyReport)
         obxManager.beginAddendum()
-        obxManager.add(AddendumFormat.randomize(false).format(addendum))
+        obxManager.add(formatAddendum())
         obxManager.beginGeneralDescription()
         addExamination(obxManager)
         addFindings(obxManager)

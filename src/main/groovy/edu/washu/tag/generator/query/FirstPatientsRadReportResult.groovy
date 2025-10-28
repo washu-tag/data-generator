@@ -6,11 +6,10 @@ import edu.washu.tag.validation.ExpectedQueryResult
 
 import java.util.function.Function
 
-class FirstPatientsRadReportResult extends ExpectedRadReportQueryProcessor {
+class FirstPatientsRadReportResult extends ExpectedRadReportQueryProcessor implements WithColumnExtractions<FirstPatientsRadReportResult> {
 
     int numPatientsToMatch = 0
     List<String> matchedPatients = []
-    Function<RadiologyReport, Map<String, String>> columnExtractions = { [:] }
     ExactRowsResult expectation = new ExactRowsResult(uniqueIdColumnName: QueryUtils.COLUMN_MESSAGE_CONTROL_ID)
 
     FirstPatientsRadReportResult() {
@@ -32,11 +31,6 @@ class FirstPatientsRadReportResult extends ExpectedRadReportQueryProcessor {
         this.numPatientsToMatch = numPatientsToMatch
     }
 
-    FirstPatientsRadReportResult withColumnExtractions(Function<RadiologyReport, Map<String, String>> columnExtractions) {
-        this.columnExtractions = columnExtractions
-        this
-    }
-
     @Override
     void includeReport(RadiologyReport radiologyReport) {
         expectation.rowAssertions.put(
@@ -47,6 +41,7 @@ class FirstPatientsRadReportResult extends ExpectedRadReportQueryProcessor {
 
     @Override
     ExpectedQueryResult outputExpectation() {
+        expectation.setColumnTypes(columnTypes)
         expectation
     }
 
