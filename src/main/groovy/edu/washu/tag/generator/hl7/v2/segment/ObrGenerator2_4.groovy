@@ -21,14 +21,13 @@ class ObrGenerator2_4 extends ObrGenerator {
         final LocalDateTime reportTime = radReport.reportDateTime
         final CodedTriplet procedureCode = ProcedureCode.lookup(radReport.study.procedureCodeId).codedTriplet
         final String numericProcedureCode = procedureCode.codeValue.replaceAll('\\D', '')
-        final String procedureText = "${numericProcedureCode} ${procedureCode.codeMeaning}".trim()
 
         DeepCopy.copy(radReport.placerOrderNumber, baseSegment.getObr2_PlacerOrderNumber())
         DeepCopy.copy(radReport.fillerOrderNumber, baseSegment.getObr3_FillerOrderNumber())
 
         final CWE universalServiceIdentifier = baseSegment.getObr4_UniversalServiceIdentifier()
         universalServiceIdentifier.getCwe1_Identifier().setValue(procedureCode.codeValue)
-        universalServiceIdentifier.getCwe2_Text().setValue(procedureText)
+        universalServiceIdentifier.getCwe2_Text().setValue(procedureCode.codeMeaning.trim())
         universalServiceIdentifier.getCwe3_NameOfCodingSystem().setValue(procedureCode.codingSchemeDesignator)
 
         baseSegment.getObr5_DeliverToLocation().setValue('URGENT')

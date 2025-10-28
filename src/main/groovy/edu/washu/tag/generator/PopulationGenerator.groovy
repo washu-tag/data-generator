@@ -21,16 +21,10 @@ import java.util.function.Consumer
 class PopulationGenerator {
 
     SpecificationParameters specificationParameters = new YamlObjectMapper().readValue(FileIOUtils.readResource('basicRequest.yaml'), SpecificationParameters)
+    EnumeratedDistribution<PatientRandomizer> patientRandomizers = initPatientRandomizers()
     boolean writeDataToFiles = false
     boolean generateTestQueries = false
     private final Logger logger = LoggerFactory.getLogger(PopulationGenerator)
-
-    private static final EnumeratedDistribution<PatientRandomizer> patientRandomizers = RandomGenUtils.setupWeightedLottery([
-            (new DefaultPatientRandomizer()) : 85,
-            (new GreekPatientRandomizer()) : 5,
-            (new JapanesePatientRandomizer()): 5,
-            (new KoreanPatientRandomizer()): 5
-    ])
 
     static void main(String[] args) {
         final PopulationGenerator generator = new PopulationGenerator()
@@ -108,6 +102,7 @@ class PopulationGenerator {
         setSpecificationParameters(
             new YamlObjectMapper().readValue(new File(configName), SpecificationParameters)
         )
+        patientRandomizers = initPatientRandomizers()
     }
 
     BatchSpecification generateBatch(NameCache nameCache, IdOffsets idOffsets, BatchRequest batchRequest) {
@@ -116,7 +111,7 @@ class PopulationGenerator {
         generateBatchWithHandler(nameCache, idOffsets, batchRequest, patientConsumer, false)
 
         if (specificationParameters.generateRadiologyReports) {
-            specificationParameters.reportGeneratorImplementation.generateReportsForPatients(batchSpecification.patients, false)
+            specificationParameters.reportGeneratorImplementation.generateReportsForPatients(batchSpecification.patients, false, specificationParameters.customReportGuarantees)
         }
 
         if (generateTestQueries) {
@@ -207,6 +202,14 @@ class PopulationGenerator {
                 Activity.executionContext.heartbeat("Batch ${batchRequest.id}, patient ${generatedPatients + 1}")
             }
         }
+    }
+
+    private EnumeratedDistribution<PatientRandomizer> initPatientRandomizers() {
+        RandomGenUtils.setupWeightedLottery(
+            specificationParameters.patientRandomizers.collectEntries { randomizer ->
+                [(randomizer): randomizer.randomizerWeight]
+            }
+        )
     }
 
 }

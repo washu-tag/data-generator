@@ -4,11 +4,14 @@ import edu.washu.tag.generator.hl7.v2.FixedSampleReportGenerator
 import edu.washu.tag.generator.hl7.v2.ReportGenerator
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.Protocol
+import edu.washu.tag.generator.metadata.patient.DefaultPatientRandomizer
+import edu.washu.tag.generator.metadata.patient.GreekPatientRandomizer
+import edu.washu.tag.generator.metadata.patient.JapanesePatientRandomizer
+import edu.washu.tag.generator.metadata.patient.KoreanPatientRandomizer
+import edu.washu.tag.generator.metadata.patient.PatientRandomizer
 import edu.washu.tag.generator.metadata.study.StudyDateDistribution
 import edu.washu.tag.generator.metadata.study.UniformStudyDateDistribution
 import edu.washu.tag.generator.util.RandomGenUtils
-
-import java.time.LocalDate
 
 class SpecificationParameters {
 
@@ -32,6 +35,13 @@ class SpecificationParameters {
     boolean generateRadiologyReports = false
     StudyDateDistribution studyDateDistribution = new UniformStudyDateDistribution()
     ReportGenerator reportGeneratorImplementation = new FixedSampleReportGenerator()
+    List<CustomGeneratedReportGuarantee> customReportGuarantees = [] // only for generating scout tests at small scale
+    List<PatientRandomizer> patientRandomizers = [
+        (new DefaultPatientRandomizer(randomizerWeight: 85)),
+        (new GreekPatientRandomizer(randomizerWeight: 5)),
+        (new JapanesePatientRandomizer(randomizerWeight: 5)),
+        (new KoreanPatientRandomizer(randomizerWeight: 5))
+    ]
 
     void postprocess() {
         averageStudiesPerPatient = numStudies / numPatients

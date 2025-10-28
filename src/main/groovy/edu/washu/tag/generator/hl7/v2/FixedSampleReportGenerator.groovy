@@ -1,8 +1,10 @@
 package edu.washu.tag.generator.hl7.v2
 
+import edu.washu.tag.generator.ai.GeneratedReport
 import edu.washu.tag.generator.ai.catalog.ClassicReport
 import edu.washu.tag.generator.ai.PatientOutput
 import edu.washu.tag.generator.metadata.Patient
+import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.util.FileIOUtils
 
 class FixedSampleReportGenerator extends CyclicVariedGenerator {
@@ -33,6 +35,11 @@ class FixedSampleReportGenerator extends CyclicVariedGenerator {
                 }
             )
         }
+    }
+
+    @Override
+    protected overwriteReport(RadiologyReport reportToOverwrite, Class<? extends GeneratedReport> reportClass) {
+        throw new UnsupportedOperationException('Report guarantees are not supported for fixed generator')
     }
 
     String getFindingsFile() {

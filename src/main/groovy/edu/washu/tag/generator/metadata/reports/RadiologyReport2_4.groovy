@@ -9,6 +9,7 @@ import edu.washu.tag.generator.hl7.v2.segment.*
 
 class RadiologyReport2_4 extends RadiologyReport2_7 {
 
+    String statusInHeader
     private static final DoctorEncoder doctorEncoder = new DoctorEncoderLegacy()
     private static final Parser cachedParser = cacheParser()
 

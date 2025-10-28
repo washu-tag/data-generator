@@ -3,47 +3,38 @@ package edu.washu.tag.generator.query
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.validation.ExactRowsResult
 import edu.washu.tag.validation.ExpectedQueryResult
-import edu.washu.tag.validation.column.ColumnType
 
-import java.util.function.Function
 import java.util.function.Predicate
 
-class FirstMatchingReportsRadReportResult extends ExpectedRadReportQueryProcessor {
+class FirstMatchingReportsRadReportResult extends ExpectedRadReportQueryProcessor implements WithColumnExtractions<FirstMatchingReportsRadReportResult> {
 
-    Function<RadiologyReport, Map<String, String>> columnExtractions = { [:] }
-    Set<ColumnType<?>> columnTypes = []
     ExactRowsResult expectation = new ExactRowsResult(uniqueIdColumnName: QueryUtils.COLUMN_MESSAGE_CONTROL_ID)
-    private int currentNumMatched = 0
-    private final int numReportsToMatchPerCriterion
-    private final int totalNumReportsToMatch
 
     FirstMatchingReportsRadReportResult(int numReportsToMatchPerCriterion, Predicate<RadiologyReport> matchCriteria) {
         this(numReportsToMatchPerCriterion, [matchCriteria])
     }
 
     FirstMatchingReportsRadReportResult(int numReportsToMatchPerCriterion, List<Predicate<RadiologyReport>> matchCriteria) {
-        this.numReportsToMatchPerCriterion = numReportsToMatchPerCriterion
-        totalNumReportsToMatch = numReportsToMatchPerCriterion * matchCriteria.size()
+        final Map<Predicate<RadiologyReport>, Integer> matcherMap = matchCriteria.collectEntries { possibility ->
+            [(possibility) : numReportsToMatchPerCriterion]
+        }
         inclusionCriteria = { RadiologyReport radiologyReport ->
-            if (currentNumMatched >= totalNumReportsToMatch) {
+            if (matcherMap.isEmpty()) {
                 false
-            } else if (matchCriteria[currentNumMatched / numReportsToMatchPerCriterion].test(radiologyReport)) {
-                currentNumMatched++
-                true
             } else {
-                false
+                final Map.Entry<Predicate<RadiologyReport>, Integer> match = matcherMap.find { entry ->
+                    entry.key.test(radiologyReport)
+                }
+                if (match != null) {
+                    if (match.value == 1) {
+                        matcherMap.remove(match.key)
+                    } else {
+                        matcherMap.put(match.key, match.value - 1)
+                    }
+                }
+                match != null
             }
         }
-    }
-
-    FirstMatchingReportsRadReportResult withColumnExtractions(Function<RadiologyReport, Map<String, String>> columnExtractions) {
-        this.columnExtractions = columnExtractions
-        this
-    }
-
-    FirstMatchingReportsRadReportResult withColumnTypes(Set<ColumnType<?>> columnTypes) {
-        this.columnTypes = columnTypes
-        this
     }
 
     @Override

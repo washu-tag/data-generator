@@ -2,13 +2,13 @@ package edu.washu.tag.generator.query.test
 
 import edu.washu.tag.TestQuery
 import edu.washu.tag.generator.BatchSpecification
-import edu.washu.tag.generator.metadata.patient.EmpiId
-import edu.washu.tag.generator.metadata.patient.EpicId
-import edu.washu.tag.generator.metadata.patient.LegacyId
-import edu.washu.tag.generator.metadata.patient.MainId
-import edu.washu.tag.generator.metadata.patient.PatientId
+import edu.washu.tag.generator.metadata.patient.*
 import edu.washu.tag.generator.query.FirstPatientsRadReportResult
+import edu.washu.tag.generator.query.QueryUtils
+import edu.washu.tag.validation.column.ArrayType
+import edu.washu.tag.validation.column.ColumnType
 
+import static edu.washu.tag.generator.query.QueryUtils.COLUMN_PATIENT_IDS
 import static edu.washu.tag.generator.query.QueryUtils.TABLE_NAME
 
 class PatientIdQuery extends TestQuery<BatchSpecification> {
@@ -22,13 +22,23 @@ class PatientIdQuery extends TestQuery<BatchSpecification> {
                         [(columnName): radiologyReport.patientIds.find { it.expectedColumnName() == columnName }?.idNumber]
                     }
                     patientIds.put(
-                        'patient_ids',
-                        '[' + radiologyReport.patientIds.collect { patientId ->
-                            "{${patientId.idNumber}, ${patientId.assigningAuthority?.getNamespaceId() ?: ''}, ${patientId.identifierTypeCode ?: ''}, ${patientId.assigningFacility?.getNamespaceId() ?: ''}}"
-                        }.join(', ') + ']'
+                        (COLUMN_PATIENT_IDS),
+                        QueryUtils.serializeArrayOfStructByProperties(
+                            radiologyReport.patientIds,
+                            { patientId ->
+                                [
+                                    patientId.idNumber,
+                                    patientId.assigningAuthority?.getNamespaceId(),
+                                    patientId.identifierTypeCode,
+                                    patientId.assigningFacility?.getNamespaceId()
+                                ]
+                            }
+                        )
                     )
                     patientIds
-                })
+                }).withColumnTypes([
+                    new ArrayType(COLUMN_PATIENT_IDS)
+                ] as Set<ColumnType<?>>)
         ).withPostProcessing({ query ->
             final Map<String, Set<String>> matchingIds = [MainId, LegacyId].collectEntries { Class<PatientId> idClass ->
                 [(idClass.getDeclaredConstructor().newInstance().expectedColumnName()): []]

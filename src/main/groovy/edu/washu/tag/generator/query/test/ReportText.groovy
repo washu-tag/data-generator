@@ -1,7 +1,5 @@
 package edu.washu.tag.generator.query.test
 
-import ca.uhn.hl7v2.model.Varies
-import ca.uhn.hl7v2.model.v281.message.ORU_R01
 import edu.washu.tag.TestQuery
 import edu.washu.tag.generator.BatchSpecification
 import edu.washu.tag.generator.ai.catalog.ClassicReport
@@ -29,7 +27,7 @@ class ReportText extends TestQuery<BatchSpecification> {
                 ]
             })
         ).withPostProcessing({ query ->
-            setSqlFindMessageControlIds(query, COLUMN_REPORT_TEXT)
+            setSqlFindMessageControlIds(query, "${COLUMN_MESSAGE_CONTROL_ID}, ${COLUMN_REPORT_TEXT}")
         })
     }
 
