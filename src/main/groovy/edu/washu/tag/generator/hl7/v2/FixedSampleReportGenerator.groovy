@@ -14,6 +14,9 @@ class FixedSampleReportGenerator extends CyclicVariedGenerator {
     private String impressionFile = 'fixed_small_impressions.txt'
     private String findings
     private String impression
+    int findingsRepetition = 1
+    int impressionRepetition = 1
+    List<String> possibleDiagnoses = ['C38.0', 'J18.9', 'M48.04', 'R91.1', 'R91.8']
 
     FixedSampleReportGenerator() {
         setFindingsFile(findingsFile)
@@ -22,6 +25,8 @@ class FixedSampleReportGenerator extends CyclicVariedGenerator {
 
     @Override
     protected List<PatientOutput> formBaseReports(List<Patient> patients, boolean temporalHeartbeat) {
+        final String repeatedFindings = findings * findingsRepetition
+        final String repeatedImpression = impression * impressionRepetition
         patients.collect { patient ->
             new PatientOutput(
                 patientId: patient.patientIds[0].idNumber,
@@ -29,8 +34,9 @@ class FixedSampleReportGenerator extends CyclicVariedGenerator {
                     new ClassicReport(
                         uid: study.studyInstanceUid,
                         examination: EXAMPLE_EXAMINATION,
-                        findings: findings,
-                        impression: impression
+                        findings: repeatedFindings,
+                        impression: repeatedImpression,
+                        diagnoses: possibleDiagnoses.size() > 2 ? possibleDiagnoses.shuffled().take(3).join(',') : ''
                     )
                 }
             )

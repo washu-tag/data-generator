@@ -10,6 +10,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
+import java.util.function.Supplier
 
 class CodeCache {
 
@@ -49,31 +50,26 @@ class CodeCache {
             return QueryStatus.MATCH
         }
         final String url = designator.getUrlForSearch(search)
-        int counter = 0
-        while (counter < MAX_RETRIES) {
-            logger.info("Querying URL for coding information: ${url}...")
-            final HttpResponse<String> response = httpClient.issueQuery(
-                HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .build()
-            )
-            if (response.statusCode() != 200) {
-                Thread.sleep(Duration.ofSeconds(1))
-                counter++
+        logger.info("Querying URL for coding information: ${url}...")
+        final HttpResponse<String> response = httpClient.issueQueryWithRetries({
+            HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .build()
+        })
+        if (response == null) {
+            return QueryStatus.API_UNAVAILABLE
+        } else {
+            final List<Object> parsed = objectMapper.readValue(response.body(), List)
+            parsed[3].each { List<String> code ->
+                codesForDesignator.put(code[0], code[1])
+            }
+            if (codesForDesignator.containsKey(search)) {
+                return QueryStatus.MATCH
             } else {
-                final List<Object> parsed = objectMapper.readValue(response.body(), List)
-                parsed[3].each { List<String> code ->
-                    codesForDesignator.put(code[0], code[1])
-                }
-                if (codesForDesignator.containsKey(search)) {
-                    return QueryStatus.MATCH
-                } else {
-                    knownBad << search
-                    return QueryStatus.NO_MATCH
-                }
+                knownBad << search
+                return QueryStatus.NO_MATCH
             }
         }
-        return QueryStatus.API_UNAVAILABLE
     }
 
     private enum QueryStatus {
@@ -98,9 +94,32 @@ class CodeCache {
             rateLimiter = RateLimiter.create(MAX_REQUESTS_PER_SECOND / concurrentExecution)
         }
 
-        HttpResponse<String> issueQuery(HttpRequest request) {
+        HttpResponse<String> issueQuery(Supplier<HttpRequest> requestSupplier) {
             rateLimiter.acquire()
-            client.send(request, HttpResponse.BodyHandlers.ofString())
+            client.send(requestSupplier.get(), HttpResponse.BodyHandlers.ofString())
+        }
+
+        HttpResponse<String> issueQueryWithRetries(Supplier<HttpRequest> requestSupplier, int maxRetries = MAX_RETRIES) {
+            int counter = 0
+            while (counter < maxRetries) {
+                try {
+                    final HttpResponse<String> response = issueQuery(requestSupplier)
+                    if (response.statusCode() == 200) {
+                        return response
+                    } else {
+                        pauseQuery()
+                        counter++
+                    }
+                } catch (ConnectException connectException) {
+                    pauseQuery()
+                    counter++
+                }
+            }
+            null
+        }
+
+        private void pauseQuery() {
+            Thread.sleep(Duration.ofSeconds(1))
         }
     }
 
