@@ -20,7 +20,7 @@ class FixedSampleReportGenerator extends CyclicVariedGenerator {
 
     FixedSampleReportGenerator() {
         setFindingsFile(findingsFile)
-        setImpressionsFile(impressionFile)
+        setImpressionFile(impressionFile)
     }
 
     @Override
@@ -57,11 +57,11 @@ class FixedSampleReportGenerator extends CyclicVariedGenerator {
         findings = FileIOUtils.readResource(findingsFile)
     }
 
-    String getImpressionsFile() {
+    String getImpressionFile() {
         impressionFile
     }
 
-    void setImpressionsFile(String impressionFile) {
+    void setImpressionFile(String impressionFile) {
         this.impressionFile = impressionFile
         impression = FileIOUtils.readResource(impressionFile)
     }
