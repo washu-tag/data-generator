@@ -8,6 +8,7 @@ import edu.washu.tag.generator.query.test.AllReports
 import edu.washu.tag.generator.query.test.Diagnoses
 import edu.washu.tag.generator.query.test.DobGreater
 import edu.washu.tag.generator.query.test.ExtendedMetadata
+import edu.washu.tag.generator.query.test.Names
 import edu.washu.tag.generator.query.test.NullMessageDt
 import edu.washu.tag.generator.query.test.PatientIdQuery
 import edu.washu.tag.generator.query.test.PlacerOrderMissing
@@ -46,7 +47,8 @@ class QueryGenerator {
         new NullMessageDt(),
         new ReportText(),
         new SuffixInferredReportSections(),
-        new Diagnoses()
+        new Diagnoses(),
+        new Names()
     ]
 
     void processData(BatchSpecification batchSpecification) {

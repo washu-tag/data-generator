@@ -7,7 +7,7 @@ import edu.washu.tag.generator.metadata.Person
 
 class DoctorEncoder2_7 extends DoctorEncoder {
 
-    private static final String HOSP = 'HOSP'
+    public static final String HOSP = 'HOSP'
 
     @Override
     void encode(Person person, XCN element) {
@@ -53,15 +53,18 @@ class DoctorEncoder2_7 extends DoctorEncoder {
         }
     }
 
-    protected boolean includeDegree() {
+    @Override
+    boolean includeDegree() {
         false
     }
 
-    protected boolean includeAssigningAuthority() {
+    @Override
+    boolean includeAssigningAuthority() {
         true
     }
 
-    protected boolean includeIdentifierTypeCode() {
+    @Override
+    boolean includeIdentifierTypeCode() {
         true
     }
 

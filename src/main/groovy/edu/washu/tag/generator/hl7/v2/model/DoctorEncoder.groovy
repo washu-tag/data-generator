@@ -10,6 +10,12 @@ abstract class DoctorEncoder {
 
     protected abstract void encodePostCheck(List<Person> people, Segment segment, int fieldId, boolean malform)
 
+    abstract boolean includeDegree()
+
+    abstract boolean includeAssigningAuthority()
+
+    abstract boolean includeIdentifierTypeCode()
+
     void encode(List<Person> people, Segment segment, int fieldId, boolean malform) {
         if (!malform) {
             throw new UnsupportedOperationException('There are currently only examples for malformed data')

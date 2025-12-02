@@ -3,17 +3,17 @@ package edu.washu.tag.generator.hl7.v2.model
 class DoctorEncoderLegacy extends DoctorEncoder2_7 {
 
     @Override
-    protected boolean includeDegree() {
+    boolean includeDegree() {
         true
     }
 
     @Override
-    protected boolean includeAssigningAuthority() {
+    boolean includeAssigningAuthority() {
         false
     }
 
     @Override
-    protected boolean includeIdentifierTypeCode() {
+    boolean includeIdentifierTypeCode() {
         false
     }
 

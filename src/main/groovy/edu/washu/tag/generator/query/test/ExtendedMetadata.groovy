@@ -30,8 +30,6 @@ class ExtendedMetadata extends TestQuery<BatchSpecification> {
     private static final String COLUMN_REQUESTED_DT = 'requested_dt'
     private static final String COLUMN_STATUS_CHANGE_DT = 'results_report_status_change_dt'
     private static final String COLUMN_YEAR = 'year'
-    private static final String COLUMN_ASSISTANT_RESULT_INTERPRETER = 'assistant_result_interpreter'
-    private static final String COLUMN_TECHNICIAN = 'technician'
 
     ExtendedMetadata() {
         super('extended_metadata', null)
@@ -58,9 +56,6 @@ class ExtendedMetadata extends TestQuery<BatchSpecification> {
                     'orc_2_placer_order_number': getOrc2(radiologyReport),
                     'obr_2_placer_order_number': radiologyReport.placerOrderNumber.getEi1_EntityIdentifier().value,
                     (COLUMN_PATIENT_AGE): radiologyReport.hl7Version == V2_7 ? String.valueOf(radiologyReport.inferPatientAge()) : null,
-                    'principal_result_interpreter': radiologyReport.principalInterpreter?.formatFirstLast()?.toUpperCase(),
-                    (COLUMN_ASSISTANT_RESULT_INTERPRETER): radiologyReport.hl7Version == V2_3 ? '[]' : '[' + radiologyReport.assistantInterpreters*.formatFirstLast()*.toUpperCase().join(', ') + ']',
-                    (COLUMN_TECHNICIAN): radiologyReport.hl7Version == V2_4 ? '[]' : "[${radiologyReport.technician.formatFirstLast().toUpperCase()}]".toString(),
                     'orc_3_filler_order_number': getOrc3(radiologyReport),
                     'obr_3_filler_order_number': radiologyReport.study.accessionNumber,
                     'service_name': procedureCode.codedTriplet.codeMeaning,
@@ -79,9 +74,7 @@ class ExtendedMetadata extends TestQuery<BatchSpecification> {
                 new InstantType(COLUMN_REQUESTED_DT),
                 new InstantType(COLUMN_STATUS_CHANGE_DT),
                 new IntegerType(COLUMN_YEAR),
-                new IntegerType(COLUMN_PATIENT_AGE),
-                new ArrayType(COLUMN_ASSISTANT_RESULT_INTERPRETER),
-                new ArrayType(COLUMN_TECHNICIAN)
+                new IntegerType(COLUMN_PATIENT_AGE)
             ] as Set<ColumnType<?>>)
         ).withPostProcessing({ query ->
             setSqlFindMessageControlIds(query)

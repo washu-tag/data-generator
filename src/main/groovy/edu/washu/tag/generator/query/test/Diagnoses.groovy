@@ -14,6 +14,7 @@ import static edu.washu.tag.generator.query.QueryUtils.*
 class Diagnoses extends TestQuery<BatchSpecification> {
 
     private static final String COLUMN_DIAGNOSES = 'diagnoses'
+    private static final String COLUMN_DIAGNOSES_CONSOLIDATED = 'diagnoses_consolidated'
 
     Diagnoses() {
         super('diagnoses', null)
@@ -34,13 +35,16 @@ class Diagnoses extends TestQuery<BatchSpecification> {
                                 classicReport.designator.hl7Representation
                             ]
                         }
-                    )
+                    ),
+                    (COLUMN_DIAGNOSES_CONSOLIDATED): classicReport.getParsedCodes().collect { diagnosisCode ->
+                        CodeCache.lookupCode(classicReport.designator, diagnosisCode)
+                    }.join('; ')
                 ]
             }).withColumnTypes([
                 new ArrayType(COLUMN_DIAGNOSES)
             ] as Set<ColumnType<?>>)
         ).withPostProcessing({ query ->
-            setSqlFindMessageControlIds(query, "${COLUMN_MESSAGE_CONTROL_ID}, ${COLUMN_DIAGNOSES}")
+            setSqlFindMessageControlIds(query, "${COLUMN_MESSAGE_CONTROL_ID}, ${COLUMN_DIAGNOSES}, ${COLUMN_DIAGNOSES_CONSOLIDATED}")
         })
     }
 

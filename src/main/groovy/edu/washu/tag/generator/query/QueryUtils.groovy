@@ -80,8 +80,8 @@ class QueryUtils {
     }
 
     static <X> String serializeArrayOfStruct(List<X> inputs, Function<X, String> objectSerializer) {
-        final String serializedObjects = inputs.collect { input ->
-            "[${objectSerializer.apply(input)}]"
+        final String serializedObjects = inputs.findResults { input ->
+            input != null ? objectSerializer.apply(input) : null
         }.join(', ')
         "[${serializedObjects}]"
     }
@@ -90,9 +90,13 @@ class QueryUtils {
         serializeArrayOfStruct(
             inputs,
             { input ->
-                objectComponents.apply(input).collect { it ?: '' }.join(',')
+                serializeStructByProperties(objectComponents.apply(input))
             }
         )
+    }
+
+    static String serializeStructByProperties(List<String> objectComponents) {
+        "[${objectComponents.join(',')}]"
     }
 
 }
