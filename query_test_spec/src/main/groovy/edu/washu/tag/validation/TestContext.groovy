@@ -11,6 +11,9 @@ class TestContext implements Serializable {
     }
 
     String replaceStrings(String input) {
+        if (input == null) {
+            return null
+        }
         String modified = input
         buildStringReplacements().each { entry ->
             modified = modified.replace(entry.key, entry.value)
