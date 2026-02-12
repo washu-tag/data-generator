@@ -14,7 +14,7 @@ class SingleRowResult implements ExpectedQueryResult {
     private static final Logger logger = LoggerFactory.getLogger(SingleRowResult)
 
     @Override
-    void validateResult(Dataset<Row> result) {
+    void validateResult(Dataset<Row> result, TestContext testContext) {
         logger.info("Validating result is a single row with various features...")
         assertThat(result.count()).as('result size').isEqualTo(1)
         final Row row = result.collectAsList()[0]

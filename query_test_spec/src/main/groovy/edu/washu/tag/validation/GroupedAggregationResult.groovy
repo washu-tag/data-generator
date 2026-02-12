@@ -31,7 +31,7 @@ class GroupedAggregationResult implements ExpectedQueryResult {
     }
 
     @Override
-    void validateResult(Dataset<Row> queryResult) {
+    void validateResult(Dataset<Row> queryResult, TestContext testContext) {
         final List<String> expectedColumns = [(primaryColumnName)] + secondaryColumns
         logger.info("Validating that the query result columns are: ${expectedColumns}...")
         assertThat(queryResult.columns() as List<String>).isEqualTo(expectedColumns)

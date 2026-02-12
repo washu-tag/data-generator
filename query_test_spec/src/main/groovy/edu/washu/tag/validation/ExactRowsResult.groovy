@@ -18,21 +18,28 @@ class ExactRowsResult implements ExpectedQueryResult {
     private static final Logger logger = LoggerFactory.getLogger(ExactRowsResult)
 
     @Override
-    void validateResult(Dataset<Row> result) {
+    void validateResult(Dataset<Row> result, TestContext testContext) {
         logger.info("Validating unique IDs in result...")
         assertThat(result.select(uniqueIdColumnName).as(Encoders.STRING()).collectAsList())
             .as('unique keys')
             .hasSameElementsAs(rowAssertions.keySet())
-        result.foreach(new RowValidationFunction())
+        result.foreach(new RowValidationFunction(testContext))
     }
 
     private class RowValidationFunction implements ForeachFunction<Row> {
         private static final Logger functionLogger = LoggerFactory.getLogger(RowValidationFunction)
 
+        private TestContext context
+
+        RowValidationFunction(TestContext context) {
+            this.context = context
+        }
+
         @Override
         void call(Row row) throws Exception {
             final String uniqueId = row.getString(row.fieldIndex(uniqueIdColumnName))
             rowAssertions.get(uniqueId).each { columnName, expectedValue ->
+                String expValue = context.replaceStrings(expectedValue)
                 functionLogger.info("Validating value for column ${columnName}")
                 final int columnIndex = row.fieldIndex(columnName)
                 final ColumnType<?> existingMapping = columnTypes.find { columnType ->
@@ -41,11 +48,11 @@ class ExactRowsResult implements ExpectedQueryResult {
                 if (existingMapping != null) {
                     assertThat(existingMapping.readValue(row, columnIndex))
                         .as(columnName)
-                        .isEqualTo(expectedValue)
+                        .isEqualTo(expValue)
                 } else {
                     assertThat(row.getString(row.fieldIndex(columnName)))
                         .as(columnName)
-                        .isEqualTo(expectedValue)
+                        .isEqualTo(expValue)
                 }
             }
         }

@@ -11,6 +11,6 @@ import org.apache.spark.sql.Row
 )
 interface ExpectedQueryResult extends Serializable {
 
-    void validateResult(Dataset<Row> result)
+    void validateResult(Dataset<Row> result, TestContext testContext)
 
 }

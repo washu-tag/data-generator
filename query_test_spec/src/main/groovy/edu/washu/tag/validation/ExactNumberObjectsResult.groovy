@@ -20,7 +20,7 @@ class ExactNumberObjectsResult implements ExpectedQueryResult {
     }
 
     @Override
-    void validateResult(Dataset<Row> result) {
+    void validateResult(Dataset<Row> result, TestContext testContext) {
         logger.info("Validating count of result to be ${expectedNumResults}")
         assertThat(result.count()).as('result count').isEqualTo(expectedNumResults)
         if (additionalValidation != null) {
