@@ -22,7 +22,7 @@ class ExactRowsResult implements ExpectedQueryResult {
         logger.info("Validating unique IDs in result...")
         assertThat(result.select(uniqueIdColumnName).as(Encoders.STRING()).collectAsList())
             .as('unique keys')
-            .hasSameElementsAs(rowAssertions.keySet())
+            .hasSameElementsAs(rowAssertions.keySet().collect { testContext.replaceStrings(it) })
         result.foreach(new RowValidationFunction(testContext))
     }
 
