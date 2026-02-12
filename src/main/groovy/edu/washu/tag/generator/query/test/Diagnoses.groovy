@@ -13,9 +13,6 @@ import static edu.washu.tag.generator.query.QueryUtils.*
 
 class Diagnoses extends TestQuery<BatchSpecification> {
 
-    private static final String COLUMN_DIAGNOSES = 'diagnoses'
-    private static final String COLUMN_DIAGNOSES_CONSOLIDATED = 'diagnoses_consolidated'
-
     Diagnoses() {
         super('diagnoses', null)
         CodeCache.initializeCache(1)

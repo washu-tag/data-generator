@@ -5,7 +5,9 @@ import edu.washu.tag.TestQuery
 import edu.washu.tag.TestQuerySuite
 import edu.washu.tag.generator.BatchSpecification
 import edu.washu.tag.generator.query.test.AllReports
+import edu.washu.tag.generator.query.test.BasicWorkflowCuration
 import edu.washu.tag.generator.query.test.Diagnoses
+import edu.washu.tag.generator.query.test.DiagnosisCount
 import edu.washu.tag.generator.query.test.DobGreater
 import edu.washu.tag.generator.query.test.ExtendedMetadata
 import edu.washu.tag.generator.query.test.Names
@@ -48,7 +50,11 @@ class QueryGenerator {
         new ReportText(),
         new SuffixInferredReportSections(),
         new Diagnoses(),
-        new Names()
+        new Names(),
+        new DiagnosisCount(),
+        BasicWorkflowCuration.curatedTable,
+        BasicWorkflowCuration.latestTable,
+        BasicWorkflowCuration.dxTable
     ]
 
     void processData(BatchSpecification batchSpecification) {

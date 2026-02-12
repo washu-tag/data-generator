@@ -15,6 +15,9 @@ class QueryUtils {
 
     public static final String SPECIAL_CHAR_INSERT = 'Inserted statement for testing with special chars: ±60%÷\n'
     public static final String TABLE_NAME = TestQuerySuite.TABLE_PLACEHOLDER
+    public static final String SUFFIX_CURATED = '_curated'
+    public static final String SUFFIX_LATEST = '_latest'
+    public static final String SUFFIX_DIAGNOSES = '_dx'
     public static final String COLUMN_SEX = 'sex'
     public static final String COLUMN_HL7_VERSION = 'version_id'
     public static final String COLUMN_DOB = 'birth_date'
@@ -22,6 +25,9 @@ class QueryUtils {
     public static final String COLUMN_REPORT_STATUS = 'report_status'
     public static final String COLUMN_MESSAGE_DT = 'message_dt'
     public static final String COLUMN_PATIENT_IDS = 'patient_ids'
+    public static final String COLUMN_DIAGNOSIS_CODE = 'diagnosis_code'
+    public static final String COLUMN_DIAGNOSES = 'diagnoses'
+    public static final String COLUMN_DIAGNOSES_CONSOLIDATED = 'diagnoses_consolidated'
 
     public static final Predicate<RadiologyReport> REPORTS_WITH_CONTENT = { RadiologyReport radiologyReport ->
         radiologyReport.includeObx
@@ -73,10 +79,14 @@ class QueryUtils {
         }
     }
 
-    static void setSqlFindMessageControlIds(TestQuery query, String select = '*') {
-        final String reportIds = (query.querySourceDataProcessor as ExpectedRadReportQueryProcessor)
+    static void setSqlFindMessageControlIds(TestQuery query, String select = '*', String tableSuffix = '') {
+        final String reportIds = (query.querySourceDataProcessor as WithMatchedReportIds)
             .matchedReportIds.collect { "'${it}'".toString() }.join(', ')
-        query.setSql("SELECT ${select} FROM ${TABLE_NAME} WHERE ${COLUMN_MESSAGE_CONTROL_ID} IN (${reportIds})")
+        query.setSql("SELECT ${select} FROM ${TABLE_NAME}${tableSuffix} WHERE ${COLUMN_MESSAGE_CONTROL_ID} IN (${reportIds})")
+    }
+
+    static void setSqlSelectStarFindMessageControlIds(TestQuery query, String tableSuffix = '') {
+        setSqlFindMessageControlIds(query, '*', tableSuffix)
     }
 
     static <X> String serializeArrayOfStruct(List<X> inputs, Function<X, String> objectSerializer) {

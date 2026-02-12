@@ -18,13 +18,13 @@ class Hl7Logger {
     List<Hl7LogFile> identifyHl7LogFiles(File hl7SourceDir) {
         final File logOutputDir = BatchProcessor.logOutput
 
-        (hl7SourceDir.listFiles() as List<File>).collectMany { yearDir ->
+        (hl7SourceDir.listFiles(File::isDirectory as FileFilter) as List<File>).collectMany { yearDir ->
             final String year = yearDir.name
             final File logYearDir = new File(logOutputDir, year)
             logYearDir.mkdirs()
-            (yearDir.listFiles() as List<File>).collectMany { monthDir ->
+            (yearDir.listFiles(File::isDirectory as FileFilter) as List<File>).collectMany { monthDir ->
                 final String month = monthDir.name.padLeft(2, '0')
-                (monthDir.listFiles() as List<File>).collect { dayDir ->
+                (monthDir.listFiles(File::isDirectory as FileFilter) as List<File>).collect { dayDir ->
                     final String day = dayDir.name.padLeft(2, '0')
 
                     new Hl7LogFile(

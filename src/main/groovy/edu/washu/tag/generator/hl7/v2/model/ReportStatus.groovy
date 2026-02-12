@@ -27,7 +27,7 @@ enum ReportStatus {
     }
 
     String randomizeTitle() {
-        final String title = "${fullText} Report"
+        final String title = "${fullText ?: PRELIMINARY.fullText} Report"
         RandomUtils.secure().randomBoolean() ? title : title.toUpperCase()
     }
 

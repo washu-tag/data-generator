@@ -8,13 +8,10 @@ import edu.washu.tag.generator.metadata.RadiologyReport
 import java.util.function.Function
 import java.util.function.Predicate
 
-abstract class ExpectedRadReportQueryProcessor implements QuerySourceDataProcessor<BatchSpecification> {
+abstract class ExpectedRadReportQueryProcessor implements QuerySourceDataProcessor<BatchSpecification>, WithMatchedReportIds {
 
     @JsonIgnore
     Predicate<RadiologyReport> inclusionCriteria
-
-    @JsonIgnore
-    List<String> matchedReportIds = []
 
     @Override
     void process(BatchSpecification batchSpecification) {
