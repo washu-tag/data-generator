@@ -25,6 +25,7 @@ class PatientStudyModule implements StudyLevelModule {
     private static final Closure<Double> weightInterpolator = { double height -> 96 * height - 82 }
     private static final double HEIGHT_STANDARD_DEVIATION_ESTIMATE = 0.05
     private static final double WEIGHT_MOD_WEIGHTING_CONSTANT = 10
+    private static final int MAX_INTERPOLATION_AGE = 105
 
     @Override
     void apply(SpecificationParameters specificationParameters, Patient patient, Study study) {
@@ -33,7 +34,9 @@ class PatientStudyModule implements StudyLevelModule {
         }
 
         if (study.protocol.allowPatientPhysiqueEncoding()) {
-            final double referenceHeight = (patient.sex == Sex.MALE ? maleReferenceHeightInterpolator : femaleReferenceHeightInterpolator).value(Period.between(patient.dateOfBirth, study.studyDate).years)
+            final double referenceHeight = (patient.sex == Sex.MALE ? maleReferenceHeightInterpolator : femaleReferenceHeightInterpolator).value(
+                Math.min(MAX_INTERPOLATION_AGE, Period.between(patient.dateOfBirth, study.studyDate).years)
+            )
             final double heightMod = patient.personalHeightMod + ThreadLocalRandom.current().nextDouble(-0.5, 0.5)
             final double height = referenceHeight + HEIGHT_STANDARD_DEVIATION_ESTIMATE * heightMod
             if (RandomGenUtils.weightedCoinFlip(specificationParameters.patientSizeEncodingPercent)) {
