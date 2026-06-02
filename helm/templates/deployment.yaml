@@ -51,6 +51,8 @@ spec:
                   name: "{{ .Release.Name }}-auth"
             - name: "SPRING_CONFIG_LOCATION"
               value: "/app/application.yaml"
+            - name: "JAVA_TOOL_OPTIONS"
+              value: {{ .Values.javaToolOptions | quote }}
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
