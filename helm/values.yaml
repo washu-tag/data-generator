@@ -68,9 +68,9 @@ ingress:
 
 resources:
   requests:
-    memory: 4Gi
+    memory: 8Gi
   limits:
-    memory: 16Gi
+    memory: 32Gi
 
 # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:
