@@ -43,6 +43,10 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
         final String workflowLoggingInfo = "[workflowId: ${workflowInfo.workflowId}]"
         logger.info("${workflowLoggingInfo} Beginning workflow ${this.class.simpleName}")
 
+        if (input.outputDir == null) {
+            input.outputDir = String.valueOf(Workflow.currentTimeMillis())
+        }
+
         final File nameCache = earlySetupActivity.initNameCache()
         final IdOffsets idOffsets = new IdOffsets()
 
