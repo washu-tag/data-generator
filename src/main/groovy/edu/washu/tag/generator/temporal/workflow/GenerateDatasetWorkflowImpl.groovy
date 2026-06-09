@@ -49,7 +49,7 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
         final List<BatchChunk> batchChunks = earlySetupActivity.chunkBatches(
             input.specificationParametersPath,
             input.concurrentExecution,
-            input.outputDir,
+            input.outputFullPath(),
             input.patientsPerFullBatch
         )
 
@@ -64,11 +64,11 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
                         .setWorkflowTaskTimeout(Duration.ofSeconds(30))
                         .build()
                 )::generateBatches,
-                new GenerateBatchesInput(input, nameCache, idOffsets, batchChunk, input.outputDir, input.concurrentExecution))
+                new GenerateBatchesInput(input, nameCache, idOffsets, batchChunk, input.outputFullPath(), input.concurrentExecution))
         }).get()
 
         logger.info("${workflowLoggingInfo} all batches have been written")
-        BatchProcessor.initDirs(input.outputDir)
+        BatchProcessor.initDirs(input.outputFullPath())
 
         // Output combined HL7(-ish) log files now that all results are prepared
         Async.function(
