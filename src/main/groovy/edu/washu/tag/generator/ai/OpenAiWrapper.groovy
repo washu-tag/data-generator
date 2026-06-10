@@ -29,11 +29,13 @@ class OpenAiWrapper {
 
     OpenAiWrapper(String endpoint, String apiKeyEnvVar, String modelName, Map<String, List<String>> queryParams) {
         model = modelName
-        client = OpenAIOkHttpClient.builder()
-            .apiKey(System.getenv(apiKeyEnvVar))
+        final OpenAIOkHttpClient.Builder builder = OpenAIOkHttpClient.builder()
             .baseUrl(endpoint)
             .queryParams(queryParams)
-            .build()
+        if (apiKeyEnvVar != null) {
+            builder.apiKey(System.getenv(apiKeyEnvVar))
+        }
+        client = builder.build()
     }
 
     PatientOutput generateReportsForPatient(Patient patient, Map<Study, Class<? extends GeneratedReport>> reports) {
