@@ -19,6 +19,7 @@ class OpenAiWrapper {
 
     private final OpenAIClient client
     private final String model
+    private final Runnable heartbeat
     private static final Logger logger = LoggerFactory.getLogger(OpenAiWrapper)
     private static final String BASE_RAD_CONTEXT = FileIOUtils.readResource('rad_context.txt')
     private static final String BASE_RAD_CONTEXT_SINGULAR = FileIOUtils.readResource('rad_context_singular.txt')
@@ -27,8 +28,9 @@ class OpenAiWrapper {
     private static final String BASE_RAD_PROMPT_SINGULAR = FileIOUtils.readResource('rad_prompt_singular.txt')
     private static final ObjectMapper objectMapper = new ObjectMapper()
 
-    OpenAiWrapper(String endpoint, String apiKeyEnvVar, String modelName, Map<String, List<String>> queryParams) {
+    OpenAiWrapper(String endpoint, String apiKeyEnvVar, String modelName, Map<String, List<String>> queryParams, Runnable heartbeat = null) {
         model = modelName
+        this.heartbeat = heartbeat
         client = OpenAIOkHttpClient.builder()
             .apiKey(apiKeyEnvVar == null ? 'unused' : System.getenv(apiKeyEnvVar))
             .baseUrl(endpoint)
@@ -82,7 +84,7 @@ class OpenAiWrapper {
             ).withValidation({ GeneratedReport report ->
                 promptReport.preserveState(report)
                 report.validateReport()
-            }).issueQuery()
+            }).withHeartbeat(heartbeat).issueQuery()
             generatedReport.setUid(studyRep.uid)
             patientOutput.generatedReports << generatedReport
         }
@@ -106,7 +108,7 @@ class OpenAiWrapper {
             "${BASE_RAD_PROMPT} ${objectMapper.writeValueAsString(reportInput)}",
             model,
             PatientOutputArrayWrapper
-        ).issueQueryUnwrapped()
+        ).withHeartbeat(heartbeat).issueQueryUnwrapped()
         patientOutputs.each { patientOutput ->
             patientOutput.generatedReports.removeAll { ClassicReport generatedReport ->
                 try {

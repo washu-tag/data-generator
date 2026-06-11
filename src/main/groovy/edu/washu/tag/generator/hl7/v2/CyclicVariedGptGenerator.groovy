@@ -27,7 +27,10 @@ class CyclicVariedGptGenerator extends CyclicVariedGenerator {
     @Override
     protected List<PatientOutput> formBaseReports(List<Patient> patients, boolean temporalHeartbeat) {
         if (openAiWrapper == null) {
-            openAiWrapper = new OpenAiWrapper(endpoint, apiKeyEnvVar, model, queryParams)
+            final Runnable llmHeartbeat = temporalHeartbeat
+                ? { Activity.executionContext.heartbeat('Calling LLM') } as Runnable
+                : null
+            openAiWrapper = new OpenAiWrapper(endpoint, apiKeyEnvVar, model, queryParams, llmHeartbeat)
         }
         List<Patient> bulkPatients
         List<Patient> customPatients = []

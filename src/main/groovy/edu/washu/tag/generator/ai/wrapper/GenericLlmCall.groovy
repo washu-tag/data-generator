@@ -19,6 +19,7 @@ class GenericLlmCall<T, S extends GenericLlmCall<T, S>> {
     private final StructuredResponseCreateParams<T> prompt
     private final String model
     private Function<T, Boolean> responseValidator
+    private Runnable heartbeat
     private static final int MAX_RETRIES = 10
     private static final Logger logger = LoggerFactory.getLogger(GenericLlmCall)
 
@@ -46,12 +47,20 @@ class GenericLlmCall<T, S extends GenericLlmCall<T, S>> {
         this as S
     }
 
+    S withHeartbeat(Runnable heartbeat) {
+        this.heartbeat = heartbeat
+        this as S
+    }
+
     T issueQuery() {
         int retry = 0
         while (retry < MAX_RETRIES) {
             final RequestOptions requestOptions = RequestOptions.builder().timeout(Duration.ofMinutes(5)).build()
             try {
                 logger.info('Calling LLM...')
+                if (heartbeat != null) {
+                    heartbeat.run()
+                }
                 final StructuredResponse<T> completion = client.responses().create(prompt, requestOptions)
                 final List<StructuredResponseOutputMessage<T>> responseItems = completion.output().findResults {
                     it.message().isPresent() ? it.message().get() : null
