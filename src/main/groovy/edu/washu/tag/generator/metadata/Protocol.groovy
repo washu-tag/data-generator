@@ -54,17 +54,7 @@ abstract class Protocol implements Randomizeable {
     private static final PatientStudyModule patientStudyModule = new PatientStudyModule()
 
     Protocol() {
-        seriesTypes = getAllSeriesTypes()
-        seriesTypes.each { seriesType ->
-            seriesType.compatibleEquipment.each { scanner ->
-                if (!scanners.any {
-                    it.class == scanner
-                }) {
-                    scanners << scanner.newInstance()
-                }
-            }
-        }
-        bodyParts = getApplicableBodyParts()
+
     }
 
     abstract List<SeriesType> getAllSeriesTypes()
@@ -99,6 +89,27 @@ abstract class Protocol implements Randomizeable {
 
     List<StudyLevelModule> additionalStudyModules() {
         []
+    }
+
+    void postprocess(SpecificationParameters specificationParameters) {
+        seriesTypes = getAllSeriesTypes()
+        seriesTypes.each { seriesType ->
+            seriesType.compatibleEquipment.each { scannerClass ->
+                if (!scanners.any {
+                    it.class == scannerClass
+                }) {
+                    final Equipment scanner = scannerClass.getDeclaredConstructor().newInstance()
+                    final Institution institutionMatch = specificationParameters.institutionOverrides.find { override ->
+                        override.class == scanner.institution.class
+                    }
+                    if (institutionMatch != null) {
+                        scanner.setInstitutionOverride(institutionMatch)
+                    }
+                    scanners << scanner
+                }
+            }
+        }
+        bodyParts = getApplicableBodyParts()
     }
 
     final Study setFieldsFor(SpecificationParameters specificationParameters, Patient patient, Study study) {

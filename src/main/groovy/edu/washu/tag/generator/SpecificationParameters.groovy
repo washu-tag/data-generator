@@ -2,6 +2,7 @@ package edu.washu.tag.generator
 
 import edu.washu.tag.generator.hl7.v2.FixedSampleReportGenerator
 import edu.washu.tag.generator.hl7.v2.ReportGenerator
+import edu.washu.tag.generator.metadata.Institution
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.Protocol
 import edu.washu.tag.generator.metadata.patient.DefaultPatientRandomizer
@@ -42,6 +43,7 @@ class SpecificationParameters {
         (new JapanesePatientRandomizer(randomizerWeight: 5)),
         (new KoreanPatientRandomizer(randomizerWeight: 5))
     ]
+    List<Institution> institutionOverrides = []
 
     void postprocess() {
         averageStudiesPerPatient = numStudies / numPatients
@@ -57,6 +59,7 @@ class SpecificationParameters {
 
         protocols.each { protocol ->
             if (protocol.isXnatCompatible() || !requireXnatCompatibility) {
+                protocol.postprocess(this)
                 if (protocol.seriesTypes.size() >= averageSeriesPerStudy) {
                     protocolsAboveNumSeriesExpectedAverage << protocol
                 } else {

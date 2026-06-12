@@ -1,6 +1,7 @@
 package edu.washu.tag.generator.metadata
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import org.dcm4che3.data.Attributes
 import org.dcm4che3.data.Tag
@@ -13,6 +14,9 @@ import edu.washu.tag.generator.metadata.enums.Manufacturer
         property = 'type'
 )
 trait Equipment implements DicomEncoder {
+
+    @JsonProperty('institutionOverride')
+    private Institution institutionOverride
 
     @JsonIgnore
     abstract Institution getInstitution()
@@ -76,4 +80,13 @@ trait Equipment implements DicomEncoder {
         setIfNonempty(attributes, Tag.SoftwareVersions, VR.LO, softwareVersions)
     }
 
+    void setInstitutionOverride(Institution inst) {
+        institutionOverride = inst
+    }
+
+    Institution getInstitutionOverride() {
+        institutionOverride
+    }
+
 }
+
