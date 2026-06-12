@@ -55,7 +55,7 @@ class GenericLlmCall<T, S extends GenericLlmCall<T, S>> {
     T issueQuery() {
         int retry = 0
         while (retry < MAX_RETRIES) {
-            final RequestOptions requestOptions = RequestOptions.builder().timeout(Duration.ofMinutes(5)).build()
+            final RequestOptions requestOptions = RequestOptions.builder().timeout(Duration.ofMinutes(10)).build()
             try {
                 logger.info('Calling LLM...')
                 if (heartbeat != null) {

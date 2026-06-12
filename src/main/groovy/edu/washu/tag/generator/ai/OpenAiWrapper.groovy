@@ -35,6 +35,7 @@ class OpenAiWrapper {
             .apiKey(apiKeyEnvVar == null ? 'unused' : System.getenv(apiKeyEnvVar))
             .baseUrl(endpoint)
             .queryParams(queryParams)
+            .maxRetries(0)
             .build()
     }
 
