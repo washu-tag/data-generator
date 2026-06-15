@@ -56,7 +56,7 @@ class SiemensAxiomArtis implements SimpleRandomizedTransferSyntaxEquipment, XaSc
     private static final List<String> fpsRepresentations = ['F/S', 'fps']
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new ChestertonAdamsHospital()
     }
 

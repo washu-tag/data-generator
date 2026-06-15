@@ -9,7 +9,6 @@ import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.Study
 import edu.washu.tag.generator.metadata.enums.Race
 import edu.washu.tag.generator.metadata.institutions.ChestertonAdamsHospital
-import edu.washu.tag.generator.metadata.patient.PatientId
 import edu.washu.tag.generator.metadata.reports.RadiologyReport2_4
 import edu.washu.tag.generator.metadata.reports.RadiologyReport2_7
 import edu.washu.tag.generator.util.RandomGenUtils

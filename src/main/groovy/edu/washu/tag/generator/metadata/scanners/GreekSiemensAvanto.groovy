@@ -8,7 +8,7 @@ import edu.washu.tag.generator.metadata.institutions.WestAthensGeneralHospital
 class GreekSiemensAvanto extends SiemensAvanto {
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new WestAthensGeneralHospital()
     }
 

@@ -46,7 +46,7 @@ class PhilipsAlluraXper implements SimpleRandomizedTransferSyntaxEquipment, XaSc
     private static final List<String> fpsRepresentations = ['F/S', 'fps']
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new CenterForSpecializedRadiology()
     }
 

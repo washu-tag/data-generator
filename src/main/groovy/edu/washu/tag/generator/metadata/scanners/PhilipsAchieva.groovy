@@ -12,7 +12,7 @@ import edu.washu.tag.generator.metadata.institutions.ChestertonAdamsHospital
 class PhilipsAchieva implements Equipment {
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new ChestertonAdamsHospital()
     }
 

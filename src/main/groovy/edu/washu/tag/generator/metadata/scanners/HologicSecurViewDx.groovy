@@ -12,7 +12,7 @@ import edu.washu.tag.generator.metadata.institutions.SouthGrandMammographySpecia
 class HologicSecurViewDx implements Equipment {
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new SouthGrandMammographySpecialty()
     }
 

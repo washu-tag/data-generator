@@ -12,8 +12,6 @@ import edu.washu.tag.generator.metadata.Study
 import edu.washu.tag.generator.metadata.module.StudyLevelModule
 import edu.washu.tag.generator.util.RandomGenUtils
 
-import java.time.LocalDate
-
 class GeneralStudyModule implements StudyLevelModule {
 
     private static final EnumeratedDistribution<Closure<String>> operatorNameFunctionRandomizer = RandomGenUtils.setupWeightedLottery([

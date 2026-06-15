@@ -19,7 +19,7 @@ trait Equipment implements DicomEncoder {
     private Institution institutionOverride
 
     @JsonIgnore
-    abstract Institution getInstitution()
+    abstract Institution getDefaultInstitution()
 
     @JsonIgnore
     abstract Manufacturer getManufacturer()
@@ -39,6 +39,19 @@ trait Equipment implements DicomEncoder {
     abstract String getProtocolName(Study study, Series series)
 
     abstract String getTransferSyntaxUID(String sopClassUID)
+
+    @JsonIgnore
+    Institution getInstitution() {
+        institutionOverride ?: getDefaultInstitution()
+    }
+
+    void setInstitutionOverride(Institution inst) {
+        institutionOverride = inst
+    }
+
+    Institution getInstitutionOverride() {
+        institutionOverride
+    }
 
     int getSeriesNumber(int seriesIndex, SeriesType seriesType) {
         seriesIndex + 1
@@ -71,21 +84,13 @@ trait Equipment implements DicomEncoder {
 
     void encode(Attributes attributes) {
         setIfNonnull(attributes, Tag.Manufacturer, VR.LO, manufacturer.dicomRepresentation)
-        setIfNonnull(attributes, Tag.InstitutionName, VR.LO, institution?.institutionName)
-        setIfNonnull(attributes, Tag.InstitutionAddress, VR.ST, institution?.institutionAddress)
+        setIfNonnull(attributes, Tag.InstitutionName, VR.LO, institution.institutionName)
+        setIfNonnull(attributes, Tag.InstitutionAddress, VR.ST, institution.institutionAddress)
         setIfNonnull(attributes, Tag.StationName, VR.SH, stationName)
         // TODO: Institutional Department Name
         setIfNonnull(attributes, Tag.ManufacturerModelName, VR.LO, modelName)
         setIfNonnull(attributes, Tag.DeviceSerialNumber, VR.LO, deviceSerialNumber)
         setIfNonempty(attributes, Tag.SoftwareVersions, VR.LO, softwareVersions)
-    }
-
-    void setInstitutionOverride(Institution inst) {
-        institutionOverride = inst
-    }
-
-    Institution getInstitutionOverride() {
-        institutionOverride
     }
 
 }

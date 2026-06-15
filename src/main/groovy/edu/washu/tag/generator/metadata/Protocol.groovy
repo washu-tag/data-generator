@@ -10,8 +10,6 @@ import edu.washu.tag.generator.metadata.module.study.GeneralStudyModule
 import edu.washu.tag.generator.metadata.module.study.PatientStudyModule
 import edu.washu.tag.generator.metadata.protocols.*
 import edu.washu.tag.generator.util.RandomGenUtils
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.util.concurrent.ThreadLocalRandom
 
@@ -100,7 +98,7 @@ abstract class Protocol implements Randomizeable {
                 }) {
                     final Equipment scanner = scannerClass.getDeclaredConstructor().newInstance()
                     final Institution institutionMatch = specificationParameters.institutionOverrides.find { override ->
-                        override.class == scanner.institution.class
+                        override.class == scanner.defaultInstitution.class
                     }
                     if (institutionMatch != null) {
                         scanner.setInstitutionOverride(institutionMatch)

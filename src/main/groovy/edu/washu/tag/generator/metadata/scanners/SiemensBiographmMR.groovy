@@ -39,7 +39,7 @@ class SiemensBiographmMR extends SiemensPetDevice {
     ])
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new ChestertonAdamsHospital()
     }
 

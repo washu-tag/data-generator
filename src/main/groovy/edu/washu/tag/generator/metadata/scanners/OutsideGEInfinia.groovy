@@ -6,7 +6,7 @@ import edu.washu.tag.generator.metadata.institutions.CenterForSpecializedRadiolo
 class OutsideGEInfinia extends GEInfinia {
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new CenterForSpecializedRadiology()
     }
 

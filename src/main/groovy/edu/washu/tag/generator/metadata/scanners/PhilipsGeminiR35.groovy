@@ -23,7 +23,7 @@ import java.util.concurrent.ThreadLocalRandom
 class PhilipsGeminiR35 implements Equipment, CtScanner, PetScanner {
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new ChestertonAdamsHospital()
     }
 

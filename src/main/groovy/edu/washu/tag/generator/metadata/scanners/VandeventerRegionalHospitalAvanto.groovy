@@ -6,7 +6,7 @@ import edu.washu.tag.generator.metadata.institutions.VandeventerRegionalHospital
 class VandeventerRegionalHospitalAvanto extends SiemensAvanto {
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new VandeventerRegionalHospital()
     }
 

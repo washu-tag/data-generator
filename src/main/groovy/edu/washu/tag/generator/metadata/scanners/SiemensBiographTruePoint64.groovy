@@ -34,7 +34,7 @@ class SiemensBiographTruePoint64 extends SiemensPetDevice implements CtScanner {
     private static final List<Integer> seriesNumbers = [1, 1, 2, 4, 5, 501]
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new ChestertonAdamsHospital()
     }
 

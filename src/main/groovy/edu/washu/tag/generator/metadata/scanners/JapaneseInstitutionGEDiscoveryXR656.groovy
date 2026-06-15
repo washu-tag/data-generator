@@ -6,7 +6,7 @@ import edu.washu.tag.generator.metadata.institutions.HokkaidoRadiologyCenter
 class JapaneseInstitutionGEDiscoveryXR656 extends GEDiscoveryXR656 {
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new HokkaidoRadiologyCenter()
     }
 

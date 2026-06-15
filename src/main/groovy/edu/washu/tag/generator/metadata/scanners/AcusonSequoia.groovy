@@ -13,7 +13,7 @@ import edu.washu.tag.generator.util.RandomGenUtils
 class AcusonSequoia implements Equipment {
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new ChestertonAdamsHospital()
     }
 

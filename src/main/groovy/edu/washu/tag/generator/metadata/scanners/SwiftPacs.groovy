@@ -22,7 +22,7 @@ class SwiftPacs implements SimpleRandomizedTransferSyntaxEquipment {
     ])
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new KoNullInstitution()
     }
 

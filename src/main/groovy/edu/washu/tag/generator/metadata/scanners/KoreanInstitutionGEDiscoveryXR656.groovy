@@ -7,7 +7,7 @@ import edu.washu.tag.generator.metadata.institutions.SeoulInterventionalRadiolog
 class KoreanInstitutionGEDiscoveryXR656 extends GEDiscoveryXR656 {
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new SeoulInterventionalRadiologyClinic()
     }
 

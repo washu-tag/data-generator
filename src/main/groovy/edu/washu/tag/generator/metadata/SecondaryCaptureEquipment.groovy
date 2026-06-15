@@ -15,7 +15,7 @@ trait SecondaryCaptureEquipment implements Equipment {
     abstract ConversionType getConversionType()
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         null
     }
 

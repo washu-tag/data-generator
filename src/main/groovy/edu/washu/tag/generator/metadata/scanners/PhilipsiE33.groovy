@@ -20,7 +20,7 @@ class PhilipsiE33 implements SimpleRandomizedTransferSyntaxEquipment {
     ])
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new ChestertonAdamsHospital()
     }
 

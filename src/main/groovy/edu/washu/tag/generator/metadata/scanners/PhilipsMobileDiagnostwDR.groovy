@@ -20,7 +20,7 @@ class PhilipsMobileDiagnostwDR implements SimpleRandomizedTransferSyntaxEquipmen
     ])
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new ChestertonAdamsHospital()
     }
 

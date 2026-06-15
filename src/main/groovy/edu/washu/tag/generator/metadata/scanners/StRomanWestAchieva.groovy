@@ -6,7 +6,7 @@ import edu.washu.tag.generator.metadata.institutions.StRomanWest
 class StRomanWestAchieva extends PhilipsAchieva {
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new StRomanWest()
     }
 

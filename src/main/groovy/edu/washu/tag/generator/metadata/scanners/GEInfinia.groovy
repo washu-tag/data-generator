@@ -22,7 +22,7 @@ class GEInfinia implements SimpleRandomizedTransferSyntaxEquipment {
     ])
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new ChestertonAdamsHospital()
     }
 

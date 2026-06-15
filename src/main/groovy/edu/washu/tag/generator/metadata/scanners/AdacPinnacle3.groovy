@@ -19,7 +19,7 @@ class AdacPinnacle3 implements SimpleRandomizedTransferSyntaxEquipment {
     ])
 
     @Override
-    Institution getInstitution() {
+    Institution getDefaultInstitution() {
         new RtNullInstitution()
     }
 
