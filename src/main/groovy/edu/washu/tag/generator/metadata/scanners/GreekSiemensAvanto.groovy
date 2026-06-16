@@ -1,15 +1,15 @@
 package edu.washu.tag.generator.metadata.scanners
 
 import edu.washu.tag.generator.metadata.Institution
+import edu.washu.tag.generator.metadata.Institutions
 import edu.washu.tag.generator.metadata.Series
 import edu.washu.tag.generator.metadata.Study
-import edu.washu.tag.generator.metadata.institutions.WestAthensGeneralHospital
 
 class GreekSiemensAvanto extends SiemensAvanto {
 
     @Override
     Institution getDefaultInstitution() {
-        new WestAthensGeneralHospital()
+        Institutions.westAthensGeneralHospital
     }
 
     @Override

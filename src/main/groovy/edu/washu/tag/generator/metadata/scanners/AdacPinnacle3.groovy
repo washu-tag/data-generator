@@ -1,5 +1,6 @@
 package edu.washu.tag.generator.metadata.scanners
 
+import edu.washu.tag.generator.metadata.Institutions
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.dcm4che3.data.UID
 import edu.washu.tag.generator.metadata.Institution
@@ -8,7 +9,6 @@ import edu.washu.tag.generator.metadata.SeriesType
 import edu.washu.tag.generator.metadata.SimpleRandomizedTransferSyntaxEquipment
 import edu.washu.tag.generator.metadata.Study
 import edu.washu.tag.generator.metadata.enums.Manufacturer
-import edu.washu.tag.generator.metadata.institutions.RtNullInstitution
 import edu.washu.tag.generator.util.RandomGenUtils
 
 class AdacPinnacle3 implements SimpleRandomizedTransferSyntaxEquipment {
@@ -20,7 +20,7 @@ class AdacPinnacle3 implements SimpleRandomizedTransferSyntaxEquipment {
 
     @Override
     Institution getDefaultInstitution() {
-        new RtNullInstitution()
+        Institutions.rtNullInstitution
     }
 
     @Override

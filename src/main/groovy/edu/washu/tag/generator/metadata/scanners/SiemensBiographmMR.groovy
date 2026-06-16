@@ -1,5 +1,6 @@
 package edu.washu.tag.generator.metadata.scanners
 
+import edu.washu.tag.generator.metadata.Institutions
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.dcm4che3.data.UID
 import edu.washu.tag.generator.metadata.Institution
@@ -8,7 +9,6 @@ import edu.washu.tag.generator.metadata.SeriesType
 import edu.washu.tag.generator.metadata.Study
 import edu.washu.tag.generator.metadata.enums.Manufacturer
 import edu.washu.tag.generator.metadata.enums.RandomsCorrectionMethod
-import edu.washu.tag.generator.metadata.institutions.ChestertonAdamsHospital
 import edu.washu.tag.generator.metadata.sequence.EnergyWindowRangeSequence
 import edu.washu.tag.generator.metadata.seriesTypes.pt.PtSeriesType
 import edu.washu.tag.generator.metadata.seriesTypes.sr.PhoenixZIPReport
@@ -40,7 +40,7 @@ class SiemensBiographmMR extends SiemensPetDevice {
 
     @Override
     Institution getDefaultInstitution() {
-        new ChestertonAdamsHospital()
+        Institutions.chestertonAdamsHospital
     }
 
     @Override

@@ -1,13 +1,13 @@
 package edu.washu.tag.generator.metadata.scanners
 
 import edu.washu.tag.generator.metadata.Institution
-import edu.washu.tag.generator.metadata.institutions.VandeventerRegionalHospital
+import edu.washu.tag.generator.metadata.Institutions
 
 class VandeventerRegionalHospitalAvanto extends SiemensAvanto {
 
     @Override
     Institution getDefaultInstitution() {
-        new VandeventerRegionalHospital()
+        Institutions.vandeventerRegionalHospital
     }
 
     @Override

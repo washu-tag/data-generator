@@ -1,5 +1,6 @@
 package edu.washu.tag.generator.metadata.scanners
 
+import edu.washu.tag.generator.metadata.Institutions
 import org.dcm4che3.data.UID
 import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.metadata.ImageType
@@ -12,7 +13,6 @@ import edu.washu.tag.generator.metadata.enums.PetImageCorrection
 import edu.washu.tag.generator.metadata.enums.PetUnit
 import edu.washu.tag.generator.metadata.enums.RandomsCorrectionMethod
 import edu.washu.tag.generator.metadata.enums.TypeOfDetectorMotion
-import edu.washu.tag.generator.metadata.institutions.ChestertonAdamsHospital
 import edu.washu.tag.generator.metadata.sequence.EnergyWindowRangeSequence
 import edu.washu.tag.generator.metadata.series.PtSeries
 import edu.washu.tag.generator.metadata.seriesTypes.pt.PtSeriesType
@@ -24,7 +24,7 @@ class PhilipsGeminiR35 implements Equipment, CtScanner, PetScanner {
 
     @Override
     Institution getDefaultInstitution() {
-        new ChestertonAdamsHospital()
+        Institutions.chestertonAdamsHospital
     }
 
     @Override

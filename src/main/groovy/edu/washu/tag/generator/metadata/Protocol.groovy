@@ -51,10 +51,6 @@ abstract class Protocol implements Randomizeable {
     private static final GeneralStudyModule generalStudyModule = new GeneralStudyModule()
     private static final PatientStudyModule patientStudyModule = new PatientStudyModule()
 
-    Protocol() {
-
-    }
-
     abstract List<SeriesType> getAllSeriesTypes()
 
     abstract List<BodyPart> getApplicableBodyParts()

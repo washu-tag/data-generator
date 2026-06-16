@@ -4,7 +4,6 @@ import edu.washu.tag.generator.hl7.v2.model.ReportStatus
 import edu.washu.tag.generator.hl7.v2.segment.ObxGenerator
 import edu.washu.tag.generator.hl7.v2.segment.ObxGeneratorHistorical
 import edu.washu.tag.generator.metadata.Institution
-import edu.washu.tag.generator.metadata.NameCache
 import edu.washu.tag.generator.metadata.Person
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.reports.RadiologyReport2_4

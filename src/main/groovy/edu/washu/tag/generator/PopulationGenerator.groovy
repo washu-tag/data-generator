@@ -2,7 +2,7 @@ package edu.washu.tag.generator
 
 import edu.washu.tag.generator.ai.catalog.ClassicReport
 import edu.washu.tag.generator.ai.catalog.CodeCache
-import edu.washu.tag.generator.metadata.NameCache
+import edu.washu.tag.generator.metadata.GenerationCache
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.Study
@@ -36,7 +36,7 @@ class PopulationGenerator {
         generator.setWriteDataToFiles(args[1] == 'true')
         generator.setGenerateTestQueries(args[2] == 'true')
 
-        final NameCache nameCache = NameCache.initInstance()
+        final GenerationCache generationCache = GenerationCache.initInstance(generator.specificationParameters)
         final IdOffsets idOffsets = new IdOffsets()
         CodeCache.initializeCache(1)
 
@@ -46,7 +46,7 @@ class PopulationGenerator {
 
         final List<File> batchSpecifications = batchRequests.collect { batchRequest ->
             final File batchFile = generator
-                .generateBatch(nameCache, idOffsets, batchRequest)
+                .generateBatch(generationCache, idOffsets, batchRequest)
                 .asFile()
             println("Specification for batch #${batchRequest.id} (out of ${batchRequests.size()}) has been created")
             batchFile
@@ -58,7 +58,7 @@ class PopulationGenerator {
             new BatchProcessor(
                 batches: batchSpecifications,
                 generateTests: generator.generateTestQueries
-            ).writeAndCombineBatches()
+            ).writeAndCombineBatches(generationCache)
         }
     }
 
@@ -105,7 +105,7 @@ class PopulationGenerator {
         patientRandomizers = initPatientRandomizers()
     }
 
-    BatchSpecification generateBatch(NameCache nameCache, IdOffsets idOffsets, BatchRequest batchRequest) {
+    BatchSpecification generateBatch(GenerationCache nameCache, IdOffsets idOffsets, BatchRequest batchRequest) {
         final BatchSpecification batchSpecification = new BatchSpecification(id: batchRequest.id)
         final Consumer<Patient> patientConsumer = { Patient patient -> batchSpecification.patients << patient }
         generateBatchWithHandler(nameCache, idOffsets, batchRequest, patientConsumer, false)
@@ -135,7 +135,7 @@ class PopulationGenerator {
         batchSpecification
     }
 
-    void generateAndWriteFullBatch(NameCache nameCache, IdOffsets idOffsets, BatchRequest batchRequest, boolean writeDicom, boolean writeHl7, boolean temporalHeartbeat = false) {
+    void generateAndWriteFullBatch(GenerationCache generationCache, IdOffsets idOffsets, BatchRequest batchRequest, boolean writeDicom, boolean writeHl7, boolean temporalHeartbeat = false) {
         final OutputHandler outputHandler = new OutputHandler(batchRequest.id)
         final Consumer<Patient> patientConsumer = { Patient patient ->
             if (writeDicom) {
@@ -145,12 +145,12 @@ class PopulationGenerator {
                 outputHandler.writeHl7ForPatient(patient)
             }
         }
-        generateBatchWithHandler(nameCache, idOffsets, batchRequest, patientConsumer, true, temporalHeartbeat)
+        generateBatchWithHandler(generationCache, idOffsets, batchRequest, patientConsumer, true, temporalHeartbeat)
     }
 
-    private void generateBatchWithHandler(NameCache nameCache, IdOffsets idOffsets, BatchRequest batchRequest, Consumer<Patient> handler, boolean generateReports, boolean temporalHeartbeat = false) {
+    private void generateBatchWithHandler(GenerationCache generationCache, IdOffsets idOffsets, BatchRequest batchRequest, Consumer<Patient> handler, boolean generateReports, boolean temporalHeartbeat = false) {
         specificationParameters.postprocess()
-        NameCache.cache(nameCache)
+        generationCache.cache()
 
         final GenerationContext generationContext = new GenerationContext(
             specificationParameters: specificationParameters,

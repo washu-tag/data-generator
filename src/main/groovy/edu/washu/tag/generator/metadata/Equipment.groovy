@@ -15,7 +15,6 @@ import edu.washu.tag.generator.metadata.enums.Manufacturer
 )
 trait Equipment implements DicomEncoder {
 
-    @JsonProperty('institutionOverride')
     private Institution institutionOverride
 
     @JsonIgnore
@@ -49,6 +48,7 @@ trait Equipment implements DicomEncoder {
         institutionOverride = inst
     }
 
+    @JsonProperty('institutionOverride')
     Institution getInstitutionOverride() {
         institutionOverride
     }
@@ -84,8 +84,8 @@ trait Equipment implements DicomEncoder {
 
     void encode(Attributes attributes) {
         setIfNonnull(attributes, Tag.Manufacturer, VR.LO, manufacturer.dicomRepresentation)
-        setIfNonnull(attributes, Tag.InstitutionName, VR.LO, institution.institutionName)
-        setIfNonnull(attributes, Tag.InstitutionAddress, VR.ST, institution.institutionAddress)
+        setIfNonnull(attributes, Tag.InstitutionName, VR.LO, institution?.institutionName)
+        setIfNonnull(attributes, Tag.InstitutionAddress, VR.ST, institution?.institutionAddress)
         setIfNonnull(attributes, Tag.StationName, VR.SH, stationName)
         // TODO: Institutional Department Name
         setIfNonnull(attributes, Tag.ManufacturerModelName, VR.LO, modelName)
@@ -94,4 +94,3 @@ trait Equipment implements DicomEncoder {
     }
 
 }
-
