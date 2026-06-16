@@ -2,7 +2,6 @@ package edu.washu.tag.generator.metadata.scanners
 
 import edu.washu.tag.generator.metadata.Institution
 import edu.washu.tag.generator.metadata.Institutions
-import edu.washu.tag.generator.metadata.institutions.StRomanWest
 
 class StRomanWestAchieva extends PhilipsAchieva {
 
