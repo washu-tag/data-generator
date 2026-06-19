@@ -331,5 +331,14 @@
       "codeMeaning": "IR INTRO CATHETER AORTA BILATERAL",
       "alternateText": "XRay Angiography"
     }
+  },
+  "ct head": {
+    "impliedModality": "CT",
+    "codedTriplet": {
+      "codeValue": "CE704500",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "CT HEAD WO",
+      "alternateText": "CT head w/o contrast"
+    }
   }
 }

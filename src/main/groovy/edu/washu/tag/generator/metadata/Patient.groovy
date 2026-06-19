@@ -37,6 +37,7 @@ class Patient implements DicomEncoder {
     @JsonIgnore double personalHeightMod
     @JsonIgnore double personalWeightMod
     @JsonIgnore boolean reportsMatched = false
+    @JsonIgnore boolean compareAdjacentStudies = false
 
     Patient randomize(GenerationContext generationContext, SequentialIdGenerator studyIdGenerator) {
         final LocalDate sixteenthBirthday = dateOfBirth.plusYears(16)

@@ -39,19 +39,18 @@ class OpenAiWrapper {
             .build()
     }
 
-    PatientOutput generateReportsForPatient(Patient patient, Map<Study, Class<? extends GeneratedReport>> reports) {
+    PatientOutput generateReportsForPatientFromPlaceholders(Patient patient, Map<Study, GeneratedReport> reports) {
         final List<String> uidMapping = []
         final PatientRep patientRep = convertToPatientRep(patient, uidMapping)
         final PatientOutput patientOutput = new PatientOutput(patientId: patient.epicMrn)
 
         patientRep.studies.each { studyRep ->
             final String studyInstanceUid = uidMapping[Integer.parseInt(studyRep.uid)]
-            final Map.Entry<Study, Class<? extends GeneratedReport>> entry = reports.find { entry ->
+            final Map.Entry<Study, GeneratedReport> entry = reports.find { entry ->
                 entry.key.studyInstanceUid == studyInstanceUid
             }
             final Study study = entry.key
-            final Class<? extends GeneratedReport> reportClass = entry.value
-            final GeneratedReport promptReport = reportClass.getDeclaredConstructor().newInstance()
+            final GeneratedReport promptReport = entry.value
 
             final String comparison = {
                 if (promptReport instanceof WithComparison && studyRep.compareTo == null) {
@@ -81,7 +80,7 @@ class OpenAiWrapper {
                 BASE_RAD_CONTEXT_SINGULAR,
                 mainPrompt,
                 model,
-                reportClass
+                promptReport.class as Class<? extends GeneratedReport>
             ).withValidation({ GeneratedReport report ->
                 promptReport.preserveState(report)
                 report.validateReport()
@@ -94,6 +93,15 @@ class OpenAiWrapper {
             generatedReport.setUid(uidMapping.get(Integer.parseInt(generatedReport.getUid())))
         }
         patientOutput
+    }
+
+    PatientOutput generateReportsForPatient(Patient patient, Map<Study, Class<? extends GeneratedReport>> reports) {
+        generateReportsForPatientFromPlaceholders(
+            patient,
+            reports.collectEntries { study, reportClass ->
+                [(study): reportClass.getDeclaredConstructor().newInstance()]
+            }
+        )
     }
 
     List<PatientOutput> generateReportsForPatients(List<Patient> patients) {
@@ -136,17 +144,23 @@ class OpenAiWrapper {
         final Map<String, String> comparisons = [:]
         final Map<String, List<String>> studiesByStandardizedDescription = [:]
 
-        sortedStudies.each { study ->
-            uidMapping << study.studyInstanceUid
-            final String description = study.simpleDescription
-            final List<String> previousStudies = studiesByStandardizedDescription.computeIfAbsent(
-                description,
-                { [] }
-            )
-            if (!previousStudies.isEmpty()) {
-                comparisons.put(study.studyInstanceUid, previousStudies.last())
+        if (patient.compareAdjacentStudies) {
+            sortedStudies.collate(2, 1, false).each { pair ->
+                comparisons.put(pair[1].studyInstanceUid, pair[0].studyInstanceUid)
             }
-            previousStudies << study.studyInstanceUid
+        } else {
+            sortedStudies.each { study ->
+                uidMapping << study.studyInstanceUid
+                final String description = study.simpleDescription
+                final List<String> previousStudies = studiesByStandardizedDescription.computeIfAbsent(
+                    description,
+                    { [] }
+                )
+                if (!previousStudies.isEmpty()) {
+                    comparisons.put(study.studyInstanceUid, previousStudies.last())
+                }
+                previousStudies << study.studyInstanceUid
+            }
         }
 
         patientRep.setStudies(sortedStudies.collect { sortedStudy ->

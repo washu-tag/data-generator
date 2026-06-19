@@ -5,6 +5,7 @@ import edu.washu.tag.generator.hl7.v2.ReportGenerator
 import edu.washu.tag.generator.metadata.Institution
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.Protocol
+import edu.washu.tag.generator.metadata.cohorting.SpecializedCohort
 import edu.washu.tag.generator.metadata.patient.DefaultPatientRandomizer
 import edu.washu.tag.generator.metadata.patient.GreekPatientRandomizer
 import edu.washu.tag.generator.metadata.patient.JapanesePatientRandomizer
@@ -44,6 +45,7 @@ class SpecificationParameters {
         (new KoreanPatientRandomizer(randomizerWeight: 5))
     ]
     List<Institution> institutionOverrides = []
+    List<SpecializedCohort> cohorts = []
 
     void postprocess() {
         averageStudiesPerPatient = numStudies / numPatients
