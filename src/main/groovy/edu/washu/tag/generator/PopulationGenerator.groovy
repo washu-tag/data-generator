@@ -154,8 +154,7 @@ class PopulationGenerator {
 
         final GenerationContext generationContext = new GenerationContext(
             specificationParameters: specificationParameters,
-            patientIdEncoders: idOffsets.getPatientIdEncodersFromOffset(batchRequest.patientOffset),
-            legacyStandaloneId: idOffsets.legacyStandaloneIdOffset,
+            patientIdGenerators: idOffsets.getPatientIdGeneratorsFromOffset(batchRequest.patientOffset),
             studyCountOverride: 0
         )
         int generatedStudies = 0
@@ -180,6 +179,9 @@ class PopulationGenerator {
             patient.studies.each { study ->
                 generatedStudies++
                 generatedSeries += study.series.size()
+                if (!specificationParameters.generateRadiologyReports) {
+                    study.cachePatientIdsForStudy()
+                }
             }
             if (temporalHeartbeat) {
                 Activity.executionContext.heartbeat("Batch ${batchRequest.id}, patient ${generatedPatients + 1} post-DICOM")

@@ -2,7 +2,7 @@ package edu.washu.tag.generator
 
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.Protocol
-import edu.washu.tag.generator.metadata.patient.PatientIdEncoder
+import edu.washu.tag.generator.metadata.patient.PatientIdGenerator
 
 class GenerationContext {
 
@@ -12,8 +12,7 @@ class GenerationContext {
     long previouslyGeneratedStudies
     int studyCountOverride
     int studyCountMaximum
-    List<PatientIdEncoder> patientIdEncoders
-    int legacyStandaloneId
+    List<PatientIdGenerator> patientIdGenerators
 
     int calculateStudyCountForCurrentPatient() {
         if (studyCountOverride > 0) {
@@ -23,12 +22,6 @@ class GenerationContext {
         } else {
             specificationParameters.chooseNumberOfStudies(currentAverageStudiesPerPatient)
         }
-    }
-
-    String nextLegacyStandaloneId() {
-        final String id = String.valueOf(legacyStandaloneId)
-        legacyStandaloneId++
-        id
     }
 
     Protocol chooseProtocol(Patient patient) {

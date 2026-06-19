@@ -1,7 +1,8 @@
 package edu.washu.tag.generator.metadata
 
+import edu.washu.tag.generator.hl7.v2.model.HierarchicDesignator
 import edu.washu.tag.generator.metadata.enums.Nationality
-import edu.washu.tag.generator.metadata.patient.MainId
+import edu.washu.tag.generator.util.GenerationConstants
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -30,26 +31,26 @@ class Institutions {
         centerForSpecializedRadiology = register {
             institutionName = 'Center for Specialized Radiology'
             institutionAddress = '1 Compton Rd, San Francisco, CA 94102'
-            assigningAuthority = MainId.assigningAuthority
+            assigningAuthority = GenerationConstants.defaultParentAssigningAuth
         }
         chestertonAdamsHospital = register {
             institutionName = 'Chesterton-Adams Hospital'
             institutionAddress = '114 N Becker Rd, St. Louis, MO 63105'
-            assigningAuthority = MainId.assigningAuthority
+            assigningAuthority = GenerationConstants.defaultParentAssigningAuth
         }
         southGrandMammographySpecialty = register {
             institutionName = 'SGMS'
-            assigningAuthority = MainId.assigningAuthority
+            assigningAuthority = GenerationConstants.defaultParentAssigningAuth
         }
         stRomanWest = register {
             institutionName = 'St Roman West'
             institutionAddress = '4599 W Hammerton, St. Louis, MO 63130'
-            assigningAuthority = MainId.assigningAuthority
+            assigningAuthority = GenerationConstants.defaultParentAssigningAuth
         }
         vandeventerRegionalHospital = register {
             institutionName = 'Vandeventer Regional Hospital'
             institutionAddress = '4 Green Plaza, St. Louis, MO 63106'
-            assigningAuthority = MainId.assigningAuthority
+            assigningAuthority = GenerationConstants.defaultParentAssigningAuth
         }
         hokkaidoRadiologyCenter = register {
             institutionName = 'Hokkaido Radiology Center'
@@ -78,6 +79,10 @@ class Institutions {
 
         overridesCache = null
         knownInstitutions
+    }
+
+    static HierarchicDesignator getAssigningAuthorityForStudy(Study study) {
+        study.primaryEquipment.institution?.assigningAuthority ?: chestertonAdamsHospital.assigningAuthority
     }
 
     private static Institution register(@DelegatesTo(value = Institution, strategy = Closure.DELEGATE_ONLY) Closure config) {

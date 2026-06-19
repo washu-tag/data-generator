@@ -33,7 +33,7 @@ class CurrentStudyReportGenerator extends StudyReportGenerator {
         radReport.setGeneratedReport(generatedReport)
         radReport.setStudy(study)
         radReport.setMessageControlId(UIDUtils.createUID())
-        radReport.setPatientIds(patient.patientIdsForStudy(study))
+        radReport.setPatientIds(study.cachePatientIdsForStudy())
         radReport.setIncludeAlias(messageRequirements.includePatientAlias)
         radReport.setRace(messageRequirements.isRaceUnavailable() ? unavailableRace() : patient.getRace())
         radReport.setSpecifyAddress(messageRequirements.specifyAddress)

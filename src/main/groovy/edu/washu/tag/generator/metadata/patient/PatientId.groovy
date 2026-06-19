@@ -2,57 +2,33 @@ package edu.washu.tag.generator.metadata.patient
 
 import ca.uhn.hl7v2.model.v281.datatype.CX
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonTypeInfo
 import edu.washu.tag.generator.hl7.v2.model.HierarchicDesignator
 import edu.washu.tag.generator.metadata.Study
 
-import java.util.concurrent.ThreadLocalRandom
+import java.util.function.Predicate
 
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.MINIMAL_CLASS,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = 'type'
-)
-trait PatientId {
+class PatientId {
 
     String idNumber
+    String identifierCheckDigit
+    String checkDigitScheme
+    HierarchicDesignator assigningAuthority
+    String identifierTypeCode
+    HierarchicDesignator assigningFacility
+    @JsonIgnore Predicate<Study> checkApplicabilityFor = { true }
 
     CX encodeId(CX emptyDataStore) {
         emptyDataStore.getCx1_IDNumber().setValue(idNumber)
         emptyDataStore.getCx2_IdentifierCheckDigit().setValue(
-            getIdentifierCheckDigit()
+            identifierCheckDigit
         )
         emptyDataStore.getCx3_CheckDigitScheme().setValue(
-            getCheckDigitScheme()
+            checkDigitScheme
         )
-        getAssigningAuthority()?.toHd(emptyDataStore.getCx4_AssigningAuthority())
-        emptyDataStore.getCx5_IdentifierTypeCode().setValue(getIdentifierTypeCode())
-        getAssigningFacility()?.toHd(emptyDataStore.getCx6_AssigningFacility())
+        assigningAuthority?.toHd(emptyDataStore.getCx4_AssigningAuthority())
+        emptyDataStore.getCx5_IdentifierTypeCode().setValue(identifierTypeCode)
+        assigningFacility?.toHd(emptyDataStore.getCx6_AssigningFacility())
         emptyDataStore
-    }
-
-    @JsonIgnore
-    abstract HierarchicDesignator getAssigningAuthority()
-
-    @JsonIgnore
-    abstract String getIdentifierTypeCode()
-
-    @JsonIgnore
-    abstract boolean isApplicableForStudy(Study study)
-
-    @JsonIgnore
-    String getIdentifierCheckDigit() {
-        null
-    }
-
-    @JsonIgnore
-    String getCheckDigitScheme() {
-        null
-    }
-
-    @JsonIgnore
-    HierarchicDesignator getAssigningFacility() {
-        null
     }
 
     @JsonIgnore

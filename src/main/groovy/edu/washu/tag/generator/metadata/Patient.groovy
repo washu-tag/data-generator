@@ -5,7 +5,9 @@ import edu.washu.tag.generator.GenerationContext
 import edu.washu.tag.generator.metadata.enums.Nationality
 import edu.washu.tag.generator.metadata.enums.Race
 import edu.washu.tag.generator.metadata.enums.Sex
-import edu.washu.tag.generator.metadata.patient.PatientId
+import edu.washu.tag.generator.metadata.patient.EpicMrnGenerator
+import edu.washu.tag.generator.metadata.patient.MpiGenerator
+import edu.washu.tag.generator.metadata.patient.PatientIdGenerator
 import edu.washu.tag.generator.util.SequentialIdGenerator
 import org.dcm4che3.data.Attributes
 import org.dcm4che3.data.Tag
@@ -23,11 +25,13 @@ class Patient implements DicomEncoder {
     LocalDate dateOfBirth
     LocalTime timeOfBirth
     Person patientName
-    List<PatientId> patientIds
-    String legacyPatientId
     Race race
     List<Study> studies = []
     String patientInstanceUid // non-standard element
+    String mpi
+    String epicMrn
+    @JsonIgnore Map<PatientIdGenerator, String> patientIds
+    @Deprecated @JsonIgnore Map<PatientIdGenerator, String> idsForGenerators = [:]
     @JsonIgnore LocalDate earliestAvailableStudyDate
     @JsonIgnore Nationality nationality
     @JsonIgnore double personalHeightMod
@@ -37,8 +41,15 @@ class Patient implements DicomEncoder {
     Patient randomize(GenerationContext generationContext, SequentialIdGenerator studyIdGenerator) {
         final LocalDate sixteenthBirthday = dateOfBirth.plusYears(16)
         patientInstanceUid = UIDUtils.createUID()
-        patientIds = generationContext.patientIdEncoders*.nextPatientId()
-        legacyPatientId = generationContext.nextLegacyStandaloneId()
+        patientIds = generationContext.patientIdGenerators.collectEntries { idGen ->
+            final String id = idGen.nextPatientId()
+            if (idGen instanceof EpicMrnGenerator) {
+                epicMrn = id
+            } else if (idGen instanceof MpiGenerator) {
+                mpi = id
+            }
+            [(idGen): id]
+        }
         earliestAvailableStudyDate = sixteenthBirthday.isAfter(imagingDataEpoch) ? sixteenthBirthday : imagingDataEpoch
         generationContext.calculateStudyCountForCurrentPatient().times {
             final Protocol selectedProtocol = generationContext.chooseProtocol(this)
@@ -51,17 +62,11 @@ class Patient implements DicomEncoder {
         this
     }
 
-    List<PatientId> patientIdsForStudy(Study study) {
-        patientIds.findAll {
-            it.isApplicableForStudy(study)
-        }
-    }
-
     void encode(Study study, Attributes attributes) {
         attributes.setString(Tag.PatientSex, VR.CS, sex.dicomRepresentation)
         setDate(attributes, Tag.PatientBirthDate, dateOfBirth)
         setTime(attributes, Tag.PatientBirthTime, timeOfBirth)
-        attributes.setString(Tag.PatientID, VR.LO, patientIdsForStudy(study)[0].idNumber)
+        attributes.setString(Tag.PatientID, VR.LO, study.patientIds[0].idNumber)
     }
 
 }

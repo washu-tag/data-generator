@@ -12,6 +12,7 @@ class Institution {
     String institutionAddress
     Nationality commonNationality = Nationality.AMERICAN
     HierarchicDesignator assigningAuthority
+    String sendingFacility
 
     String getId() {
         id ?: institutionName

@@ -12,7 +12,6 @@ import edu.washu.tag.generator.query.test.DobGreater
 import edu.washu.tag.generator.query.test.ExtendedMetadata
 import edu.washu.tag.generator.query.test.Names
 import edu.washu.tag.generator.query.test.NullMessageDt
-import edu.washu.tag.generator.query.test.PatientIdQuery
 import edu.washu.tag.generator.query.test.PlacerOrderMissing
 import edu.washu.tag.generator.query.test.PrimaryModalityBySex
 import edu.washu.tag.generator.query.test.ReportStatusCount
@@ -44,7 +43,6 @@ class QueryGenerator {
         new PrimaryModalityBySex(),
         new ReportStatusCount(),
         new ExtendedMetadata(),
-        new PatientIdQuery(),
         new AllReports(),
         new NullMessageDt(),
         new ReportText(),

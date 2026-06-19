@@ -9,8 +9,6 @@ import edu.washu.tag.generator.hl7.v2.model.TransportationMode
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.Study
-import edu.washu.tag.generator.metadata.patient.EmpiId
-import edu.washu.tag.generator.metadata.patient.PatientId
 import io.temporal.workflow.Workflow
 import org.slf4j.Logger
 
@@ -30,7 +28,7 @@ abstract class CyclicVariedGenerator extends ReportGenerator {
 
         patients.each { patient ->
             final List<GeneratedReport> reports = output.find { patientOutput ->
-                patientOutput.patientId == patient.patientIds[0].idNumber
+                patientOutput.patientId == patient.epicMrn
             }.generatedReports
 
             patient.studies.each { study ->
@@ -80,11 +78,10 @@ abstract class CyclicVariedGenerator extends ReportGenerator {
         }
 
         patients.each { patient ->
-            if (patient.studies.any { it.radReport.hl7Version == ReportVersion.V2_3 }) {
-                final PatientId mpi = new EmpiId(idNumber: patient.legacyPatientId)
-                patient.studies*.radReport.each { radReport ->
-                    if (radReport.hl7Version == ReportVersion.V2_7) {
-                        radReport.patientIds << mpi
+            patient.studies.each { study ->
+                patient.patientIds.each { patientIdGenerator, id ->
+                    if (patientIdGenerator.conditionalIncludeIdOn(study)) {
+                        study.patientIds << patientIdGenerator.materializeIdForStudy(study, id)
                     }
                 }
             }

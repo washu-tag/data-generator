@@ -1,6 +1,10 @@
 package edu.washu.tag.generator.metadata
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import edu.washu.tag.generator.metadata.patient.EpicMrnGenerator
+import edu.washu.tag.generator.metadata.patient.MpiGenerator
+import edu.washu.tag.generator.metadata.patient.PatientId
+import edu.washu.tag.generator.metadata.patient.PatientIdGenerator
 import edu.washu.tag.generator.util.SequentialIdGenerator
 import org.dcm4che3.data.Attributes
 import org.dcm4che3.data.Tag
@@ -11,6 +15,8 @@ import edu.washu.tag.generator.metadata.enums.SeriesBundling
 import edu.washu.tag.generator.metadata.privateElements.AsciiRepeatedBinaryPrivateElement
 import edu.washu.tag.generator.metadata.privateElements.PrivateBlock
 import edu.washu.tag.generator.metadata.privateElements.PrivateElementContainer
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -28,6 +34,7 @@ class Study implements DicomEncoder, PrivateElementContainer {
     Double patientSize = null
     Double patientWeight = null
     String patientName // Yes, this is a patient field, but we want the value to be inconsistently encoded *across studies*, but consistent within a study
+    List<PatientId> patientIds
     String referringPhysicianName = ''
     List<String> consultingPhysicianName
     List<String> characterSets = ['ISO_IR 100'] // simplifying assumption to put it here
@@ -48,6 +55,7 @@ class Study implements DicomEncoder, PrivateElementContainer {
     @JsonIgnore Map<Equipment, List<String>> operatorMap
     @JsonIgnore List<Person> primaryOperators
     @JsonIgnore List<String> performingPhysiciansName // Series level field, but in most cases it's going to be fixed across a study
+    private static final Logger logger = LoggerFactory.getLogger(Study)
 
     Study randomize(SpecificationParameters specificationParameters, SequentialIdGenerator studyIdGenerator, Protocol protocol) {
         studyId = studyIdGenerator.get()
@@ -104,6 +112,25 @@ class Study implements DicomEncoder, PrivateElementContainer {
     @JsonIgnore
     LocalDateTime studyDateTime() {
         studyDate.atTime(studyTime)
+    }
+
+    @JsonIgnore
+    List<PatientId> cachePatientIdsForStudy() {
+        if (patientIds == null) {
+            List<PatientIdGenerator> idGenerators
+            if (radReport == null) {
+                logger.warn("Falling back to only default ID generator since reports are disabled")
+                patientIds = patient.patientIds.findResults { idGen, id ->
+                    idGen.isDefault() ? idGen.materializeIdForStudy(this, id) : null
+                }
+            } else {
+                patientIds = patient.patientIds.findResults { idGen, id ->
+                    final PatientId patientId = idGen.materializeIdForStudy(this, id)
+                    patientId.checkApplicabilityFor.test(this) ? patientId : null
+                }
+            }
+        }
+        patientIds
     }
 
 }
