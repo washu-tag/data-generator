@@ -58,7 +58,7 @@ class CyclicVariedGptGenerator extends CyclicVariedGenerator {
             heartbeatAndLog('LLM called')
             generated.each { patientOutput ->
                 final Patient patient = sublist.find { pat ->
-                    pat.patientIds[0].idNumber == patientOutput.patientId
+                    pat.epicMrn == patientOutput.patientId
                 }
                 if (patient != null) {
                     if (validateReportMatch(patient, patientOutput)) {

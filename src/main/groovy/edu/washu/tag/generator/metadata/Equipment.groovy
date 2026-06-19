@@ -1,6 +1,7 @@
 package edu.washu.tag.generator.metadata
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import org.dcm4che3.data.Attributes
 import org.dcm4che3.data.Tag
@@ -14,8 +15,10 @@ import edu.washu.tag.generator.metadata.enums.Manufacturer
 )
 trait Equipment implements DicomEncoder {
 
+    private Institution institutionOverride
+
     @JsonIgnore
-    abstract Institution getInstitution()
+    abstract Institution getDefaultInstitution()
 
     @JsonIgnore
     abstract Manufacturer getManufacturer()
@@ -35,6 +38,20 @@ trait Equipment implements DicomEncoder {
     abstract String getProtocolName(Study study, Series series)
 
     abstract String getTransferSyntaxUID(String sopClassUID)
+
+    @JsonIgnore
+    Institution getInstitution() {
+        institutionOverride ?: getDefaultInstitution()
+    }
+
+    void setInstitutionOverride(Institution inst) {
+        institutionOverride = inst
+    }
+
+    @JsonProperty('institutionOverride')
+    Institution getInstitutionOverride() {
+        institutionOverride
+    }
 
     int getSeriesNumber(int seriesIndex, SeriesType seriesType) {
         seriesIndex + 1

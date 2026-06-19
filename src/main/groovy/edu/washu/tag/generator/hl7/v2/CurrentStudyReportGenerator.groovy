@@ -2,14 +2,13 @@ package edu.washu.tag.generator.hl7.v2
 
 import edu.washu.tag.generator.ai.GeneratedReport
 import edu.washu.tag.generator.metadata.Institution
-import edu.washu.tag.generator.metadata.NameCache
+import edu.washu.tag.generator.metadata.Institutions
+import edu.washu.tag.generator.metadata.GenerationCache
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.Person
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.Study
 import edu.washu.tag.generator.metadata.enums.Race
-import edu.washu.tag.generator.metadata.institutions.ChestertonAdamsHospital
-import edu.washu.tag.generator.metadata.patient.PatientId
 import edu.washu.tag.generator.metadata.reports.RadiologyReport2_4
 import edu.washu.tag.generator.metadata.reports.RadiologyReport2_7
 import edu.washu.tag.generator.util.RandomGenUtils
@@ -25,7 +24,7 @@ class CurrentStudyReportGenerator extends StudyReportGenerator {
 
     @Override
     RadiologyReport generateReportFrom(Patient patient, Study study, MessageRequirements messageRequirements, GeneratedReport generatedReport) {
-        final Institution procedureInstitution = study.primaryEquipment.institution ?: new ChestertonAdamsHospital()
+        final Institution procedureInstitution = study.primaryEquipment.institution ?: Institutions.chestertonAdamsHospital
         final RadiologyReport radReport = initReport()
         study.setRadReport(radReport)
         radReport.setReportDateTime(
@@ -34,7 +33,7 @@ class CurrentStudyReportGenerator extends StudyReportGenerator {
         radReport.setGeneratedReport(generatedReport)
         radReport.setStudy(study)
         radReport.setMessageControlId(UIDUtils.createUID())
-        radReport.setPatientIds(patient.patientIdsForStudy(study))
+        radReport.setPatientIds(study.cachePatientIdsForStudy())
         radReport.setIncludeAlias(messageRequirements.includePatientAlias)
         radReport.setRace(messageRequirements.isRaceUnavailable() ? unavailableRace() : patient.getRace())
         radReport.setSpecifyAddress(messageRequirements.specifyAddress)
@@ -42,12 +41,12 @@ class CurrentStudyReportGenerator extends StudyReportGenerator {
         radReport.setMalformInterpretersTechnician(messageRequirements.malformObrInterpretersAndTech)
         radReport.setIncludeObx(messageRequirements.includeObx)
         chooseInterpreters(radReport, procedureInstitution, messageRequirements)
-        radReport.setAttendingDoctors(NameCache.selectPhysicians(procedureInstitution, messageRequirements.numAttendingDoctors))
+        radReport.setAttendingDoctors(GenerationCache.selectPhysicians(procedureInstitution, messageRequirements.numAttendingDoctors))
         if (study.primaryOperators != null) {
             radReport.setTechnician(study.primaryOperators[0])
         }
         radReport.setVisitNumber(visitIdGenerator.get())
-        radReport.setOrderingProvider(NameCache.selectPhysician(procedureInstitution))
+        radReport.setOrderingProvider(GenerationCache.selectPhysician(procedureInstitution))
         setOrcStatus(radReport, messageRequirements)
         radReport.setReasonForStudy(messageRequirements.reasonForStudy)
         radReport.setTransportationMode(messageRequirements.transportationMode)
@@ -73,7 +72,7 @@ class CurrentStudyReportGenerator extends StudyReportGenerator {
     // TODO: this isn't really accurate
     protected void chooseInterpreters(RadiologyReport radReport, Institution institution, MessageRequirements messageRequirements) {
         radReport.setAssistantInterpreters(
-                NameCache.selectPhysicians(
+                GenerationCache.selectPhysicians(
                         institution,
                         messageRequirements.numAsstInterpreters
                 )
@@ -81,7 +80,7 @@ class CurrentStudyReportGenerator extends StudyReportGenerator {
     }
 
     protected void chooseInterpretersWithPrimary(RadiologyReport radReport, Institution institution, MessageRequirements messageRequirements) {
-        final List<Person> allInterpreters = NameCache.selectPhysicians(
+        final List<Person> allInterpreters = GenerationCache.selectPhysicians(
             institution,
             messageRequirements.numAsstInterpreters + 1
         )

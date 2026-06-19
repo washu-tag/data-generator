@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import edu.washu.tag.generator.BatchChunk
 import edu.washu.tag.generator.BatchProcessor
 import edu.washu.tag.generator.PopulationGenerator
-import edu.washu.tag.generator.metadata.NameCache
+import edu.washu.tag.generator.metadata.GenerationCache
 import edu.washu.tag.generator.temporal.TemporalApplication
 import io.temporal.spring.boot.ActivityImpl
 import io.temporal.workflow.Workflow
 import org.slf4j.Logger
 import org.springframework.stereotype.Component
+
+import java.nio.file.Paths
 
 @Component
 @ActivityImpl(taskQueues = TemporalApplication.TASK_QUEUE)
@@ -30,9 +32,11 @@ class EarlySetupHandlerActivityImpl implements EarlySetupHandlerActivity {
     }
 
     @Override
-    File initNameCache() {
-        final File asFile = new File("name_cache_${System.currentTimeMillis()}.json")
-        new ObjectMapper().writeValue(asFile, NameCache.initInstance())
+    File initGenerationCache(String specificationParamsPath, String outputPath) {
+        final PopulationGenerator generator = new PopulationGenerator()
+        generator.readSpecificationParameters(specificationParamsPath)
+        final File asFile = Paths.get(outputPath, "generation_cache_${System.currentTimeMillis()}.json").toFile()
+        new ObjectMapper().writeValue(asFile, GenerationCache.initInstance(generator.specificationParameters))
         asFile
     }
 

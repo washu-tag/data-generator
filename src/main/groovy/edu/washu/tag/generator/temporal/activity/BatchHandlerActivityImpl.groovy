@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import edu.washu.tag.generator.BatchProcessor
 import edu.washu.tag.generator.PopulationGenerator
 import edu.washu.tag.generator.ai.catalog.CodeCache
-import edu.washu.tag.generator.metadata.NameCache
+import edu.washu.tag.generator.metadata.GenerationCache
 import edu.washu.tag.generator.temporal.TemporalApplication
 import edu.washu.tag.generator.temporal.model.BatchHandlerActivityInput
 import io.temporal.spring.boot.ActivityImpl
@@ -26,7 +26,7 @@ class BatchHandlerActivityImpl implements BatchHandlerActivity {
         final PopulationGenerator populationGenerator = new PopulationGenerator()
         populationGenerator.readSpecificationParameters(batchHandlerActivityInput.datasetInput.specificationParametersPath)
         populationGenerator.generateAndWriteFullBatch(
-            new ObjectMapper().readValue(batchHandlerActivityInput.nameCachePath, NameCache),
+            new ObjectMapper().readValue(batchHandlerActivityInput.generationCachePath, GenerationCache),
             batchHandlerActivityInput.idOffsets,
             batchHandlerActivityInput.batchRequest,
             batchHandlerActivityInput.datasetInput.writeDicom,

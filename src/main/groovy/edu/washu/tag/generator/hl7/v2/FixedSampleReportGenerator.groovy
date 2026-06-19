@@ -29,7 +29,7 @@ class FixedSampleReportGenerator extends CyclicVariedGenerator {
         final String repeatedImpression = impression * impressionRepetition
         patients.collect { patient ->
             new PatientOutput(
-                patientId: patient.patientIds[0].idNumber,
+                patientId: patient.epicMrn,
                 generatedReports: patient.studies.collect { study ->
                     new ClassicReport(
                         uid: study.studyInstanceUid,

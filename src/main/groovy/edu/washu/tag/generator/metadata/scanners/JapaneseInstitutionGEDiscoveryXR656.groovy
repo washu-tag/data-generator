@@ -1,13 +1,12 @@
 package edu.washu.tag.generator.metadata.scanners
 
 import edu.washu.tag.generator.metadata.*
-import edu.washu.tag.generator.metadata.institutions.HokkaidoRadiologyCenter
 
 class JapaneseInstitutionGEDiscoveryXR656 extends GEDiscoveryXR656 {
 
     @Override
-    Institution getInstitution() {
-        new HokkaidoRadiologyCenter()
+    Institution getDefaultInstitution() {
+        Institutions.hokkaidoRadiologyCenter
     }
 
     @Override

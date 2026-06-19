@@ -45,7 +45,7 @@ class PidGenerator2_3 extends PidGenerator {
 
     @Override
     protected void addLegacyPatientId(PID baseSegment, Patient patient) {
-        baseSegment.pid2_PatientID.setValue(patient.legacyPatientId)
+        baseSegment.pid2_PatientID.setValue(patient.mpi)
     }
 
     @Override
@@ -71,7 +71,7 @@ class PidGenerator2_3 extends PidGenerator {
         final String phoneNumber = '(111) 111-1111 x'
         baseSegment.getPid13_PhoneNumberHome(0).getXtn1_TelephoneNumber().setValue(phoneNumber)
         baseSegment.getPid14_PhoneNumberBusiness(0).getXtn1_TelephoneNumber().setValue(phoneNumber)
-        baseSegment.getPid18_PatientAccountNumber().getCx1_IDNumber().setValue('M' + radReport.patient.legacyPatientId + '3R')
+        baseSegment.getPid18_PatientAccountNumber().getCx1_IDNumber().setValue('M' + radReport.patient.mpi + '3R')
         baseSegment.getPid19_SSNNumberPatient().setValue('111-11-1111')
         baseSegment.getPid30_PatientDeathIndicator().setValue('N')
     }

@@ -1,5 +1,7 @@
 package edu.washu.tag.generator
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import edu.washu.tag.generator.metadata.GenerationCache
 import edu.washu.tag.generator.query.QueryGenerator
 
 import java.nio.file.Path
@@ -16,18 +18,19 @@ class BatchProcessor {
     static File logOutput
 
     static void main(String[] args) {
-        initDirs(args.length > 3 ? args[3] : '.')
+        initDirs(args.length > 4 ? args[4] : '.')
         final BatchProcessor batchProcessor = new BatchProcessor(batches: args[0].split(',').collect {
             new File(it)
         })
-        if (args.length > 1) {
-            batchProcessor.setWriteFiles(Boolean.parseBoolean(args[1]))
-        }
+        final GenerationCache generationCache = new ObjectMapper().readValue(args[1], GenerationCache)
         if (args.length > 2) {
-            batchProcessor.setGenerateTests(Boolean.parseBoolean(args[2]))
+            batchProcessor.setWriteFiles(Boolean.parseBoolean(args[2]))
+        }
+        if (args.length > 3) {
+            batchProcessor.setGenerateTests(Boolean.parseBoolean(args[3]))
         }
 
-        batchProcessor.writeAndCombineBatches()
+        batchProcessor.writeAndCombineBatches(generationCache)
     }
 
     static void initDirs(String outputDirectory) {
@@ -72,7 +75,8 @@ class BatchProcessor {
         }
     }
 
-    void writeAndCombineBatches() {
+    void writeAndCombineBatches(GenerationCache generationCache) {
+        generationCache.cache()
         writeBatches()
 
         if (radReportWritten) {

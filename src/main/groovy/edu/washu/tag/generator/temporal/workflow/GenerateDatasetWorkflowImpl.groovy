@@ -47,7 +47,7 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
             input.outputDir = String.valueOf(Workflow.currentTimeMillis())
         }
 
-        final File nameCache = earlySetupActivity.initNameCache()
+        final File nameCache = earlySetupActivity.initGenerationCache(input.specificationParametersPath, input.outputFullPath())
         final IdOffsets idOffsets = new IdOffsets()
 
         final List<BatchChunk> batchChunks = earlySetupActivity.chunkBatches(

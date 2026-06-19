@@ -1,13 +1,13 @@
 package edu.washu.tag.generator.metadata.scanners
 
 import edu.washu.tag.generator.metadata.Institution
-import edu.washu.tag.generator.metadata.institutions.StRomanWest
+import edu.washu.tag.generator.metadata.Institutions
 
 class StRomanWestAchieva extends PhilipsAchieva {
 
     @Override
-    Institution getInstitution() {
-        new StRomanWest()
+    Institution getDefaultInstitution() {
+        Institutions.stRomanWest
     }
 
     @Override

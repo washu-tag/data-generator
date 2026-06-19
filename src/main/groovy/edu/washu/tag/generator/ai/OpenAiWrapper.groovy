@@ -42,7 +42,7 @@ class OpenAiWrapper {
     PatientOutput generateReportsForPatient(Patient patient, Map<Study, Class<? extends GeneratedReport>> reports) {
         final List<String> uidMapping = []
         final PatientRep patientRep = convertToPatientRep(patient, uidMapping)
-        final PatientOutput patientOutput = new PatientOutput(patientId: patient.patientIds[0].idNumber)
+        final PatientOutput patientOutput = new PatientOutput(patientId: patient.epicMrn)
 
         patientRep.studies.each { studyRep ->
             final String studyInstanceUid = uidMapping[Integer.parseInt(studyRep.uid)]
@@ -129,7 +129,7 @@ class OpenAiWrapper {
     private static PatientRep convertToPatientRep(Patient patient, List<String> uidMapping) {
         final PatientRep patientRep = new PatientRep()
         patientRep.setSex(patient.sex.name().toLowerCase())
-        patientRep.setPatientId(patient.patientIds[0].idNumber)
+        patientRep.setPatientId(patient.epicMrn)
         patientRep.setDateOfBirth(TimeUtils.UNAMBIGUOUS_DATE.format(patient.dateOfBirth))
 
         final List<Study> sortedStudies = patient.studies.sort(false, { it.studyDateTime() })

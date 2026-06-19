@@ -1,13 +1,13 @@
 package edu.washu.tag.generator.metadata.scanners
 
 import edu.washu.tag.generator.metadata.Institution
-import edu.washu.tag.generator.metadata.institutions.CenterForSpecializedRadiology
+import edu.washu.tag.generator.metadata.Institutions
 
 class OutsideGEInfinia extends GEInfinia {
 
     @Override
-    Institution getInstitution() {
-        new CenterForSpecializedRadiology()
+    Institution getDefaultInstitution() {
+        Institutions.centerForSpecializedRadiology
     }
 
     @Override

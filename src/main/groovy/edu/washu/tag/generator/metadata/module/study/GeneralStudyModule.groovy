@@ -4,15 +4,13 @@ import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.dcm4che3.util.UIDUtils
 import edu.washu.tag.generator.SpecificationParameters
 import edu.washu.tag.generator.metadata.Equipment
-import edu.washu.tag.generator.metadata.NameCache
+import edu.washu.tag.generator.metadata.GenerationCache
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.Person
 import edu.washu.tag.generator.metadata.Protocol
 import edu.washu.tag.generator.metadata.Study
 import edu.washu.tag.generator.metadata.module.StudyLevelModule
 import edu.washu.tag.generator.util.RandomGenUtils
-
-import java.time.LocalDate
 
 class GeneralStudyModule implements StudyLevelModule {
 
@@ -32,12 +30,12 @@ class GeneralStudyModule implements StudyLevelModule {
 
         if (protocol.includeMedicalStaff()) {
             if (RandomGenUtils.weightedCoinFlip(60)) {
-                study.setReferringPhysicianName(scanner.serializeName(NameCache.selectPhysician(patient.nationality)))
+                study.setReferringPhysicianName(scanner.serializeName(GenerationCache.selectPhysician(patient.nationality)))
             }
             if (RandomGenUtils.weightedCoinFlip(10)) {
                 final int numPhysicians = RandomGenUtils.weightedCoinFlip(90) ? 1 : 2
                 study.setConsultingPhysicianName(
-                        NameCache.selectPhysicians(patient.nationality, numPhysicians).collect { physician ->
+                        GenerationCache.selectPhysicians(patient.nationality, numPhysicians).collect { physician ->
                             physician.serializeToDicom(scanner.supportsNonLatinCharacterSets())
                         }
                 )
@@ -45,7 +43,7 @@ class GeneralStudyModule implements StudyLevelModule {
             final Map<Equipment, List<String>> operatorMap = [:]
             study.equipmentMap.values().unique(false).each { equipment ->
                 final int numOperators = RandomGenUtils.weightedCoinFlip(70) ? 1 : 2
-                final List<Person> operators = NameCache.selectOperators(equipment.institution, numOperators)
+                final List<Person> operators = GenerationCache.selectOperators(equipment.institution, numOperators)
                 if (equipment == scanner) {
                     study.setPrimaryOperators(operators) // we want this always for reports
                 }
@@ -60,7 +58,7 @@ class GeneralStudyModule implements StudyLevelModule {
             study.setOperatorMap(operatorMap)
             if (RandomGenUtils.weightedCoinFlip(95)) {
                 final int numPerforming = RandomGenUtils.weightedCoinFlip(90) ? 1 : 2
-                study.setPerformingPhysiciansName(NameCache.selectPhysicians(scanner.institution, numPerforming).collect { physician ->
+                study.setPerformingPhysiciansName(GenerationCache.selectPhysicians(scanner.institution, numPerforming).collect { physician ->
                     physician.serializeToDicom(scanner.supportsNonLatinCharacterSets()) // belongs to C.7.3.1 General Series Module
                 })
             }

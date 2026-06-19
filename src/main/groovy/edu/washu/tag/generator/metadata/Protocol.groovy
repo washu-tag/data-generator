@@ -10,8 +10,6 @@ import edu.washu.tag.generator.metadata.module.study.GeneralStudyModule
 import edu.washu.tag.generator.metadata.module.study.PatientStudyModule
 import edu.washu.tag.generator.metadata.protocols.*
 import edu.washu.tag.generator.util.RandomGenUtils
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.util.concurrent.ThreadLocalRandom
 
@@ -53,20 +51,6 @@ abstract class Protocol implements Randomizeable {
     private static final GeneralStudyModule generalStudyModule = new GeneralStudyModule()
     private static final PatientStudyModule patientStudyModule = new PatientStudyModule()
 
-    Protocol() {
-        seriesTypes = getAllSeriesTypes()
-        seriesTypes.each { seriesType ->
-            seriesType.compatibleEquipment.each { scanner ->
-                if (!scanners.any {
-                    it.class == scanner
-                }) {
-                    scanners << scanner.newInstance()
-                }
-            }
-        }
-        bodyParts = getApplicableBodyParts()
-    }
-
     abstract List<SeriesType> getAllSeriesTypes()
 
     abstract List<BodyPart> getApplicableBodyParts()
@@ -99,6 +83,27 @@ abstract class Protocol implements Randomizeable {
 
     List<StudyLevelModule> additionalStudyModules() {
         []
+    }
+
+    void postprocess(SpecificationParameters specificationParameters) {
+        seriesTypes = getAllSeriesTypes()
+        seriesTypes.each { seriesType ->
+            seriesType.compatibleEquipment.each { scannerClass ->
+                if (!scanners.any {
+                    it.class == scannerClass
+                }) {
+                    final Equipment scanner = scannerClass.getDeclaredConstructor().newInstance()
+                    final Institution institutionMatch = specificationParameters.institutionOverrides.find { override ->
+                        override.class == scanner.defaultInstitution.class
+                    }
+                    if (institutionMatch != null) {
+                        scanner.setInstitutionOverride(institutionMatch)
+                    }
+                    scanners << scanner
+                }
+            }
+        }
+        bodyParts = getApplicableBodyParts()
     }
 
     final Study setFieldsFor(SpecificationParameters specificationParameters, Patient patient, Study study) {

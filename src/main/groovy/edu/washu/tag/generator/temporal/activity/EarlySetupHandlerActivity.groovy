@@ -11,6 +11,6 @@ interface EarlySetupHandlerActivity {
     List<BatchChunk> chunkBatches(String specificationParamsPath, int concurrentExecution, String outputDir, int patientsPerFullBatch)
 
     @ActivityMethod
-    File initNameCache()
+    File initGenerationCache(String specificationParamsPath, String outputPath)
 
 }

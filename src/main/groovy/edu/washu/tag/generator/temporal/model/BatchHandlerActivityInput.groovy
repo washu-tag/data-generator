@@ -8,7 +8,7 @@ import groovy.transform.TupleConstructor
 class BatchHandlerActivityInput {
 
     GenerateDatasetInput datasetInput
-    File nameCachePath
+    File generationCachePath
     IdOffsets idOffsets
     int concurrentExecution
     BatchRequest batchRequest

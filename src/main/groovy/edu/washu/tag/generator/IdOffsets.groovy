@@ -1,10 +1,10 @@
 package edu.washu.tag.generator
 
-import edu.washu.tag.generator.metadata.patient.EpicId
-import edu.washu.tag.generator.metadata.patient.LegacyId
-import edu.washu.tag.generator.metadata.patient.MainId
-import edu.washu.tag.generator.metadata.patient.PatientIdEncoder
-import edu.washu.tag.generator.metadata.patient.SimplePatientIdEncoder
+import edu.washu.tag.generator.metadata.patient.EpicMrnGenerator
+import edu.washu.tag.generator.metadata.patient.LegacyIdGenerator
+import edu.washu.tag.generator.metadata.patient.MpiGenerator
+import edu.washu.tag.generator.metadata.patient.PatientIdGenerator
+import edu.washu.tag.generator.metadata.patient.SharedMrGenerator
 import edu.washu.tag.generator.util.RandomGenUtils
 import edu.washu.tag.generator.util.SequentialIdGenerator
 
@@ -17,17 +17,18 @@ import java.util.concurrent.ThreadLocalRandom
  */
 class IdOffsets {
 
-    int mainIdOffset = RandomGenUtils.randomId(RandomGenUtils.DEFAULT_NUM_DIGITS)
     int epicIdOffset = RandomGenUtils.randomId(RandomGenUtils.DEFAULT_NUM_DIGITS)
     int studyIdOffset = 200000000 + ThreadLocalRandom.current().nextInt(700000000)
+    int historicalMrnOffset = RandomGenUtils.randomId(RandomGenUtils.DEFAULT_NUM_DIGITS)
     int legacyIdOffset = RandomGenUtils.randomId(RandomGenUtils.DEFAULT_NUM_DIGITS)
-    int legacyStandaloneIdOffset = RandomGenUtils.randomId(RandomGenUtils.DEFAULT_NUM_DIGITS)
+    int mpiOffset = RandomGenUtils.randomId(RandomGenUtils.DEFAULT_NUM_DIGITS)
 
-    List<PatientIdEncoder> getPatientIdEncodersFromOffset(int offset) {
+    List<PatientIdGenerator> getPatientIdGeneratorsFromOffset(int offset) {
         [
-            new SimplePatientIdEncoder(MainId, mainIdOffset + offset),
-            new SimplePatientIdEncoder(EpicId, epicIdOffset + offset),
-            new SimplePatientIdEncoder(LegacyId, legacyIdOffset + offset)
+            new LegacyIdGenerator(legacyIdOffset + offset),
+            new MpiGenerator(mpiOffset + offset),
+            new SharedMrGenerator(historicalMrnOffset + offset),
+            new EpicMrnGenerator(epicIdOffset + offset)
         ]
     }
 

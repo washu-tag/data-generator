@@ -6,7 +6,6 @@ import edu.washu.tag.generator.hl7.v2.segment.ObrGenerator
 import edu.washu.tag.generator.metadata.ProcedureCode
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.query.FirstMatchingReportsRadReportResult
-import edu.washu.tag.validation.column.ArrayType
 import edu.washu.tag.validation.column.ColumnType
 import edu.washu.tag.validation.column.InstantType
 import edu.washu.tag.validation.column.IntegerType
@@ -47,7 +46,7 @@ class ExtendedMetadata extends TestQuery<BatchSpecification> {
                     .toFormatter()
                 [
                     'version_id': radiologyReport.hl7Version.hl7Version,
-                    'mpi': radiologyReport.hl7Version == V2_3 ? radiologyReport.patient.legacyPatientId : null,
+                    'mpi': radiologyReport.hl7Version == V2_3 ? radiologyReport.patient.mpi : null,
                     'sending_facility': 'ABCHOSP',
                     'service_identifier': procedureCode.codedTriplet.codeValue,
                     (COLUMN_SEX): radiologyReport.patient.sex.dicomRepresentation,
