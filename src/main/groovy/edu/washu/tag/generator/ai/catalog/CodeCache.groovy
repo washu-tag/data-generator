@@ -93,7 +93,7 @@ class CodeCache {
             client = HttpClient.newHttpClient()
             final String numWorkers = System.getenv('NUM_WORKERS')
             rateLimiter = RateLimiter.create(
-                numWorkers == null ? MAX_REQUESTS_PER_SECOND : MAX_REQUESTS_PER_SECOND / Integer.parseInt(numWorkers)
+                numWorkers == null ? MAX_REQUESTS_PER_SECOND : (MAX_REQUESTS_PER_SECOND / Integer.parseInt(numWorkers) as double)
             )
         }
 
