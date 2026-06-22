@@ -21,7 +21,7 @@ class BatchHandlerActivityImpl implements BatchHandlerActivity {
     @Override
     void formAndWriteBatch(BatchHandlerActivityInput batchHandlerActivityInput) {
         BatchProcessor.initDirs(batchHandlerActivityInput.datasetInput.outputFullPath())
-        CodeCache.initializeCache(batchHandlerActivityInput.concurrentExecution)
+        CodeCache.initializeCache()
         logger.info("Generating batch ${batchHandlerActivityInput.batchRequest.id}...")
         final PopulationGenerator populationGenerator = new PopulationGenerator()
         populationGenerator.readSpecificationParameters(batchHandlerActivityInput.datasetInput.specificationParametersPath)

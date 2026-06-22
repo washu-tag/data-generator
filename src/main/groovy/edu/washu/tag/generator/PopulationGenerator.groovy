@@ -38,7 +38,7 @@ class PopulationGenerator {
 
         final GenerationCache generationCache = GenerationCache.initInstance(generator.specificationParameters)
         final IdOffsets idOffsets = new IdOffsets()
-        CodeCache.initializeCache(1)
+        CodeCache.initializeCache()
 
         final List<BatchRequest> batchRequests = generator.resolveBatches()
         final String batchFulfillment = batchRequests.size() > 1 ? "split into ${batchRequests.size()} batches" : 'fulfilled in a single batch'

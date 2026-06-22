@@ -153,7 +153,6 @@ Currently, the properties of that object are:
 - `specificationParametersPath`: (_Required_) the full path to the [config](#config) YAML which you wish to use to generate a dataset.
 - `writeDicom`: (Optional) a boolean for controlling if DICOM files should be written for the dataset. Defaults to `true`.
 - `writeHl7`: (Optional) a boolean for controlling if HL7 files (and aggregated "hl7ish" log files) should be written for the dataset corresponding to radiology reports. Defaults to `true`.
-- `concurrentExecution`: (Optional) an integer for defining how many subactivities to run in parallel for a large generation job. Defaults to `4`.
 - `outputDir`: (Optional) an optional relative path for the output data within the `/output` mount. Defaults to a timestamp.
 
 ---

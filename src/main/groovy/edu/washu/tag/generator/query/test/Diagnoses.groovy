@@ -15,7 +15,7 @@ class Diagnoses extends TestQuery<BatchSpecification> {
 
     Diagnoses() {
         super('diagnoses', null)
-        CodeCache.initializeCache(1)
+        CodeCache.initializeCache()
         withDataProcessor(
             new FirstMatchingReportsRadReportResult(
                 1,

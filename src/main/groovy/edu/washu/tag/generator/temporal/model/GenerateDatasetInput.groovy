@@ -9,7 +9,6 @@ class GenerateDatasetInput {
     String specificationParametersPath
     Boolean writeDicom = true
     Boolean writeHl7 = true
-    int concurrentExecution = 4
     String outputDir
     int patientsPerFullBatch = BatchSpecification.MAX_PATIENTS
 

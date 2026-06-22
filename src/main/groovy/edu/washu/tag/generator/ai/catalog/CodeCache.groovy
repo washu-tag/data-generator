@@ -21,9 +21,9 @@ class CodeCache {
     public static final Map<DiagnosisCodeDesignator, Map<String, String>> codes = [:]
     public static final Map<DiagnosisCodeDesignator, List<String>> knownBadCodes = [:]
 
-    static void initializeCache(int concurrentExecution) {
+    static void initializeCache() {
         if (httpClient == null) {
-            httpClient = new RateLimitedHttpClient(concurrentExecution)
+            httpClient = new RateLimitedHttpClient()
             ['C3', 'C5', 'C7', 'G9', 'I2', 'I5', 'I6', 'I7', 'J', 'K5', 'K7', 'K8', 'M4', 'M5', 'N6', 'N8', 'R9'].each { code ->
                 cacheCodesFromSearch(DiagnosisCodeDesignator.ICD_10, code)
             }
@@ -89,9 +89,12 @@ class CodeCache {
         private final RateLimiter rateLimiter
         private static final double MAX_REQUESTS_PER_SECOND = 25.0
 
-        RateLimitedHttpClient(int concurrentExecution) {
+        RateLimitedHttpClient() {
             client = HttpClient.newHttpClient()
-            rateLimiter = RateLimiter.create(MAX_REQUESTS_PER_SECOND / concurrentExecution)
+            final String numWorkers = System.getenv('NUM_WORKERS')
+            rateLimiter = RateLimiter.create(
+                numWorkers == null ? MAX_REQUESTS_PER_SECOND : MAX_REQUESTS_PER_SECOND / Integer.parseInt(numWorkers)
+            )
         }
 
         HttpResponse<String> issueQuery(Supplier<HttpRequest> requestSupplier) {

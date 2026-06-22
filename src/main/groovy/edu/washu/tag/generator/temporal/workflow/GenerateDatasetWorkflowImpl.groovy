@@ -80,7 +80,7 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
         Promise.allOf(batches.collect { batchRequest ->
             Async.function(
                 batchHandlerActivity::formAndWriteBatch,
-                new BatchHandlerActivityInput(input, nameCache, idOffsets, input.concurrentExecution, batchRequest))
+                new BatchHandlerActivityInput(input, nameCache, idOffsets, batchRequest))
         }).get()
 
         logger.info("${workflowLoggingInfo} all batches have been written")
