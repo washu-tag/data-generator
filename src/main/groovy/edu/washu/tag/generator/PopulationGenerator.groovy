@@ -40,7 +40,7 @@ class PopulationGenerator {
         final IdOffsets idOffsets = new IdOffsets()
         CodeCache.initializeCache(1)
 
-        final List<BatchRequest> batchRequests = generator.chunkRequest()[0].resolveToBatches()
+        final List<BatchRequest> batchRequests = generator.resolveBatches()
         final String batchFulfillment = batchRequests.size() > 1 ? "split into ${batchRequests.size()} batches" : 'fulfilled in a single batch'
         println("STAGE 1: request will be ${batchFulfillment}")
 
@@ -62,39 +62,36 @@ class PopulationGenerator {
         }
     }
 
-    List<BatchChunk> chunkRequest(int patientsPerFullBatch = BatchSpecification.MAX_PATIENTS, int chunks = 1) {
+    /**
+     * Resolves the entire requested population into a flat list of standalone batches. Each {@link BatchRequest}
+     * carries its own patient/study offsets, so it can be fulfilled independently by any worker with no
+     * coordination between batches.
+     */
+    List<BatchRequest> resolveBatches(int patientsPerFullBatch = BatchSpecification.MAX_PATIENTS) {
         new File('batches').mkdir() // while we're still in a single process
 
-        final int totalNumPatients = specificationParameters.numPatients
-        final int totalNumStudies = specificationParameters.numStudies
-        final int totalNumSeries = specificationParameters.numSeries
+        final int numPatients = specificationParameters.numPatients
+        final int numStudies = specificationParameters.numStudies
+        final int numSeries = specificationParameters.numSeries
 
-        int minPatientsInChunk = totalNumPatients / chunks
-        int patientRemainder = totalNumPatients % chunks
-        int minStudiesInChunk = totalNumStudies / chunks
-        int studyRemainder = totalNumStudies % chunks
-        int minSeriesInChunk = totalNumSeries / chunks
-        int seriesRemainder = totalNumSeries % chunks
+        final int totalNumBatches = Math.ceilDiv(numPatients, patientsPerFullBatch)
 
-        int batchOffset = 0
-        int patientOffset = 0
-        int studyOffset = 0
+        final int patientsInSmallerBatches = numPatients / totalNumBatches
+        final int patientRemainder = numPatients % totalNumBatches
+        final int studiesInSmallerBatch = numStudies / totalNumBatches
+        final int studyRemainder = numStudies % totalNumBatches
+        final int seriesInSmallerBatch = numSeries / totalNumBatches
+        final int seriesRemainder = numSeries % totalNumBatches
 
-        (0 ..< chunks).collect { chunkIndex ->
-            final BatchChunk batchChunk = new BatchChunk(
-                numPatients: minPatientsInChunk + (chunkIndex < patientRemainder ? 1 : 0),
-                numStudies: minStudiesInChunk + (chunkIndex < studyRemainder ? 1 : 0),
-                numSeries: minSeriesInChunk + (chunkIndex < seriesRemainder ? 1 : 0),
-                patientOffset: patientOffset,
-                studyOffset: studyOffset,
-                batchIdOffset: batchOffset,
-                patientsPerFullBatch: patientsPerFullBatch
+        (0 ..< totalNumBatches).collect { batchId ->
+            new BatchRequest(
+                id: batchId,
+                numPatients: patientsInSmallerBatches + (batchId < patientRemainder ? 1 : 0),
+                numStudies: studiesInSmallerBatch + (batchId < studyRemainder ? 1 : 0),
+                numSeries: seriesInSmallerBatch + (batchId < seriesRemainder ? 1 : 0),
+                patientOffset: patientsInSmallerBatches * batchId + Math.min(batchId, patientRemainder),
+                studyOffset: studiesInSmallerBatch * batchId + Math.min(batchId, studyRemainder)
             )
-            batchOffset += batchChunk.calculateNumBatches()
-            patientOffset += batchChunk.numPatients
-            studyOffset += batchChunk.numStudies
-
-            batchChunk
         }
     }
 

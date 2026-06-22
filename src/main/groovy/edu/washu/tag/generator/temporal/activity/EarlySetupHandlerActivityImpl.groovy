@@ -1,7 +1,7 @@
 package edu.washu.tag.generator.temporal.activity
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import edu.washu.tag.generator.BatchChunk
+import edu.washu.tag.generator.BatchRequest
 import edu.washu.tag.generator.BatchProcessor
 import edu.washu.tag.generator.PopulationGenerator
 import edu.washu.tag.generator.metadata.GenerationCache
@@ -20,13 +20,13 @@ class EarlySetupHandlerActivityImpl implements EarlySetupHandlerActivity {
     private static final Logger logger = Workflow.getLogger(EarlySetupHandlerActivityImpl)
 
     @Override
-    List<BatchChunk> chunkBatches(String specificationParamsPath, int concurrentExecution, String outputDir, int patientsPerFullBatch) {
+    List<BatchRequest> resolveBatches(String specificationParamsPath, String outputDir, int patientsPerFullBatch) {
         BatchProcessor.initDirs(outputDir)
         final PopulationGenerator generator = new PopulationGenerator()
         generator.readSpecificationParameters(specificationParamsPath)
 
-        final List<BatchChunk> batchRequests = generator.chunkRequest(patientsPerFullBatch, concurrentExecution)
-        logger.info("Request has been split into ${batchRequests.size()} chunks with a total of ${batchRequests*.calculateNumBatches().sum()} batches")
+        final List<BatchRequest> batchRequests = generator.resolveBatches(patientsPerFullBatch)
+        logger.info("Request has been resolved into ${batchRequests.size()} standalone batches")
 
         batchRequests
     }

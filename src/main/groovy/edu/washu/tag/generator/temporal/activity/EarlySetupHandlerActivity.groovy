@@ -1,6 +1,6 @@
 package edu.washu.tag.generator.temporal.activity
 
-import edu.washu.tag.generator.BatchChunk
+import edu.washu.tag.generator.BatchRequest
 import io.temporal.activity.ActivityInterface
 import io.temporal.activity.ActivityMethod
 
@@ -8,7 +8,7 @@ import io.temporal.activity.ActivityMethod
 interface EarlySetupHandlerActivity {
 
     @ActivityMethod
-    List<BatchChunk> chunkBatches(String specificationParamsPath, int concurrentExecution, String outputDir, int patientsPerFullBatch)
+    List<BatchRequest> resolveBatches(String specificationParamsPath, String outputDir, int patientsPerFullBatch)
 
     @ActivityMethod
     File initGenerationCache(String specificationParamsPath, String outputPath)

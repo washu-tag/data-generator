@@ -1,10 +1,11 @@
 package edu.washu.tag.generator.temporal.workflow
 
-import edu.washu.tag.generator.BatchChunk
 import edu.washu.tag.generator.BatchProcessor
+import edu.washu.tag.generator.BatchRequest
 import edu.washu.tag.generator.IdOffsets
+import edu.washu.tag.generator.temporal.activity.BatchHandlerActivity
 import edu.washu.tag.generator.temporal.activity.EarlySetupHandlerActivity
-import edu.washu.tag.generator.temporal.model.GenerateBatchesInput
+import edu.washu.tag.generator.temporal.model.BatchHandlerActivityInput
 import edu.washu.tag.generator.temporal.model.GenerateDatasetInput
 import edu.washu.tag.generator.temporal.TemporalApplication
 import io.temporal.activity.ActivityOptions
@@ -37,6 +38,19 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
                 ).build()
         )
 
+    private final BatchHandlerActivity batchHandlerActivity =
+        Workflow.newActivityStub(
+            BatchHandlerActivity,
+            ActivityOptions.newBuilder()
+                .setStartToCloseTimeout(Duration.ofHours(24))
+                .setHeartbeatTimeout(Duration.ofMinutes(15))
+                .setRetryOptions(RetryOptions.newBuilder()
+                    .setMaximumInterval(Duration.ofSeconds(1))
+                    .setMaximumAttempts(3)
+                    .build())
+                .build()
+        )
+
     @Override
     void generateDataset(GenerateDatasetInput input) {
         final WorkflowInfo workflowInfo = Workflow.getInfo()
@@ -50,25 +64,23 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
         final File nameCache = earlySetupActivity.initGenerationCache(input.specificationParametersPath, input.outputFullPath())
         final IdOffsets idOffsets = new IdOffsets()
 
-        final List<BatchChunk> batchChunks = earlySetupActivity.chunkBatches(
+        final List<BatchRequest> batches = earlySetupActivity.resolveBatches(
             input.specificationParametersPath,
-            input.concurrentExecution,
             input.outputFullPath(),
             input.patientsPerFullBatch
         )
+        logger.info("${workflowLoggingInfo} fanning out ${batches.size()} standalone batches")
 
-        // Launch child workflow where each fulfills several batches in sequence
-        Promise.allOf(batchChunks.collect { batchChunk ->
+        // Each batch is an independent activity. Effective concurrency is (number of workers ×
+        // maxConcurrentActivityExecutionSize), not anything encoded here - excess batches simply queue on the task
+        // queue until a worker slot frees. NOTE: every batch is scheduled up front, so each adds events to this
+        // workflow's history. Temporal warns near 10k events and hard-caps ~50k, leaving comfortable headroom to
+        // ~1-2k batches per run; beyond that, window the fan-out with continueAsNew (the window would be a history
+        // checkpoint only, not a concurrency knob).
+        Promise.allOf(batches.collect { batchRequest ->
             Async.function(
-                Workflow.newChildWorkflowStub(
-                    GenerateBatchWorkflow,
-                    ChildWorkflowOptions.newBuilder()
-                        .setTaskQueue(TemporalApplication.TASK_QUEUE)
-                        .setWorkflowId("${workflowInfo.workflowId}/${batchChunk.workflowSubid()}")
-                        .setWorkflowTaskTimeout(Duration.ofSeconds(30))
-                        .build()
-                )::generateBatches,
-                new GenerateBatchesInput(input, nameCache, idOffsets, batchChunk, input.outputFullPath(), input.concurrentExecution))
+                batchHandlerActivity::formAndWriteBatch,
+                new BatchHandlerActivityInput(input, nameCache, idOffsets, input.concurrentExecution, batchRequest))
         }).get()
 
         logger.info("${workflowLoggingInfo} all batches have been written")
