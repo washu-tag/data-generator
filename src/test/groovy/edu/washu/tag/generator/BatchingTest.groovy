@@ -1,5 +1,7 @@
 package edu.washu.tag.generator
 
+import edu.washu.tag.generator.metadata.cohorting.SpecializedCohort
+import edu.washu.tag.generator.metadata.cohorting.StudyRequest
 import org.testng.annotations.Test
 
 import static org.testng.Assert.assertEquals
@@ -8,8 +10,8 @@ class BatchingTest {
 
     @Test
     void testBatchingHappyPath() {
-        final List<BatchRequest> batchRequests = new PopulationGenerator(
-            specificationParameters: new SpecificationParameters(
+        final List<BatchRequest> batchRequests = new Batcher(
+            new SpecificationParameters(
                 numPatients: 4000,
                 numStudies: 10000,
                 numSeries: 30000
@@ -29,8 +31,8 @@ class BatchingTest {
 
     @Test
     void testBatchingMessy() {
-        final List<BatchRequest> batchRequests = new PopulationGenerator(
-            specificationParameters: new SpecificationParameters(
+        final List<BatchRequest> batchRequests = new Batcher(
+            new SpecificationParameters(
                 numPatients: 4100,
                 numStudies: 10000,
                 numSeries: 30001
@@ -57,6 +59,74 @@ class BatchingTest {
         assertEquals(batch2.numSeries, 10000)
         assertEquals(batch2.patientOffset, 2734)
         assertEquals(batch2.studyOffset, 6667)
+    }
+
+    @Test
+    void testBatchingWithCohorts() {
+        final List<BatchRequest> batchRequests = new Batcher(
+            new SpecificationParameters(
+                numPatients: 1000,
+                numStudies: 10000,
+                numSeries: 30000,
+                cohorts: [
+                    new SpecializedCohort(
+                        name: 'cohort1',
+                        numPatients: 4000,
+                        trajectory: [
+                            new StudyRequest(
+                                name: 'MR'
+                            ),
+                            new StudyRequest(
+                                name: 'CT'
+                            )
+                        ]
+                    ),
+                    new SpecializedCohort(
+                        name: 'cohort2',
+                        numPatients: 2000,
+                        trajectory: [
+                            new StudyRequest(
+                                name: 'MR'
+                            ),
+                            new StudyRequest(
+                                name: 'CT'
+                            ),
+                            new StudyRequest(
+                                name: 'CT2'
+                            )
+                        ]
+                    )
+                ]
+            )
+        ).resolveBatches()
+        assertEquals(batchRequests.size(), 4)
+        final BatchRequest batch0 = batchRequests[0]
+        assertEquals(batch0.numPatients, 1000)
+        assertEquals(batch0.numStudies, 10000)
+        assertEquals(batch0.numSeries, 30000)
+        assertEquals(batch0.patientOffset, 0)
+        assertEquals(batch0.studyOffset, 0)
+
+        final BatchRequest batch1 = batchRequests[1]
+        assertEquals(batch1.numPatients, 2000)
+        assertEquals(batch1.numStudies, 4000)
+        assertEquals(batch1.patientOffset, 1000)
+        assertEquals(batch1.studyOffset, 10000)
+        assertEquals(batch1.cohort.name, 'cohort1')
+
+        final BatchRequest batch2 = batchRequests[2]
+        assertEquals(batch2.numPatients, 2000)
+        assertEquals(batch2.numStudies, 4000)
+        assertEquals(batch2.patientOffset, 3000)
+        assertEquals(batch2.studyOffset, 14000)
+        assertEquals(batch2.cohort.name, 'cohort1')
+
+        final BatchRequest batch3 = batchRequests[3]
+        assertEquals(batch3.numPatients, 2000)
+        assertEquals(batch3.numStudies, 6000)
+        assertEquals(batch3.patientOffset, 5000)
+        assertEquals(batch3.studyOffset, 18000)
+        assertEquals(batch3.cohort.name, 'cohort2')
     }
 
 }

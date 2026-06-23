@@ -3,6 +3,7 @@ package edu.washu.tag.generator.temporal.activity
 import com.fasterxml.jackson.databind.ObjectMapper
 import edu.washu.tag.generator.BatchRequest
 import edu.washu.tag.generator.BatchProcessor
+import edu.washu.tag.generator.Batcher
 import edu.washu.tag.generator.PopulationGenerator
 import edu.washu.tag.generator.metadata.GenerationCache
 import edu.washu.tag.generator.temporal.TemporalApplication
@@ -25,7 +26,7 @@ class EarlySetupHandlerActivityImpl implements EarlySetupHandlerActivity {
         final PopulationGenerator generator = new PopulationGenerator()
         generator.readSpecificationParameters(specificationParamsPath)
 
-        final List<BatchRequest> batchRequests = generator.resolveBatches(patientsPerFullBatch)
+        final List<BatchRequest> batchRequests = new Batcher(generator.specificationParameters, patientsPerFullBatch).resolveBatches()
         logger.info("Request has been resolved into ${batchRequests.size()} standalone batches")
 
         batchRequests

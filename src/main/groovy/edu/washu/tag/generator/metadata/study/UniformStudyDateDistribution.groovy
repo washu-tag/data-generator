@@ -5,10 +5,7 @@ import edu.washu.tag.generator.util.RandomGenUtils
 
 import java.time.LocalDate
 
-class UniformStudyDateDistribution implements StudyDateDistribution {
-
-    LocalDate minDate = Patient.imagingDataEpoch
-    LocalDate maxDate = LocalDate.now().minusMonths(6)
+class UniformStudyDateDistribution extends StudyDateDistribution {
 
     @Override
     LocalDate generateStudyDate(Patient patient) {

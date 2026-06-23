@@ -24,7 +24,7 @@ class OpenAiWrapper {
     private static final String BASE_RAD_CONTEXT = FileIOUtils.readResource('rad_context.txt')
     private static final String BASE_RAD_CONTEXT_SINGULAR = FileIOUtils.readResource('rad_context_singular.txt')
     private static final String BASE_RAD_PROMPT = FileIOUtils.readResource('rad_prompt.txt')
-        .replace(StringReplacements.DIAG_PROMPT, new ClassicReport().diagnosisPrompt())
+        .replace(StringReplacements.PROMPT_ADDITIONS, new ClassicReport().diagnosisPrompt())
     private static final String BASE_RAD_PROMPT_SINGULAR = FileIOUtils.readResource('rad_prompt_singular.txt')
     private static final ObjectMapper objectMapper = new ObjectMapper()
 

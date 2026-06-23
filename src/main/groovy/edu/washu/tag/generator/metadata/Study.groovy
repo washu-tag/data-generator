@@ -57,7 +57,7 @@ class Study implements DicomEncoder, PrivateElementContainer {
     @JsonIgnore List<String> performingPhysiciansName // Series level field, but in most cases it's going to be fixed across a study
     private static final Logger logger = LoggerFactory.getLogger(Study)
 
-    Study randomize(SpecificationParameters specificationParameters, SequentialIdGenerator studyIdGenerator, Protocol protocol) {
+    Study randomize(SpecificationParameters specificationParameters, SequentialIdGenerator studyIdGenerator) {
         studyId = studyIdGenerator.get()
         accessionNumber = studyId
         protocol.setFieldsFor(specificationParameters, patient, this)

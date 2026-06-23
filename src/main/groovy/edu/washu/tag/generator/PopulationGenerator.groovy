@@ -40,7 +40,7 @@ class PopulationGenerator {
         final IdOffsets idOffsets = new IdOffsets()
         CodeCache.initializeCache()
 
-        final List<BatchRequest> batchRequests = generator.resolveBatches()
+        final List<BatchRequest> batchRequests = new Batcher(generator.specificationParameters).resolveBatches()
         final String batchFulfillment = batchRequests.size() > 1 ? "split into ${batchRequests.size()} batches" : 'fulfilled in a single batch'
         println("STAGE 1: request will be ${batchFulfillment}")
 
@@ -59,39 +59,6 @@ class PopulationGenerator {
                 batches: batchSpecifications,
                 generateTests: generator.generateTestQueries
             ).writeAndCombineBatches(generationCache)
-        }
-    }
-
-    /**
-     * Resolves the entire requested population into a flat list of standalone batches. Each {@link BatchRequest}
-     * carries its own patient/study offsets, so it can be fulfilled independently by any worker with no
-     * coordination between batches.
-     */
-    List<BatchRequest> resolveBatches(int patientsPerFullBatch = BatchSpecification.MAX_PATIENTS) {
-        new File('batches').mkdir() // while we're still in a single process
-
-        final int numPatients = specificationParameters.numPatients
-        final int numStudies = specificationParameters.numStudies
-        final int numSeries = specificationParameters.numSeries
-
-        final int totalNumBatches = Math.ceilDiv(numPatients, patientsPerFullBatch)
-
-        final int patientsInSmallerBatches = numPatients / totalNumBatches
-        final int patientRemainder = numPatients % totalNumBatches
-        final int studiesInSmallerBatch = numStudies / totalNumBatches
-        final int studyRemainder = numStudies % totalNumBatches
-        final int seriesInSmallerBatch = numSeries / totalNumBatches
-        final int seriesRemainder = numSeries % totalNumBatches
-
-        (0 ..< totalNumBatches).collect { batchId ->
-            new BatchRequest(
-                id: batchId,
-                numPatients: patientsInSmallerBatches + (batchId < patientRemainder ? 1 : 0),
-                numStudies: studiesInSmallerBatch + (batchId < studyRemainder ? 1 : 0),
-                numSeries: seriesInSmallerBatch + (batchId < seriesRemainder ? 1 : 0),
-                patientOffset: patientsInSmallerBatches * batchId + Math.min(batchId, patientRemainder),
-                studyOffset: studiesInSmallerBatch * batchId + Math.min(batchId, studyRemainder)
-            )
         }
     }
 
@@ -146,61 +113,16 @@ class PopulationGenerator {
     }
 
     private void generateBatchWithHandler(GenerationCache generationCache, IdOffsets idOffsets, BatchRequest batchRequest, Consumer<Patient> handler, boolean generateReports, boolean temporalHeartbeat = false) {
-        specificationParameters.postprocess()
-        generationCache.cache()
-
-        final GenerationContext generationContext = new GenerationContext(
-            specificationParameters: specificationParameters,
-            patientIdGenerators: idOffsets.getPatientIdGeneratorsFromOffset(batchRequest.patientOffset),
-            studyCountOverride: 0
+        batchRequest.generateBatchWithHandler(
+            new BatchRequestContext()
+                .specificationParameters(specificationParameters)
+                .generationCache(generationCache)
+                .idOffsets(idOffsets)
+                .patientRandomizers(patientRandomizers)
+                .handler(handler)
+                .generateReports(generateReports)
+                .temporalHeartbeat(temporalHeartbeat)
         )
-        int generatedStudies = 0
-        int generatedSeries = 0
-        final SequentialIdGenerator studyIdGenerator = idOffsets.getStudyIdEncoderFromOffset(batchRequest.studyOffset)
-        final List<Patient> patients = []
-
-        batchRequest.numPatients.times { generatedPatients ->
-            final Closure<Integer> remainingStudies = { batchRequest.numStudies - generatedStudies }
-
-            generationContext.setCurrentAverageStudiesPerPatient(generatedPatients == 0 ? 0.0 : generatedStudies / generatedPatients)
-            generationContext.setPreviouslyGeneratedSeries(generatedSeries)
-            generationContext.setPreviouslyGeneratedStudies(generatedStudies)
-            if (generatedPatients > batchRequest.numPatients - 4) {
-                generationContext.setStudyCountMaximum(remainingStudies() - (batchRequest.numPatients - generatedPatients - 1))
-            } // 3rd to last must leave 2 reports for final 2 patients, 2nd to last must leave a report for final patient
-            if (generatedPatients == batchRequest.numPatients - 1) { // for last patient in batch, we need to ensure exact number of studies
-                generationContext.setStudyCountOverride(remainingStudies())
-            }
-            final Patient patient = patientRandomizers.sample().createPatient(specificationParameters)
-            patient.randomize(generationContext, studyIdGenerator)
-            patient.studies.each { study ->
-                generatedStudies++
-                generatedSeries += study.series.size()
-                if (!specificationParameters.generateRadiologyReports) {
-                    study.cachePatientIdsForStudy()
-                }
-            }
-            if (temporalHeartbeat) {
-                Activity.executionContext.heartbeat("Batch ${batchRequest.id}, patient ${generatedPatients + 1} post-DICOM")
-            }
-            patients << patient
-        }
-
-        logger.info("DICOM specs for batch ${batchRequest.id} with ${patients.size()} patients and ${patients*.studies*.size().sum()} studies")
-
-        if (specificationParameters.generateRadiologyReports && generateReports) {
-            specificationParameters.reportGeneratorImplementation.generateReportsForPatients(patients, temporalHeartbeat)
-        }
-
-        patients.eachWithIndex { patient, generatedPatients ->
-            handler.accept(patient)
-            if ((generatedPatients + 1) % 100 == 0) {
-                logger.info("Generated DICOM and/or HL7 for patient ${patient.patientInstanceUid} in batch ${batchRequest.id} [${generatedPatients + 1}/${batchRequest.numPatients}]")
-            }
-            if (temporalHeartbeat) {
-                Activity.executionContext.heartbeat("Batch ${batchRequest.id}, patient ${generatedPatients + 1}")
-            }
-        }
     }
 
     private EnumeratedDistribution<PatientRandomizer> initPatientRandomizers() {

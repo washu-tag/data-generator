@@ -14,8 +14,11 @@ import java.time.LocalDate
 @JsonSubTypes([
     @JsonSubTypes.Type(value = UniformStudyDateDistribution, name = 'uniform')
 ])
-interface StudyDateDistribution {
+abstract class StudyDateDistribution {
 
-    LocalDate generateStudyDate(Patient patient)
+    LocalDate minDate = Patient.imagingDataEpoch
+    LocalDate maxDate = LocalDate.now().minusMonths(6)
+
+    abstract LocalDate generateStudyDate(Patient patient)
 
 }

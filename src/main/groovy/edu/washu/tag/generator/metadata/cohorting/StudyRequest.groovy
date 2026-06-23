@@ -9,5 +9,7 @@ class StudyRequest {
     List<String> diagnosisCodes
     String additionalGenerationContext = ''
     CodeStrategy codeStrategy = CodeStrategy.ONLY_ONE
+    int studyOffsetMin
+    int studyOffsetMax
 
 }
