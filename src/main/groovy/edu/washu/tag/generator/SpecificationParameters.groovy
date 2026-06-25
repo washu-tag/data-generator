@@ -48,6 +48,12 @@ class SpecificationParameters {
     List<SpecializedCohort> cohorts = []
 
     void postprocess() {
+        cohorts.each { cohort ->
+            cohort.trajectory.each { studyRequest ->
+                studyRequest.protocol.postprocess(this)
+            }
+        }
+        
         if (numPatients == 0) {
             return
         }
@@ -72,12 +78,6 @@ class SpecificationParameters {
                 }
             } else {
                 println("One of the protocols you requested (class name: ${protocol.class.simpleName}) is not compatible with XNAT. Because you are requiring XNAT compatibility, studies will not be generated under this protocol.")
-            }
-        }
-
-        cohorts.each { cohort ->
-            cohort.trajectory.each { studyRequest ->
-                studyRequest.protocol.postprocess(this)
             }
         }
 
