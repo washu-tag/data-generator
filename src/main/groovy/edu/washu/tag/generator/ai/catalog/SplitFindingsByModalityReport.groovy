@@ -9,6 +9,7 @@ import edu.washu.tag.generator.ai.catalog.attribute.*
 import edu.washu.tag.generator.ai.catalog.builder.HistoricalReportTextBuilder
 import edu.washu.tag.generator.ai.catalog.builder.ModernReportTextBuilder
 import edu.washu.tag.generator.ai.catalog.builder.SectionInternalDelimiter
+import edu.washu.tag.generator.ai.wrapper.ValidationResult
 import edu.washu.tag.generator.hl7.v2.ReportVersion
 import edu.washu.tag.generator.metadata.*
 
@@ -51,7 +52,7 @@ class SplitFindingsByModalityReport extends GeneratedReport<SplitFindingsByModal
     }
 
     @Override
-    Boolean validateReport() {
+    ValidationResult validateReport() {
         final Set<String> inferredModalities = findings.collect {
             it.split(':')[0].toUpperCase()
         }
@@ -60,9 +61,9 @@ class SplitFindingsByModalityReport extends GeneratedReport<SplitFindingsByModal
                 final int colonIndex = finding.indexOf(':')
                 "${finding.substring(0, colonIndex)} FINDINGS: ${finding.substring(colonIndex + 1).trim()}".toString()
             }
-            true
+            ValidationResult.PASSED
         } else {
-            false
+            ValidationResult.failBecause("Inferred modalities ${inferredModalities} did not match expected ${expectedModalities}")
         }
     }
 

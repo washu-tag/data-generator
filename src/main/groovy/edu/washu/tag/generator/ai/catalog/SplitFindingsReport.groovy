@@ -13,6 +13,7 @@ import edu.washu.tag.generator.ai.catalog.attribute.WithTechnique
 import edu.washu.tag.generator.ai.catalog.builder.HistoricalReportTextBuilder
 import edu.washu.tag.generator.ai.catalog.builder.ModernReportTextBuilder
 import edu.washu.tag.generator.ai.catalog.builder.SectionInternalDelimiter
+import edu.washu.tag.generator.ai.wrapper.ValidationResult
 import edu.washu.tag.generator.hl7.v2.ReportVersion
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.Study
@@ -61,11 +62,11 @@ class SplitFindingsReport extends GeneratedReport<SplitFindingsReport> implement
     }
 
     @Override
-    Boolean validateReport() {
+    ValidationResult validateReport() {
         final Set<String> inferredBodyParts = findings.collect {
             it.split(':')[0].toUpperCase()
         }
-        inferredBodyParts == expectedBodyParts
+        inferredBodyParts == expectedBodyParts ? ValidationResult.PASSED : ValidationResult.failBecause("Inferred body parts ${inferredBodyParts} did not match expected ${expectedBodyParts}")
     }
 
     @Override

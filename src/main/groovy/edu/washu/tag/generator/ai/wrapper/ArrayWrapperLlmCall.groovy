@@ -16,7 +16,7 @@ class ArrayWrapperLlmCall<T, A extends ModelArrayWrapper<T>> extends GenericLlmC
         super(client, systemMessage, userMessage, model, responseClass)
     }
 
-    ArrayWrapperLlmCall<T, A> validating(Function<List<T>, Boolean> validator) {
+    ArrayWrapperLlmCall<T, A> validating(Function<List<T>, ValidationResult> validator) {
         withValidation({ validator.apply(it.objects) })
     }
 

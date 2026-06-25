@@ -18,7 +18,7 @@ class GenericLlmCall<T, S extends GenericLlmCall<T, S>> {
     private final OpenAIClient client
     private final StructuredResponseCreateParams<T> prompt
     private final String model
-    private Function<T, Boolean> responseValidator
+    private Function<T, ValidationResult> responseValidator
     private Runnable heartbeat
     private static final int MAX_RETRIES = 10
     private static final Logger logger = LoggerFactory.getLogger(GenericLlmCall)
@@ -42,7 +42,7 @@ class GenericLlmCall<T, S extends GenericLlmCall<T, S>> {
         )
     }
 
-    S withValidation(Function<T, Boolean> validator) {
+    S withValidation(Function<T, ValidationResult> validator) {
         responseValidator = validator
         this as S
     }
@@ -73,10 +73,11 @@ class GenericLlmCall<T, S extends GenericLlmCall<T, S>> {
                 if (responseValidator == null) {
                     return output
                 } else {
-                    if (responseValidator.apply(output)) {
+                    final ValidationResult validationResult = responseValidator.apply(output)
+                    if (validationResult.passed) {
                         return output
                     } else {
-                        logger.warn('LLM response failed custom validation')
+                        logger.warn("LLM response failed custom validation: ${validationResult.failureCause}")
                     }
                 }
             } catch (OpenAIIoException | OpenAIInvalidDataException oaiException) {

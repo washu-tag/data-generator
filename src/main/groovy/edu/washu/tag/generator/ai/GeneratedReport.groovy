@@ -4,6 +4,7 @@ import ca.uhn.hl7v2.model.v281.message.ORU_R01
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
 import edu.washu.tag.generator.ai.catalog.builder.HistoricalReportTextBuilder
 import edu.washu.tag.generator.ai.catalog.builder.ModernReportTextBuilder
+import edu.washu.tag.generator.ai.wrapper.ValidationResult
 import edu.washu.tag.generator.hl7.v2.StudyReportGenerator2_4
 import edu.washu.tag.generator.hl7.v2.ReportVersion
 import edu.washu.tag.generator.hl7.v2.segment.ObxGenerator
@@ -37,8 +38,8 @@ abstract class GeneratedReport<T extends GeneratedReport<T>> {
         ''
     }
 
-    Boolean validateReport() {
-        true
+    ValidationResult validateReport() {
+        ValidationResult.PASSED
     }
 
     Boolean checkApplicability(Study study) {

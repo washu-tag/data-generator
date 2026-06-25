@@ -3,6 +3,7 @@ package edu.washu.tag.generator.ai.catalog.attribute
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
+import edu.washu.tag.generator.ai.wrapper.ValidationResult
 
 trait WithDiagnosisCodes {
 
@@ -47,6 +48,11 @@ trait WithDiagnosisCodes {
         } else {
             false
         }
+    }
+
+    @JsonIgnore
+    ValidationResult validateCodes() {
+        pruneCodes() ? ValidationResult.PASSED : ValidationResult.failBecause("Could not derive valid codes from: ${diagnoses}")
     }
 
     @JsonIgnore

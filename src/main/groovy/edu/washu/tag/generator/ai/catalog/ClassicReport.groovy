@@ -10,6 +10,7 @@ import edu.washu.tag.generator.ai.catalog.attribute.WithFindings
 import edu.washu.tag.generator.ai.catalog.attribute.WithImpression
 import edu.washu.tag.generator.ai.catalog.builder.HistoricalReportTextBuilder
 import edu.washu.tag.generator.ai.catalog.builder.ModernReportTextBuilder
+import edu.washu.tag.generator.ai.wrapper.ValidationResult
 import edu.washu.tag.generator.hl7.v2.ReportVersion
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.Study
@@ -35,8 +36,8 @@ class ClassicReport extends GeneratedReport<ClassicReport> implements
     }
 
     @Override
-    Boolean validateReport() {
-        pruneCodes()
+    ValidationResult validateReport() {
+        validateCodes()
     }
 
     @Override
