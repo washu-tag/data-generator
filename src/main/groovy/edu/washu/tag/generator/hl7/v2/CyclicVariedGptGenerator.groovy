@@ -7,6 +7,8 @@ import edu.washu.tag.generator.ai.StudyRep
 import edu.washu.tag.generator.ai.catalog.ReportRegistry
 import edu.washu.tag.generator.ai.catalog.attribute.DiagnosisCodeDesignator
 import edu.washu.tag.generator.ai.catalog.attribute.WithDiagnosisCodes
+import edu.washu.tag.generator.ai.wrapper.ValidationResult
+import edu.washu.tag.generator.metadata.Diagnosis
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.Study
@@ -81,15 +83,21 @@ class CyclicVariedGptGenerator extends CyclicVariedGenerator {
                     patient,
                     patient.studies.collectEntries { study ->
                         final GeneratedReport placeholderReport = ReportRegistry.randomReportClass(study).getDeclaredConstructor().newInstance()
-                        final String dxString = study.resolveDiagnoses().collect { it.code }.join(',')
+                        final List<Diagnosis> diagnoses = study.resolveDiagnoses()
+                        final String dxString = diagnoses*.code.join(',')
+                        final String codeMeanings = '[' + diagnoses*.codeMeaning.join(', ') + ']'
                         if (placeholderReport instanceof WithDiagnosisCodes) {
                             placeholderReport.metaClass.diagnosisPrompt = {
-                                "The diagnoses should be set to ${dxString} and the meaning of those codes used in the rest of the report. "
+                                "The diagnoses for this report are ${dxString}, which should inform the rest of the report. The meanings for these codes are: ${codeMeanings}."
                             }
                             placeholderReport.designator = DiagnosisCodeDesignator.ICD_10
+                            placeholderReport.metaClass.preserveState = { WithDiagnosisCodes report ->
+                                report.setDesignator(DiagnosisCodeDesignator.ICD_10)
+                                report.setDiagnoses(dxString)
+                            }
                         } else {
                             study.setAdditionalGenerationContext(
-                                "The diagnoses for this report are ${dxString}. The meaning of those codes should be used in the rest of the report. ${study.additionalGenerationContext ?: ''} "
+                                "The diagnoses for this report are ${dxString}, which should inform the rest of the report. The meanings for these codes are: ${codeMeanings}. ${study.additionalGenerationContext ?: ''} "
                             )
                         }
                         [(study): placeholderReport]
