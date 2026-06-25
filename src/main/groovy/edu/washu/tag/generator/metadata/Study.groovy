@@ -1,8 +1,8 @@
 package edu.washu.tag.generator.metadata
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import edu.washu.tag.generator.metadata.patient.EpicMrnGenerator
-import edu.washu.tag.generator.metadata.patient.MpiGenerator
+import edu.washu.tag.generator.ai.GeneratedReport
+import edu.washu.tag.generator.ai.catalog.attribute.WithDiagnosisCodes
 import edu.washu.tag.generator.metadata.patient.PatientId
 import edu.washu.tag.generator.metadata.patient.PatientIdGenerator
 import edu.washu.tag.generator.util.SequentialIdGenerator
@@ -45,6 +45,7 @@ class Study implements DicomEncoder, PrivateElementContainer {
     String procedureCodeId
     GeneralizedProcedure generalizedProcedure
     BodyPart bodyPartExamined // TODO: this is a simplifying assumption. This is really a series-level field
+    List<Diagnosis> diagnoses
     @JsonIgnore Patient patient
     @JsonIgnore String ethnicGroup // Yes, this is a patient field, but we want the value to be inconsistently encoded *across studies*, but consistent within a study
     @JsonIgnore Protocol protocol
@@ -55,6 +56,7 @@ class Study implements DicomEncoder, PrivateElementContainer {
     @JsonIgnore Map<Equipment, List<String>> operatorMap
     @JsonIgnore List<Person> primaryOperators
     @JsonIgnore List<String> performingPhysiciansName // Series level field, but in most cases it's going to be fixed across a study
+    @JsonIgnore String additionalGenerationContext
     private static final Logger logger = LoggerFactory.getLogger(Study)
 
     Study randomize(SpecificationParameters specificationParameters, SequentialIdGenerator studyIdGenerator) {
@@ -131,6 +133,21 @@ class Study implements DicomEncoder, PrivateElementContainer {
             }
         }
         patientIds
+    }
+
+    @JsonIgnore
+    List<Diagnosis> resolveDiagnoses() {
+        final GeneratedReport genReport = radReport?.generatedReport
+        if (diagnoses != null && !diagnoses.isEmpty()) {
+            diagnoses
+        } else if (genReport instanceof WithDiagnosisCodes) {
+            final String designator = genReport.designator
+            genReport.parsedCodes.collect {
+                new Diagnosis(code: it, designator: designator)
+            }
+        } else {
+            []
+        }
     }
 
 }

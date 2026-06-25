@@ -91,6 +91,8 @@ class Patient implements DicomEncoder {
                     patient : this,
                     studyDate: startDate.plusDays(offsetMapForCohort.get(studyRequest))
                 ).randomize(generationContext.specificationParameters, studyIdGenerator)
+                study.setDiagnoses(studyRequest.randomizeCodes(study))
+                study.setAdditionalGenerationContext(studyRequest.additionalGenerationContext)
                 studies << study
                 generationContext.previouslyGeneratedStudies++
                 generationContext.previouslyGeneratedSeries += study.series.size()

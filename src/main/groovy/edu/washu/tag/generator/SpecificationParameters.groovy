@@ -48,6 +48,9 @@ class SpecificationParameters {
     List<SpecializedCohort> cohorts = []
 
     void postprocess() {
+        if (numPatients == 0) {
+            return
+        }
         averageStudiesPerPatient = numStudies / numPatients
         averageSeriesPerStudy = (numSeries as double) / numStudies
 

@@ -39,6 +39,9 @@ class Batcher {
             idOffset += allBatches.size()
 
             specificationParameters.cohorts.each { cohort ->
+                cohort.trajectory.each { studyReq ->
+                    studyReq.protocol.postprocess(specificationParameters)
+                }
                 final int cohortPatients = cohort.numPatients
                 final int cohortStudies = cohortPatients * cohort.trajectory.size()
                 final List<BatchRequest> batchesForCohort = computeBatchesFrom(
@@ -60,6 +63,9 @@ class Batcher {
     }
 
     private List<BatchRequest> computeBatchesFrom(int numPatients, int numStudies, int numSeries, Function<Integer, String> summarizer) {
+        if (numPatients == 0) {
+            return []
+        }
         final int totalNumBatches = Math.ceilDiv(numPatients, patientsPerFullBatch)
 
         final int patientsInSmallerBatches = numPatients / totalNumBatches

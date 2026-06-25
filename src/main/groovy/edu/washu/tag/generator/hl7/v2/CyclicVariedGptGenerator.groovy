@@ -3,7 +3,10 @@ package edu.washu.tag.generator.hl7.v2
 import edu.washu.tag.generator.ai.GeneratedReport
 import edu.washu.tag.generator.ai.OpenAiWrapper
 import edu.washu.tag.generator.ai.PatientOutput
+import edu.washu.tag.generator.ai.StudyRep
 import edu.washu.tag.generator.ai.catalog.ReportRegistry
+import edu.washu.tag.generator.ai.catalog.attribute.DiagnosisCodeDesignator
+import edu.washu.tag.generator.ai.catalog.attribute.WithDiagnosisCodes
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.Study
@@ -32,10 +35,13 @@ class CyclicVariedGptGenerator extends CyclicVariedGenerator {
                 : null
             openAiWrapper = new OpenAiWrapper(endpoint, apiKeyEnvVar, model, queryParams, llmHeartbeat)
         }
-        List<Patient> bulkPatients
+        final boolean isCohort = patients.any { it.parentCohort != null }
+        List<Patient> bulkPatients = []
         List<Patient> customPatients = []
         if (customReportFraction == null) {
             bulkPatients = patients
+        } else if (isCohort) { // for custom cohort, each patient is pre-assigned different diagnosis codes, don't want to overload model context with per-study complex specifications
+            customPatients = patients
         } else {
             (bulkPatients, customPatients) = patients.split {
                 ThreadLocalRandom.current().nextDouble() > customReportFraction
@@ -69,14 +75,38 @@ class CyclicVariedGptGenerator extends CyclicVariedGenerator {
                 }
             }
         }
-        customPatients.eachWithIndex { patient, index ->
-            patientOutputs << openAiWrapper.generateReportsForPatient(
-                patient,
-                patient.studies.collectEntries { study ->
-                    [(study): ReportRegistry.randomReportClass(study)]
-                }
-            )
-            heartbeatAndLog("Generated customized reports for patient [${index + 1}/${customPatients.size()}]")
+        if (isCohort) {
+            customPatients.eachWithIndex { patient, index ->
+                patientOutputs << openAiWrapper.generateReportsForPatientFromPlaceholders(
+                    patient,
+                    patient.studies.collectEntries { study ->
+                        final GeneratedReport placeholderReport = ReportRegistry.randomReportClass(study).getDeclaredConstructor().newInstance()
+                        final String dxString = study.resolveDiagnoses().collect { it.code }.join(',')
+                        if (placeholderReport instanceof WithDiagnosisCodes) {
+                            placeholderReport.metaClass.diagnosisPrompt = {
+                                "The diagnoses should be set to ${dxString} and the meaning of those codes used in the rest of the report. "
+                            }
+                            placeholderReport.designator = DiagnosisCodeDesignator.ICD_10
+                        } else {
+                            study.setAdditionalGenerationContext(
+                                "The diagnoses for this report are ${dxString}. The meaning of those codes should be used in the rest of the report. ${study.additionalGenerationContext ?: ''} "
+                            )
+                        }
+                        [(study): placeholderReport]
+                    }
+                )
+                heartbeatAndLog("Generated customized reports for cohort patient [${index + 1}/${customPatients.size()}]")
+            }
+        } else {
+            customPatients.eachWithIndex { patient, index ->
+                patientOutputs << openAiWrapper.generateReportsForPatient(
+                    patient,
+                    patient.studies.collectEntries { study ->
+                        [(study): ReportRegistry.randomReportClass(study)]
+                    }
+                )
+                heartbeatAndLog("Generated customized reports for patient [${index + 1}/${customPatients.size()}]")
+            }
         }
         patientOutputs
     }

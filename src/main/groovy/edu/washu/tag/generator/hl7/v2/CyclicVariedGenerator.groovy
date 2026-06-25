@@ -9,6 +9,7 @@ import edu.washu.tag.generator.hl7.v2.model.TransportationMode
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.metadata.Study
+import edu.washu.tag.generator.metadata.cohorting.SpecializedCohort
 import io.temporal.workflow.Workflow
 import org.slf4j.Logger
 

@@ -73,6 +73,7 @@ class OpenAiWrapper {
                 " The patient is ${patient.sex.name().toLowerCase()} and was born on ${TimeUtils.UNAMBIGUOUS_DATE.format(patient.dateOfBirth)}." +
                 " The study you are currently evaluating is a ${studyRep.description}. ${comparison}" +
                 promptReport.getUserMessage(study, studyRep) +
+                (study.additionalGenerationContext ?: '') +
                 fullComparisonSerialization
 
             final GeneratedReport generatedReport = new GenericLlmCall<>(
@@ -144,13 +145,15 @@ class OpenAiWrapper {
         final Map<String, String> comparisons = [:]
         final Map<String, List<String>> studiesByStandardizedDescription = [:]
 
+        sortedStudies.each { study ->
+            uidMapping << study.studyInstanceUid
+        }
         if (patient.compareAdjacentStudies) {
             sortedStudies.collate(2, 1, false).each { pair ->
                 comparisons.put(pair[1].studyInstanceUid, pair[0].studyInstanceUid)
             }
         } else {
             sortedStudies.each { study ->
-                uidMapping << study.studyInstanceUid
                 final String description = study.simpleDescription
                 final List<String> previousStudies = studiesByStandardizedDescription.computeIfAbsent(
                     description,
