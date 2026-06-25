@@ -2,6 +2,8 @@ package edu.washu.tag.generator
 
 import edu.washu.tag.generator.metadata.cohorting.SpecializedCohort
 import edu.washu.tag.generator.metadata.cohorting.StudyRequest
+import edu.washu.tag.generator.metadata.protocols.MriSpecializedBrain
+import edu.washu.tag.generator.metadata.protocols.SimpleCt
 import org.testng.annotations.Test
 
 import static org.testng.Assert.assertEquals
@@ -74,10 +76,12 @@ class BatchingTest {
                         numPatients: 4000,
                         trajectory: [
                             new StudyRequest(
-                                name: 'MR'
+                                name: 'MR',
+                                protocol: new MriSpecializedBrain()
                             ),
                             new StudyRequest(
-                                name: 'CT'
+                                name: 'CT',
+                                protocol: new SimpleCt()
                             )
                         ]
                     ),
@@ -86,13 +90,16 @@ class BatchingTest {
                         numPatients: 2000,
                         trajectory: [
                             new StudyRequest(
-                                name: 'MR'
+                                name: 'MR',
+                                protocol: new MriSpecializedBrain()
                             ),
                             new StudyRequest(
-                                name: 'CT'
+                                name: 'CT',
+                                protocol: new SimpleCt()
                             ),
                             new StudyRequest(
-                                name: 'CT2'
+                                name: 'CT2',
+                                protocol: new SimpleCt()
                             )
                         ]
                     )

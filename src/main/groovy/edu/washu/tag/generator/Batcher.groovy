@@ -40,6 +40,9 @@ class Batcher {
 
             specificationParameters.cohorts.each { cohort ->
                 cohort.trajectory.each { studyReq ->
+                    if (studyReq.protocol == null) {
+                        throw new UnsupportedOperationException('Each StudyRequest must specify a protocol.')
+                    }
                     studyReq.protocol.postprocess(specificationParameters)
                 }
                 final int cohortPatients = cohort.numPatients
