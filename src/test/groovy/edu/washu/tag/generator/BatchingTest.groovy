@@ -119,21 +119,21 @@ class BatchingTest {
         assertEquals(batch1.numStudies, 4000)
         assertEquals(batch1.patientOffset, 1000)
         assertEquals(batch1.studyOffset, 10000)
-        assertEquals(batch1.cohort.name, 'cohort1')
+        assertEquals(batch1.cohortName, 'cohort1')
 
         final BatchRequest batch2 = batchRequests[2]
         assertEquals(batch2.numPatients, 2000)
         assertEquals(batch2.numStudies, 4000)
         assertEquals(batch2.patientOffset, 3000)
         assertEquals(batch2.studyOffset, 14000)
-        assertEquals(batch2.cohort.name, 'cohort1')
+        assertEquals(batch2.cohortName, 'cohort1')
 
         final BatchRequest batch3 = batchRequests[3]
         assertEquals(batch3.numPatients, 2000)
         assertEquals(batch3.numStudies, 6000)
         assertEquals(batch3.patientOffset, 5000)
         assertEquals(batch3.studyOffset, 18000)
-        assertEquals(batch3.cohort.name, 'cohort2')
+        assertEquals(batch3.cohortName, 'cohort2')
     }
 
 }

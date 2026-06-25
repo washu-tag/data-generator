@@ -54,7 +54,7 @@ class Batcher {
                     { id -> "cohort ${cohort.name} batch ${id}" }
                 )
                 batchesForCohort.each { batch ->
-                    batch.setCohort(cohort)
+                    batch.setCohortName(cohort.name)
                     allBatches << batch
                 }
                 patientOffset += cohortPatients

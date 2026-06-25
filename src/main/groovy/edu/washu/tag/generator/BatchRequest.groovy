@@ -16,11 +16,12 @@ class BatchRequest {
     int patientOffset
     int studyOffset
     String temporalSummary
-    SpecializedCohort cohort
+    String cohortName
     private static final Logger logger = LoggerFactory.getLogger(BatchRequest)
 
     void generateBatchWithHandler(BatchRequestContext batchRequestContext) {
         final SpecificationParameters specificationParameters = batchRequestContext.specificationParameters
+        final SpecializedCohort cohort = lookupCohort(specificationParameters)
         specificationParameters.postprocess()
         batchRequestContext.generationCache.cache()
 
@@ -97,6 +98,18 @@ class BatchRequest {
             if (batchRequestContext.temporalHeartbeat) {
                 Activity.executionContext.heartbeat("Batch ${id}, patient ${generatedPatients + 1}")
             }
+        }
+    }
+
+    private SpecializedCohort lookupCohort(SpecificationParameters specificationParameters) {
+        if (cohortName == null) {
+            null
+        } else {
+            final SpecializedCohort cohort = specificationParameters.cohorts.find { it.name == cohortName }
+            if (cohort == null) {
+                throw new IllegalStateException("Could not find cohort with name ${cohortName}")
+            }
+            cohort
         }
     }
 
