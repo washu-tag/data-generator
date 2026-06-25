@@ -34,6 +34,7 @@ class EarlySetupHandlerActivityImpl implements EarlySetupHandlerActivity {
 
     @Override
     File initGenerationCache(String specificationParamsPath, String outputPath) {
+        BatchProcessor.initDirs(outputPath)
         final PopulationGenerator generator = new PopulationGenerator()
         generator.readSpecificationParameters(specificationParamsPath)
         final File asFile = Paths.get(outputPath, "generation_cache_${System.currentTimeMillis()}.json").toFile()
