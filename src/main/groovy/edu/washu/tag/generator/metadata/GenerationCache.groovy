@@ -20,8 +20,8 @@ class GenerationCache {
     private static GenerationCache instance
 
     List<Institution> institutions
-    PersonCache<Institution> operators
-    PersonCache<Institution> hospitalPhysicians
+    PersonCache<String> operators
+    PersonCache<String> hospitalPhysicians
     PersonCache<Nationality> generalPhysicians
 
     static GenerationCache initInstance(SpecificationParameters specificationParameters) {
@@ -30,36 +30,36 @@ class GenerationCache {
             operators: new PersonGenerator<>(NUM_OPERATORS, INSTITUTION_NATIONALITY_MAPPER)
                 .dropMiddle()
                 .idGenerator(new SequentialIdGenerator().prefix('T'))
-                .cachePeople(allInstitutions),
+                .cachePeople(allInstitutions, { it.id }),
             hospitalPhysicians: new PersonGenerator<>(NUM_HOSPITAL_PHYSICIANS, INSTITUTION_NATIONALITY_MAPPER)
                 .includeMd()
                 .idGenerator(new SequentialIdGenerator().prefix('D'))
                 .inferAssigningAuthorityFrom({ Institution institution ->
                     institution.assigningAuthority
-                }).cachePeople(allInstitutions),
+                }).cachePeople(allInstitutions, { it.id }),
             generalPhysicians: new PersonGenerator<>(NUM_NATIONAL_PHYSICIANS, Function.identity())
                 .includeMd()
                 .idGenerator(new SequentialIdGenerator().prefix('D'))
-                .cachePeople(Nationality.values() as List<Nationality>),
+                .cachePeople(Nationality.values() as List<Nationality>, Function.identity()),
             institutions: allInstitutions
         )
         instance
     }
 
     static List<Person> selectOperators(Institution institution, int numOperators) {
-        instance.operators.selectPeople(institution, numOperators)
+        instance.operators.selectPeople(institution.id, numOperators)
     }
 
     static Person selectOperator(Institution institution) {
-        instance.operators.selectPerson(institution)
+        instance.operators.selectPerson(institution.id)
     }
 
     static List<Person> selectPhysicians(Institution institution, int numPhysicians) {
-        instance.hospitalPhysicians.selectPeople(institution, numPhysicians)
+        instance.hospitalPhysicians.selectPeople(institution.id, numPhysicians)
     }
 
     static Person selectPhysician(Institution institution) {
-        instance.hospitalPhysicians.selectPerson(institution)
+        instance.hospitalPhysicians.selectPerson(institution.id)
     }
 
     static List<Person> selectPhysicians(Nationality nationality, int numPhysicians) {

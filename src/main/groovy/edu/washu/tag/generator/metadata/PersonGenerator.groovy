@@ -40,12 +40,12 @@ class PersonGenerator<X> {
         this
     }
 
-    PersonCache<X> cachePeople(List<X> personLinks) {
-        new PersonCache<X>(personLinks.collectEntries { personLink ->
+    <K> PersonCache<K> cachePeople(List<X> personLinks, Function<X, K> keyExtractor) {
+        new PersonCache<K>(personLinks.collectEntries { personLink ->
             final Nationality derivedNationality = nationalityFunction.apply(personLink)
             final HierarchicDesignator assigningAuthority = assigningAuthorityDerivation?.apply(personLink)
 
-            [(personLink) : (1 .. numTotalPeople).collect {
+            [(keyExtractor.apply(personLink)) : (1 .. numTotalPeople).collect {
                 final Person person = derivedNationality.generateRandomPerson()
                 if (dropMiddle) {
                     person.middleName(null)
