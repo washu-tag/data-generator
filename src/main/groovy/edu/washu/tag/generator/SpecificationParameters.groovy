@@ -75,6 +75,12 @@ class SpecificationParameters {
             }
         }
 
+        cohorts.each { cohort ->
+            cohort.trajectory.each { studyRequest ->
+                studyRequest.protocol.postprocess(this)
+            }
+        }
+
         if (protocolsAboveNumSeriesExpectedAverage.isEmpty() || protocolsBelowNumSeriesExpectedAverage.isEmpty()) {
             final String userRequestDefinition = "You requested ${numSeries} series with ${numStudies} studies, which averages to ${averageSeriesPerStudy} series per study."
 
