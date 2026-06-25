@@ -3,6 +3,7 @@ package edu.washu.tag.generator.ai.catalog
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.util.concurrent.RateLimiter
 import edu.washu.tag.generator.ai.catalog.attribute.DiagnosisCodeDesignator
+import edu.washu.tag.generator.metadata.Diagnosis
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -18,7 +19,7 @@ class CodeCache {
     private static final int MAX_RETRIES = 5
     private static final ObjectMapper objectMapper = new ObjectMapper()
     private static final Logger logger = LoggerFactory.getLogger(CodeCache)
-    public static final Map<DiagnosisCodeDesignator, Map<String, String>> codes = [:]
+    public static final Map<DiagnosisCodeDesignator, List<Diagnosis>> codes = [:]
     public static final Map<DiagnosisCodeDesignator, List<String>> knownBadCodes = [:]
 
     static void initializeCache() {
@@ -36,17 +37,38 @@ class CodeCache {
         cacheCodesFromSearch(designator, code) == QueryStatus.MATCH
     }
 
+    static Diagnosis lookupDiagnosis(DiagnosisCodeDesignator designator, String code) {
+        codes[designator].find {
+            it.code = code
+        }
+    }
+
     static String lookupCode(DiagnosisCodeDesignator designator, String code) {
-        codes[designator][code]
+        lookupDiagnosis(designator, code).codeMeaning
+    }
+
+    static String lookupCode(Diagnosis code) {
+        code.codeMeaning ?: lookupCode(code.designator, code.code)
+    }
+
+    static List<Diagnosis> resolvePartialCode(DiagnosisCodeDesignator designator, String code) {
+        final QueryStatus queryStatus = cacheCodesFromSearch(designator, code)
+        if (queryStatus == QueryStatus.MATCH) {
+            [lookupDiagnosis(designator, code)]
+        } else {
+            codes[designator].findAll {
+                it.code.startsWith(code)
+            }
+        }
     }
 
     private static QueryStatus cacheCodesFromSearch(DiagnosisCodeDesignator designator, String search) {
-        final Map<String, String> codesForDesignator = codes.get(designator, [:])
+        final List<Diagnosis> codesForDesignator = codes.get(designator, [])
         final List<String> knownBad = knownBadCodes.get(designator, [])
         if (knownBad.contains(search)) {
             return QueryStatus.NO_MATCH
         }
-        if (codesForDesignator.containsKey(search)) {
+        if (codesForDesignator.any { it.code == search }) {
             return QueryStatus.MATCH
         }
         final String url = designator.getUrlForSearch(search)
@@ -61,9 +83,13 @@ class CodeCache {
         } else {
             final List<Object> parsed = objectMapper.readValue(response.body(), List)
             parsed[3].each { List<String> code ->
-                codesForDesignator.put(code[0], code[1])
+                codesForDesignator << new Diagnosis(
+                    designator: designator,
+                    code: code[0],
+                    codeMeaning: code[1]
+                )
             }
-            if (codesForDesignator.containsKey(search)) {
+            if (codesForDesignator.any { it.code == search }) {
                 return QueryStatus.MATCH
             } else {
                 knownBad << search

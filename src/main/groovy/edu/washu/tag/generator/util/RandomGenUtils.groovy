@@ -75,4 +75,15 @@ class RandomGenUtils {
         )
     }
 
+    static<X> List<X> sampleWithoutReplacement(int subsetSize, Map<X, Integer> weights) {
+        final List<X> results = []
+        Map<X, Integer> filteredWeights = new HashMap<>(weights)
+        while (results.size() < subsetSize) {
+            final X result = setupWeightedLottery(filteredWeights).sample()
+            results << result
+            filteredWeights.remove(result)
+        }
+        results
+    }
+
 }

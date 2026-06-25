@@ -24,7 +24,7 @@ class OpenAiWrapper {
     private static final String BASE_RAD_CONTEXT = FileIOUtils.readResource('rad_context.txt')
     private static final String BASE_RAD_CONTEXT_SINGULAR = FileIOUtils.readResource('rad_context_singular.txt')
     private static final String BASE_RAD_PROMPT = FileIOUtils.readResource('rad_prompt.txt')
-        .replace(StringReplacements.DIAG_PROMPT, new ClassicReport().diagnosisPrompt())
+        .replace(StringReplacements.PROMPT_ADDITIONS, new ClassicReport().diagnosisPrompt())
     private static final String BASE_RAD_PROMPT_SINGULAR = FileIOUtils.readResource('rad_prompt_singular.txt')
     private static final ObjectMapper objectMapper = new ObjectMapper()
 
@@ -39,19 +39,18 @@ class OpenAiWrapper {
             .build()
     }
 
-    PatientOutput generateReportsForPatient(Patient patient, Map<Study, Class<? extends GeneratedReport>> reports) {
+    PatientOutput generateReportsForPatientFromPlaceholders(Patient patient, Map<Study, GeneratedReport> reports) {
         final List<String> uidMapping = []
         final PatientRep patientRep = convertToPatientRep(patient, uidMapping)
         final PatientOutput patientOutput = new PatientOutput(patientId: patient.epicMrn)
 
         patientRep.studies.each { studyRep ->
             final String studyInstanceUid = uidMapping[Integer.parseInt(studyRep.uid)]
-            final Map.Entry<Study, Class<? extends GeneratedReport>> entry = reports.find { entry ->
+            final Map.Entry<Study, GeneratedReport> entry = reports.find { entry ->
                 entry.key.studyInstanceUid == studyInstanceUid
             }
             final Study study = entry.key
-            final Class<? extends GeneratedReport> reportClass = entry.value
-            final GeneratedReport promptReport = reportClass.getDeclaredConstructor().newInstance()
+            final GeneratedReport promptReport = entry.value
 
             final String comparison = {
                 if (promptReport instanceof WithComparison && studyRep.compareTo == null) {
@@ -74,6 +73,7 @@ class OpenAiWrapper {
                 " The patient is ${patient.sex.name().toLowerCase()} and was born on ${TimeUtils.UNAMBIGUOUS_DATE.format(patient.dateOfBirth)}." +
                 " The study you are currently evaluating is a ${studyRep.description}. ${comparison}" +
                 promptReport.getUserMessage(study, studyRep) +
+                (study.additionalGenerationContext ?: '') +
                 fullComparisonSerialization
 
             final GeneratedReport generatedReport = new GenericLlmCall<>(
@@ -81,7 +81,7 @@ class OpenAiWrapper {
                 BASE_RAD_CONTEXT_SINGULAR,
                 mainPrompt,
                 model,
-                reportClass
+                promptReport.class as Class<? extends GeneratedReport>
             ).withValidation({ GeneratedReport report ->
                 promptReport.preserveState(report)
                 report.validateReport()
@@ -94,6 +94,15 @@ class OpenAiWrapper {
             generatedReport.setUid(uidMapping.get(Integer.parseInt(generatedReport.getUid())))
         }
         patientOutput
+    }
+
+    PatientOutput generateReportsForPatient(Patient patient, Map<Study, Class<? extends GeneratedReport>> reports) {
+        generateReportsForPatientFromPlaceholders(
+            patient,
+            reports.collectEntries { study, reportClass ->
+                [(study): reportClass.getDeclaredConstructor().newInstance()]
+            }
+        )
     }
 
     List<PatientOutput> generateReportsForPatients(List<Patient> patients) {
@@ -138,15 +147,23 @@ class OpenAiWrapper {
 
         sortedStudies.each { study ->
             uidMapping << study.studyInstanceUid
-            final String description = study.simpleDescription
-            final List<String> previousStudies = studiesByStandardizedDescription.computeIfAbsent(
-                description,
-                { [] }
-            )
-            if (!previousStudies.isEmpty()) {
-                comparisons.put(study.studyInstanceUid, previousStudies.last())
+        }
+        if (patient.compareAdjacentStudies) {
+            sortedStudies.collate(2, 1, false).each { pair ->
+                comparisons.put(pair[1].studyInstanceUid, pair[0].studyInstanceUid)
             }
-            previousStudies << study.studyInstanceUid
+        } else {
+            sortedStudies.each { study ->
+                final String description = study.simpleDescription
+                final List<String> previousStudies = studiesByStandardizedDescription.computeIfAbsent(
+                    description,
+                    { [] }
+                )
+                if (!previousStudies.isEmpty()) {
+                    comparisons.put(study.studyInstanceUid, previousStudies.last())
+                }
+                previousStudies << study.studyInstanceUid
+            }
         }
 
         patientRep.setStudies(sortedStudies.collect { sortedStudy ->

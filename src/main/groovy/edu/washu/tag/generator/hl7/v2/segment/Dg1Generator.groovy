@@ -6,6 +6,7 @@ import ca.uhn.hl7v2.model.v281.message.ORU_R01
 import ca.uhn.hl7v2.model.v281.segment.DG1
 import edu.washu.tag.generator.ai.catalog.CodeCache
 import edu.washu.tag.generator.ai.catalog.attribute.DiagnosisCodeDesignator
+import edu.washu.tag.generator.metadata.Diagnosis
 import edu.washu.tag.generator.metadata.RadiologyReport
 
 class Dg1Generator extends NonstandardSegmentGenerator<DG1> {
@@ -22,13 +23,11 @@ class Dg1Generator extends NonstandardSegmentGenerator<DG1> {
      */
 
     int index
-    String code
-    DiagnosisCodeDesignator designator
+    Diagnosis code
 
-    Dg1Generator(int index, String code, DiagnosisCodeDesignator designator) {
+    Dg1Generator(int index, Diagnosis code) {
         this.index = index
         this.code = code
-        this.designator = designator
     }
 
     @Override
@@ -53,12 +52,13 @@ class Dg1Generator extends NonstandardSegmentGenerator<DG1> {
 
     @Override
     void generateSegment(RadiologyReport radReport, DG1 baseSegment) {
-        final String codeMeaning = CodeCache.lookupCode(designator, code)
+        final String codeMeaning = code.codeMeaning ?: CodeCache.lookupCode(code)
+        final DiagnosisCodeDesignator designator = code.designator
 
         baseSegment.getDg11_SetIDDG1().setValue(String.valueOf(index + 1))
         baseSegment.getDg12_DiagnosisCodingMethod().setValue(designator.hl7Representation)
         final CWE codeCwe = baseSegment.getDg13_DiagnosisCodeDG1()
-        codeCwe.getCwe1_Identifier().setValue(code)
+        codeCwe.getCwe1_Identifier().setValue(code.code)
         codeCwe.getCwe2_Text().setValue(codeMeaning)
         codeCwe.getCwe3_NameOfCodingSystem().setValue(designator.hl7Representation)
         baseSegment.getDg14_DiagnosisDescription().setValue(codeMeaning)

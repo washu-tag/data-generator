@@ -26,6 +26,7 @@ import java.util.concurrent.ThreadLocalRandom
         @JsonSubTypes.Type(value = MammogramSingleView, name = 'mg'),
         @JsonSubTypes.Type(value = MammogramFourView, name = 'mg4view'),
         @JsonSubTypes.Type(value = PetCt, name = 'petct'),
+        @JsonSubTypes.Type(value = SimpleCt, name = 'simplect'),
         @JsonSubTypes.Type(value = AnteroposteriorCr, name = 'ap_cr'),
         @JsonSubTypes.Type(value = SingleViewXRay, name = 'dx'),
         @JsonSubTypes.Type(value = MyocardialPerfusion, name = 'nm_mpi'),

@@ -40,7 +40,7 @@ class TechnicianNoteReport extends GeneratedReport<TechnicianNoteReport> impleme
         'Be brief in the examination section. The findings and impressions should be significantly detailed. ' +
             'The technicianNote section should not be empty and could be anything the technician needs to note in the report. It should be less formal in tone than the other sections.' +
             'It should focus on the examination itself, so it should not mention things such as image quality. Examples of possible values could be things from this non-exhaustive list:\n' +
-            examples.collect { '* ' + it }.join('\n')
+            examples.collect { '* ' + it }.join('\n') + '\n'
     }
 
     @Override

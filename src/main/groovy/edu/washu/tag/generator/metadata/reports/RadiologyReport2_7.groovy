@@ -7,7 +7,6 @@ import ca.uhn.hl7v2.model.v281.group.ORU_R01_PATIENT
 import ca.uhn.hl7v2.model.v281.message.ORU_R01
 import ca.uhn.hl7v2.model.v281.segment.MSH
 import ca.uhn.hl7v2.model.v281.segment.OBX
-import edu.washu.tag.generator.ai.catalog.attribute.WithDiagnosisCodes
 import edu.washu.tag.generator.hl7.v2.ReportVersion
 import edu.washu.tag.generator.hl7.v2.model.DoctorEncoder
 import edu.washu.tag.generator.hl7.v2.model.DoctorEncoder2_7
@@ -39,9 +38,9 @@ class RadiologyReport2_7 extends RadiologyReport {
             new ZpfGenerator().generateNonstandardSegment(this, radReport)
         }
 
-        if (hl7Version == ReportVersion.V2_7 && generatedReport instanceof WithDiagnosisCodes) {
-            generatedReport.parsedCodes.eachWithIndex { diagnosis, index ->
-                new Dg1Generator(index, diagnosis, generatedReport.designator).generateNonstandardSegment(this, radReport)
+        if (hl7Version == ReportVersion.V2_7) {
+            study.resolveDiagnoses().eachWithIndex { diagnosis, index ->
+                new Dg1Generator(index, diagnosis).generateNonstandardSegment(this, radReport)
             }
         }
 

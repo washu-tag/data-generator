@@ -25,7 +25,9 @@ class GeneralStudyModule implements StudyLevelModule {
         final Protocol protocol = study.protocol
         final Equipment scanner = study.primaryEquipment // if more than one device, they should at least handle all study-level fields the same
         study.setStudyInstanceUid(UIDUtils.createUID())
-        study.setStudyDate(specificationParameters.studyDateDistribution.generateStudyDate(patient))
+        if (study.studyDate == null) {
+            study.setStudyDate(specificationParameters.studyDateDistribution.generateStudyDate(patient))
+        }
         study.setStudyTime(RandomGenUtils.randomStudyTime())
 
         if (protocol.includeMedicalStaff()) {

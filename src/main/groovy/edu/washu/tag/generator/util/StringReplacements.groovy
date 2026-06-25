@@ -6,6 +6,6 @@ class StringReplacements {
     public static final String LATERALITY = '%LATERALITY%'
     public static final String VIEW = '%VIEW%'
     public static final String FPS = '%FPS%'
-    public static final String DIAG_PROMPT = '%DIAGNOSIS_PROMPT%'
+    public static final String PROMPT_ADDITIONS = '%PROMPT_ADDITIONS%'
 
 }

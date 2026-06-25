@@ -38,19 +38,6 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
                 ).build()
         )
 
-    private final BatchHandlerActivity batchHandlerActivity =
-        Workflow.newActivityStub(
-            BatchHandlerActivity,
-            ActivityOptions.newBuilder()
-                .setStartToCloseTimeout(Duration.ofHours(24))
-                .setHeartbeatTimeout(Duration.ofMinutes(15))
-                .setRetryOptions(RetryOptions.newBuilder()
-                    .setMaximumInterval(Duration.ofSeconds(1))
-                    .setMaximumAttempts(3)
-                    .build())
-                .build()
-        )
-
     @Override
     void generateDataset(GenerateDatasetInput input) {
         final WorkflowInfo workflowInfo = Workflow.getInfo()
@@ -78,6 +65,20 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
         // ~1-2k batches per run; beyond that, window the fan-out with continueAsNew (the window would be a history
         // checkpoint only, not a concurrency knob).
         Promise.allOf(batches.collect { batchRequest ->
+            final BatchHandlerActivity batchHandlerActivity =
+                Workflow.newActivityStub(
+                    BatchHandlerActivity,
+                    ActivityOptions.newBuilder()
+                        .setStartToCloseTimeout(Duration.ofHours(24))
+                        .setHeartbeatTimeout(Duration.ofMinutes(15))
+                        .setSummary(batchRequest.temporalSummary)
+                        .setRetryOptions(RetryOptions.newBuilder()
+                            .setMaximumInterval(Duration.ofSeconds(1))
+                            .setMaximumAttempts(3)
+                            .build())
+                        .build()
+                )
+
             Async.function(
                 batchHandlerActivity::formAndWriteBatch,
                 new BatchHandlerActivityInput(input, nameCache, idOffsets, batchRequest))
