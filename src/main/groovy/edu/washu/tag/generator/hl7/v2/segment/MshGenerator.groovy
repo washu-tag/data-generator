@@ -1,6 +1,7 @@
 package edu.washu.tag.generator.hl7.v2.segment
 
 import ca.uhn.hl7v2.model.v281.segment.MSH
+import edu.washu.tag.generator.hl7.v2.model.HierarchicDesignator
 import edu.washu.tag.generator.metadata.RadiologyReport
 import edu.washu.tag.generator.util.TimeUtils
 
@@ -11,7 +12,12 @@ class MshGenerator extends SegmentGenerator<MSH> {
         msh.getMsh1_FieldSeparator().setValue('|')
         msh.getMsh2_EncodingCharacters().setValue('^~\\&')
         msh.getMsh3_SendingApplication().getHd1_NamespaceID().setValue('SOMERIS')
-        msh.getMsh4_SendingFacility().getHd1_NamespaceID().setValue('ABCHOSP')
+        final HierarchicDesignator sendingFacility = radReport.sendingFacility
+        if (sendingFacility != null) {
+            sendingFacility.toHd(msh.getMsh4_SendingFacility())
+        } else {
+            msh.getMsh4_SendingFacility().getHd1_NamespaceID().setValue('ABCHOSP')
+        }
         msh.getMsh5_ReceivingApplication().getHd1_NamespaceID().setValue('SOMEAPP')
         msh.getMsh6_ReceivingFacility().getHd1_NamespaceID().setValue('ABC_HOSP_DEPT_X')
         msh.getMsh7_DateTimeOfMessage().setValue(TimeUtils.toHl7(radReport.reportDateTime))

@@ -16,9 +16,9 @@ import ca.uhn.hl7v2.validation.impl.ValidationContextImpl
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import edu.washu.tag.generator.ai.GeneratedReport
-import edu.washu.tag.generator.ai.catalog.attribute.WithDiagnosisCodes
 import edu.washu.tag.generator.hl7.v2.ReportVersion
 import edu.washu.tag.generator.hl7.v2.model.DoctorEncoder
+import edu.washu.tag.generator.hl7.v2.model.HierarchicDesignator
 import edu.washu.tag.generator.hl7.v2.model.ReportStatus
 import edu.washu.tag.generator.hl7.v2.model.TransportationMode
 import edu.washu.tag.generator.hl7.v2.segment.MshGenerator
@@ -60,6 +60,7 @@ abstract class RadiologyReport {
     String placerOrderNumberId
     String placerOrderNumberNamespace
     TransportationMode transportationMode
+    HierarchicDesignator sendingFacility
     @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS, include = JsonTypeInfo.As.PROPERTY, property = 'type') GeneratedReport generatedReport
     @JsonIgnore NULLDT deliverToLocation
     @JsonIgnore Parser parser

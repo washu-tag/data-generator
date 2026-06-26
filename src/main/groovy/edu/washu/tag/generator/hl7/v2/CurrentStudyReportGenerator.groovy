@@ -47,6 +47,7 @@ class CurrentStudyReportGenerator extends StudyReportGenerator {
         }
         radReport.setVisitNumber(visitIdGenerator.get())
         radReport.setOrderingProvider(GenerationCache.selectPhysician(procedureInstitution))
+        radReport.setSendingFacility(procedureInstitution.assigningAuthority)
         setOrcStatus(radReport, messageRequirements)
         radReport.setReasonForStudy(messageRequirements.reasonForStudy)
         radReport.setTransportationMode(messageRequirements.transportationMode)
