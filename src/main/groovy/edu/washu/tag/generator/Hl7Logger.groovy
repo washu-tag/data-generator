@@ -18,24 +18,34 @@ class Hl7Logger {
     List<Hl7LogFile> identifyHl7LogFiles(File hl7SourceDir) {
         final File logOutputDir = BatchProcessor.logOutput
 
-        (hl7SourceDir.listFiles(File::isDirectory as FileFilter) as List<File>).collectMany { yearDir ->
-            final String year = yearDir.name
-            final File logYearDir = new File(logOutputDir, year)
-            logYearDir.mkdirs()
-            (yearDir.listFiles(File::isDirectory as FileFilter) as List<File>).collectMany { monthDir ->
-                final String month = monthDir.name.padLeft(2, '0')
-                (monthDir.listFiles(File::isDirectory as FileFilter) as List<File>).collect { dayDir ->
-                    final String day = dayDir.name.padLeft(2, '0')
-
-                    new Hl7LogFile(
-                        year: year,
-                        month: month,
-                        day: day,
-                        dayDir: dayDir,
-                        asFile: new File(logYearDir, "${year}${month}${day}.log")
-                    )
+        // HL7 files are written into per-batch subtrees (hl7/batch_<id>/<year>/<month>/<day>/) so a Temporal
+        // retry can wipe and rewrite a single batch in isolation. Collapse those subtrees back into one log
+        // per calendar day, gathering every batch directory that wrote to that day.
+        final Map<List<String>, List<File>> dayDirsByDate = [:].withDefault { [] }
+        (hl7SourceDir.listFiles(File::isDirectory as FileFilter) as List<File>).each { batchDir ->
+            (batchDir.listFiles(File::isDirectory as FileFilter) as List<File>).each { yearDir ->
+                final String year = yearDir.name
+                (yearDir.listFiles(File::isDirectory as FileFilter) as List<File>).each { monthDir ->
+                    final String month = monthDir.name.padLeft(2, '0')
+                    (monthDir.listFiles(File::isDirectory as FileFilter) as List<File>).each { dayDir ->
+                        final String day = dayDir.name.padLeft(2, '0')
+                        dayDirsByDate[[year, month, day]] << dayDir
+                    }
                 }
             }
+        }
+
+        dayDirsByDate.collect { dateKey, dayDirs ->
+            final String year = dateKey[0]
+            final File logYearDir = new File(logOutputDir, year)
+            logYearDir.mkdirs()
+            new Hl7LogFile(
+                year: year,
+                month: dateKey[1],
+                day: dateKey[2],
+                dayDirs: dayDirs,
+                asFile: new File(logYearDir, "${year}${dateKey[1]}${dateKey[2]}.log")
+            )
         }
     }
 
@@ -50,19 +60,22 @@ class Hl7Logger {
         }
         fileForDay.createNewFile()
 
-        logger.info('Reading hl7 files in {}...', logFileToWrite.dayDir.absolutePath)
-        final List<TimedMessage> messagesForDay = (logFileToWrite.dayDir.listFiles() as List<File>).findAll {
-            it.name.endsWith('.hl7')
-        }.collect { hl7File ->
-            new TimedMessage(
-                hl7File.text,
-                hl7File
-                    .name
-                    .dropRight(4) // drop .hl7
-                    .split('_')[1]
-            )
+        final List<TimedMessage> messagesForDay = logFileToWrite.dayDirs.collectMany { dayDir ->
+            logger.info('Reading hl7 files in {}...', dayDir.absolutePath)
+            final List<TimedMessage> messages = (dayDir.listFiles() as List<File>).findAll {
+                it.name.endsWith('.hl7')
+            }.collect { hl7File ->
+                new TimedMessage(
+                    hl7File.text,
+                    hl7File
+                        .name
+                        .dropRight(4) // drop .hl7
+                        .split('_')[1]
+                )
+            }
+            logger.info('Read hl7 files in {}', dayDir.absolutePath)
+            messages
         }
-        logger.info('Read hl7 files in {}', logFileToWrite.dayDir.absolutePath)
         messagesForDay.sort { it.reportTime }
 
         fileForDay.text = messagesForDay*.transform().join("${CR_REPLACEMENT}\n\r\n")

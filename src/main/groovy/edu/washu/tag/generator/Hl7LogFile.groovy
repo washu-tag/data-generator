@@ -5,7 +5,7 @@ class Hl7LogFile {
     String year
     String month
     String day
-    File dayDir
+    List<File> dayDirs
     File asFile
 
 }
