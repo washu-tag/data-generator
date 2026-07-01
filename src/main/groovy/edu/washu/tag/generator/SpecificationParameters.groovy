@@ -15,6 +15,10 @@ import edu.washu.tag.generator.metadata.study.StudyDateDistribution
 import edu.washu.tag.generator.metadata.study.UniformStudyDateDistribution
 import edu.washu.tag.generator.util.RandomGenUtils
 
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+
 class SpecificationParameters {
 
     int numPatients

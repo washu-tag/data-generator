@@ -1,8 +1,7 @@
 package edu.washu.tag.generator.temporal.model
 
 import edu.washu.tag.generator.BatchSpecification
-
-import java.nio.file.Paths
+import edu.washu.tag.generator.OutputManager
 
 class GenerateDatasetInput {
 
@@ -13,7 +12,7 @@ class GenerateDatasetInput {
     int patientsPerFullBatch = BatchSpecification.MAX_PATIENTS
 
     String outputFullPath() {
-        Paths.get('/output', outputDir).toString()
+        OutputManager.prefixOutput(outputDir)
     }
 
 }

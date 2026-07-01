@@ -1,18 +1,21 @@
 package edu.washu.tag.generator.temporal.activity
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import edu.washu.tag.generator.BatchRequest
 import edu.washu.tag.generator.BatchProcessor
 import edu.washu.tag.generator.Batcher
+import edu.washu.tag.generator.OutputManager
 import edu.washu.tag.generator.PopulationGenerator
+import edu.washu.tag.generator.SpecificationParameters
+import edu.washu.tag.generator.YamlObjectMapper
 import edu.washu.tag.generator.metadata.GenerationCache
 import edu.washu.tag.generator.temporal.TemporalApplication
+import edu.washu.tag.generator.temporal.model.BatchedRequestWithContinuation
+import edu.washu.tag.generator.temporal.model.ContinueGenerationWorkflowInput
+import edu.washu.tag.generator.temporal.model.ExtendSpecWorkflowInput
+import io.temporal.failure.ApplicationFailure
 import io.temporal.spring.boot.ActivityImpl
 import io.temporal.workflow.Workflow
 import org.slf4j.Logger
 import org.springframework.stereotype.Component
-
-import java.nio.file.Paths
 
 @Component
 @ActivityImpl(taskQueues = TemporalApplication.TASK_QUEUE)
@@ -21,25 +24,76 @@ class EarlySetupHandlerActivityImpl implements EarlySetupHandlerActivity {
     private static final Logger logger = Workflow.getLogger(EarlySetupHandlerActivityImpl)
 
     @Override
-    List<BatchRequest> resolveBatches(String specificationParamsPath, String outputDir, int patientsPerFullBatch) {
+    BatchedRequestWithContinuation resolveBatches(String specificationParamsPath, String outputDir, int patientsPerFullBatch) {
         BatchProcessor.initDirs(outputDir)
+
         final PopulationGenerator generator = new PopulationGenerator()
         generator.readSpecificationParameters(specificationParamsPath)
 
-        final List<BatchRequest> batchRequests = new Batcher(generator.specificationParameters, patientsPerFullBatch).resolveBatches()
+        final BatchedRequestWithContinuation batchRequests = new Batcher(generator.specificationParameters, patientsPerFullBatch).resolveBatchesWithContinuation()
         logger.info("Request has been resolved into ${batchRequests.size()} standalone batches")
 
         batchRequests
     }
 
     @Override
-    File initGenerationCache(String specificationParamsPath, String outputPath) {
+    BatchedRequestWithContinuation resolveBatchesForExtendedSpec(ExtendSpecWorkflowInput extendSpecWorkflowInput) {
+        final String outputDir = OutputManager.prefixOutput(extendSpecWorkflowInput.previousDataset)
+        BatchProcessor.initDirs(outputDir)
+        final OutputManager outputManager = new OutputManager(outputDir)
+
+        final SpecificationParameters existingSpec = outputManager.readSpecificationParametersFromOutputDir()
+        existingSpec.setNumPatients(extendSpecWorkflowInput.newPatients)
+        existingSpec.setNumStudies(extendSpecWorkflowInput.newStudies)
+        existingSpec.setNumSeries(extendSpecWorkflowInput.newSeries)
+        existingSpec.cohorts.each { cohort ->
+            if (extendSpecWorkflowInput.existingCohortAdditions.containsKey(cohort.name)) {
+                cohort.setNumPatients(extendSpecWorkflowInput.existingCohortAdditions[cohort.name])
+            } else {
+                logger.warn("Existing cohort ${cohort.name} was not found in extension object, falling back to original patient count of ${cohort.numPatients}")
+            }
+        }
+        final List<String> unknownCohorts = extendSpecWorkflowInput.existingCohortAdditions.keySet().findAll {
+            !existingSpec.cohorts*.name.contains(it)
+        }
+        if (unknownCohorts.size() > 0) {
+            throw ApplicationFailure.newNonRetryableFailure("Cohorts ${unknownCohorts} not found in existing specification parameters", 'incorrect-data')
+        }
+
+        final BatchedRequestWithContinuation batchRequests = outputManager.initBatcherFromLatestContinuation(
+            existingSpec,
+            extendSpecWorkflowInput.patientsPerFullBatch
+        ).resolveBatchesWithContinuation()
+
+        logger.info("Extension request has been resolved into ${batchRequests.size()} standalone batches")
+
+        outputManager.writeContinuationSpecificationParameters(existingSpec, batchRequests.continuation)
+
+        batchRequests
+    }
+
+    @Override
+    BatchedRequestWithContinuation resolveBatchesForContinuation(ContinueGenerationWorkflowInput continueGenerationWorkflowInput) {
+        final String outputDir = OutputManager.prefixOutput(continueGenerationWorkflowInput.previousDataset)
+        BatchProcessor.initDirs(outputDir)
+        final OutputManager outputManager = new OutputManager(outputDir)
+
+        final BatchedRequestWithContinuation batchRequests = outputManager.initBatcherFromLatestContinuation(
+            new YamlObjectMapper().readValue(new File(continueGenerationWorkflowInput.newSpecificationPath), SpecificationParameters),
+            continueGenerationWorkflowInput.patientsPerFullBatch
+        ).resolveBatchesWithContinuation()
+
+        logger.info("Continuation request has been resolved into ${batchRequests.size()} standalone batches")
+
+        batchRequests
+    }
+
+    @Override
+    void initGenerationCache(String specificationParamsPath, String outputPath) {
         BatchProcessor.initDirs(outputPath)
         final PopulationGenerator generator = new PopulationGenerator()
         generator.readSpecificationParameters(specificationParamsPath)
-        final File asFile = Paths.get(outputPath, "generation_cache_${System.currentTimeMillis()}.json").toFile()
-        new ObjectMapper().writeValue(asFile, GenerationCache.initInstance(generator.specificationParameters))
-        asFile
+        new OutputManager(outputPath).writeGenerationCacheToFile(GenerationCache.initInstance(generator.specificationParameters))
     }
 
 }

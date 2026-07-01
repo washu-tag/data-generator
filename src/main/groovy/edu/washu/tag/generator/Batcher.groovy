@@ -1,5 +1,7 @@
 package edu.washu.tag.generator
 
+import edu.washu.tag.generator.temporal.model.BatchedRequestWithContinuation
+
 import java.util.function.Function
 
 class Batcher {
@@ -9,6 +11,7 @@ class Batcher {
     int patientOffset = 0
     int studyOffset = 0
     int idOffset = 0
+    int continuationId = 0
 
     Batcher(SpecificationParameters specificationParameters, int patientsPerFullBatch = BatchSpecification.MAX_PATIENTS) {
         new File('batches').mkdir() // while we're still in a single process
@@ -22,10 +25,6 @@ class Batcher {
      * coordination between batches.
      */
     List<BatchRequest> resolveBatches() {
-        patientOffset = 0
-        studyOffset = 0
-        idOffset = 0
-
         final List<BatchRequest> allBatches = computeBatchesFrom(
             specificationParameters.numPatients,
             specificationParameters.numStudies,
@@ -33,36 +32,45 @@ class Batcher {
             { Integer id -> "standard batch ${id}" }
         )
 
-        if (!specificationParameters.cohorts.isEmpty()) {
-            patientOffset += specificationParameters.numPatients
-            studyOffset += specificationParameters.numStudies
-            idOffset += allBatches.size()
-
-            specificationParameters.cohorts.each { cohort ->
-                cohort.trajectory.each { studyReq ->
-                    if (studyReq.protocol == null) {
-                        throw new UnsupportedOperationException('Each StudyRequest must specify a protocol.')
-                    }
-                    studyReq.protocol.postprocess(specificationParameters)
+        patientOffset += specificationParameters.numPatients
+        studyOffset += specificationParameters.numStudies
+        idOffset += allBatches.size()
+        specificationParameters.cohorts.each { cohort ->
+            cohort.trajectory.each { studyReq ->
+                if (studyReq.protocol == null) {
+                    throw new UnsupportedOperationException('Each StudyRequest must specify a protocol.')
                 }
-                final int cohortPatients = cohort.numPatients
-                final int cohortStudies = cohortPatients * cohort.trajectory.size()
-                final List<BatchRequest> batchesForCohort = computeBatchesFrom(
-                    cohortPatients,
-                    cohortStudies,
-                    0, // obviously not true, but we don't need this
-                    { id -> "cohort ${cohort.name} batch ${id}" }
-                )
-                batchesForCohort.each { batch ->
-                    batch.setCohortName(cohort.name)
-                    allBatches << batch
-                }
-                patientOffset += cohortPatients
-                studyOffset += cohortStudies
-                idOffset += batchesForCohort.size()
+                studyReq.protocol.postprocess(specificationParameters)
             }
+            final int cohortPatients = cohort.numPatients
+            final int cohortStudies = cohortPatients * cohort.trajectory.size()
+            final List<BatchRequest> batchesForCohort = computeBatchesFrom(
+                cohortPatients,
+                cohortStudies,
+                0, // obviously not true, but we don't need this
+                { id -> "cohort ${cohort.name} batch ${id}" }
+            )
+            batchesForCohort.each { batch ->
+                batch.setCohortName(cohort.name)
+                allBatches << batch
+            }
+            patientOffset += cohortPatients
+            studyOffset += cohortStudies
+            idOffset += batchesForCohort.size()
         }
         allBatches
+    }
+
+    BatchedRequestWithContinuation resolveBatchesWithContinuation() {
+        new BatchedRequestWithContinuation(
+            batches: resolveBatches(),
+            continuation: new Continuation(
+                continuationId: continuationId,
+                batchIdOffset: idOffset,
+                patientOffset: patientOffset,
+                studyOffset: studyOffset
+            )
+        )
     }
 
     private List<BatchRequest> computeBatchesFrom(int numPatients, int numStudies, int numSeries, Function<Integer, String> summarizer) {

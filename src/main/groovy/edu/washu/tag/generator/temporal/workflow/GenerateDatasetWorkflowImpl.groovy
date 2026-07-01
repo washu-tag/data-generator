@@ -2,10 +2,15 @@ package edu.washu.tag.generator.temporal.workflow
 
 import edu.washu.tag.generator.BatchProcessor
 import edu.washu.tag.generator.BatchRequest
+import edu.washu.tag.generator.Batcher
 import edu.washu.tag.generator.IdOffsets
+import edu.washu.tag.generator.OutputManager
 import edu.washu.tag.generator.temporal.activity.BatchHandlerActivity
 import edu.washu.tag.generator.temporal.activity.EarlySetupHandlerActivity
 import edu.washu.tag.generator.temporal.model.BatchHandlerActivityInput
+import edu.washu.tag.generator.temporal.model.BatchedRequestWithContinuation
+import edu.washu.tag.generator.temporal.model.ContinueGenerationWorkflowInput
+import edu.washu.tag.generator.temporal.model.ExtendSpecWorkflowInput
 import edu.washu.tag.generator.temporal.model.GenerateDatasetInput
 import edu.washu.tag.generator.temporal.TemporalApplication
 import io.temporal.activity.ActivityOptions
@@ -18,10 +23,11 @@ import io.temporal.workflow.Workflow
 import io.temporal.workflow.WorkflowInfo
 import org.slf4j.Logger
 
+import java.nio.file.Paths
 import java.time.Duration
 
 @WorkflowImpl(taskQueues = TemporalApplication.TASK_QUEUE)
-class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
+class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow, ExtendSpecWorkflow, ContinueGenerationWorkflow {
 
     private static final Logger logger = Workflow.getLogger(GenerateDatasetWorkflowImpl)
 
@@ -40,23 +46,74 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
 
     @Override
     void generateDataset(GenerateDatasetInput input) {
-        final WorkflowInfo workflowInfo = Workflow.getInfo()
-        final String workflowLoggingInfo = "[workflowId: ${workflowInfo.workflowId}]"
-        logger.info("${workflowLoggingInfo} Beginning workflow ${this.class.simpleName}")
+        logInfoWithWorkflowId("Beginning workflow ${this.class.simpleName}, generateDataset")
 
         if (input.outputDir == null) {
             input.outputDir = String.valueOf(Workflow.currentTimeMillis())
         }
 
-        final File nameCache = earlySetupActivity.initGenerationCache(input.specificationParametersPath, input.outputFullPath())
-        final IdOffsets idOffsets = new IdOffsets()
+        final OutputManager outputManager = new OutputManager(input.outputFullPath())
+        outputManager.ensureNonempty()
+        outputManager.copySpecificationParameters(input.specificationParametersPath)
+        earlySetupActivity.initGenerationCache(input.specificationParametersPath, input.outputFullPath())
+        final IdOffsets fixedOffsets = new IdOffsets()
+        outputManager.writeFixedOffsets(fixedOffsets)
 
-        final List<BatchRequest> batches = earlySetupActivity.resolveBatches(
-            input.specificationParametersPath,
-            input.outputFullPath(),
-            input.patientsPerFullBatch
+        fulfillDataset(
+            input,
+            earlySetupActivity.resolveBatches(
+                input.specificationParametersPath,
+                input.outputFullPath(),
+                input.patientsPerFullBatch
+            ),
+            fixedOffsets
         )
-        logger.info("${workflowLoggingInfo} fanning out ${batches.size()} standalone batches")
+    }
+
+    @Override
+    void continueGeneration(ContinueGenerationWorkflowInput continueGenerationWorkflowInput) {
+        logInfoWithWorkflowId("Beginning workflow ${this.class.simpleName}, continueGeneration")
+
+        final GenerateDatasetInput datasetInput = new GenerateDatasetInput(
+            specificationParametersPath: continueGenerationWorkflowInput.newSpecificationPath,
+            writeDicom: continueGenerationWorkflowInput.writeDicom,
+            writeHl7: continueGenerationWorkflowInput.writeHl7,
+            outputDir: continueGenerationWorkflowInput.previousDataset,
+            patientsPerFullBatch: continueGenerationWorkflowInput.patientsPerFullBatch
+        )
+
+        fulfillDataset(
+            datasetInput,
+            earlySetupActivity.resolveBatchesForContinuation(continueGenerationWorkflowInput),
+            new OutputManager(datasetInput.outputFullPath()).readFixedOffsets()
+        )
+    }
+
+    @Override
+    void extendSpec(ExtendSpecWorkflowInput extendSpecWorkflowInput) {
+        logInfoWithWorkflowId("Beginning workflow ${this.class.simpleName}, extendSpec")
+
+        final GenerateDatasetInput datasetInput = new GenerateDatasetInput(
+            writeDicom: extendSpecWorkflowInput.writeDicom,
+            writeHl7: extendSpecWorkflowInput.writeHl7,
+            outputDir: extendSpecWorkflowInput.previousDataset,
+            patientsPerFullBatch: extendSpecWorkflowInput.patientsPerFullBatch,
+        )
+        final OutputManager outputManager = new OutputManager(datasetInput.outputFullPath())
+        final BatchedRequestWithContinuation batches = earlySetupActivity.resolveBatchesForExtendedSpec(extendSpecWorkflowInput)
+
+        datasetInput.setSpecificationParametersPath(outputManager.getContinuationSpecificationParametersPath(batches.continuation))
+
+        fulfillDataset(
+            datasetInput,
+            batches,
+            outputManager.readFixedOffsets()
+        )
+    }
+
+    private void fulfillDataset(GenerateDatasetInput input, BatchedRequestWithContinuation batchesWithContinuation, IdOffsets idOffsets) {
+        final List<BatchRequest> batches = batchesWithContinuation.batches
+        logInfoWithWorkflowId("fanning out ${batches.size()} standalone batches")
 
         // Each batch is an independent activity. Effective concurrency is (number of workers ×
         // maxConcurrentActivityExecutionSize), not anything encoded here - excess batches simply queue on the task
@@ -81,10 +138,10 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
 
             Async.function(
                 batchHandlerActivity::formAndWriteBatch,
-                new BatchHandlerActivityInput(input, nameCache, idOffsets, batchRequest))
+                new BatchHandlerActivityInput(input, idOffsets, batchRequest))
         }).get()
 
-        logger.info("${workflowLoggingInfo} all batches have been written")
+        logInfoWithWorkflowId("all batches have been written")
         BatchProcessor.initDirs(input.outputFullPath())
 
         // Output combined HL7(-ish) log files now that all results are prepared
@@ -93,11 +150,17 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow {
                 CombineHl7Workflow,
                 ChildWorkflowOptions.newBuilder()
                     .setTaskQueue(TemporalApplication.TASK_QUEUE)
-                    .setWorkflowId("${workflowInfo.workflowId}/combine-hl7")
+                    .setWorkflowId("${Workflow.getInfo().workflowId}/combine-hl7")
                     .build()
             )::combineLogs,
             BatchProcessor.hl7Output
         ).get()
+
+        new OutputManager(input.outputFullPath()).writeContinuationToOutput(batchesWithContinuation.continuation)
+    }
+
+    private void logInfoWithWorkflowId(String logged) {
+        logger.info("[workflowId: ${Workflow.getInfo().workflowId}] ${logged}")
     }
 
 }

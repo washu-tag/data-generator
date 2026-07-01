@@ -9,12 +9,8 @@ import edu.washu.tag.generator.metadata.Study
 import edu.washu.tag.generator.metadata.patient.*
 import edu.washu.tag.generator.query.QueryUtils
 import edu.washu.tag.generator.util.RandomGenUtils
-import edu.washu.tag.generator.util.SequentialIdGenerator
 import edu.washu.tag.util.FileIOUtils
-import io.temporal.activity.Activity
 import org.apache.commons.math3.distribution.EnumeratedDistribution
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 import java.util.function.Consumer
 
@@ -24,7 +20,6 @@ class PopulationGenerator {
     EnumeratedDistribution<PatientRandomizer> patientRandomizers = initPatientRandomizers()
     boolean writeDataToFiles = false
     boolean generateTestQueries = false
-    private final Logger logger = LoggerFactory.getLogger(PopulationGenerator)
 
     static void main(String[] args) {
         final PopulationGenerator generator = new PopulationGenerator()
@@ -63,9 +58,13 @@ class PopulationGenerator {
     }
 
     void readSpecificationParameters(String configName) {
-        setSpecificationParameters(
+        initFromSpecificationParameters(
             new YamlObjectMapper().readValue(new File(configName), SpecificationParameters)
         )
+    }
+
+    void initFromSpecificationParameters(SpecificationParameters specificationParameters) {
+        this.specificationParameters = specificationParameters
         patientRandomizers = initPatientRandomizers()
     }
 

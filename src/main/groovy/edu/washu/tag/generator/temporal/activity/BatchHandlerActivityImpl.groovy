@@ -2,6 +2,7 @@ package edu.washu.tag.generator.temporal.activity
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import edu.washu.tag.generator.BatchProcessor
+import edu.washu.tag.generator.OutputManager
 import edu.washu.tag.generator.PopulationGenerator
 import edu.washu.tag.generator.ai.catalog.CodeCache
 import edu.washu.tag.generator.metadata.GenerationCache
@@ -20,13 +21,17 @@ class BatchHandlerActivityImpl implements BatchHandlerActivity {
 
     @Override
     void formAndWriteBatch(BatchHandlerActivityInput batchHandlerActivityInput) {
-        BatchProcessor.initDirs(batchHandlerActivityInput.datasetInput.outputFullPath())
+        final String outputPath = batchHandlerActivityInput.datasetInput.outputFullPath()
+        BatchProcessor.initDirs(outputPath)
+        final OutputManager outputManager = new OutputManager(outputPath)
         CodeCache.initializeCache()
         logger.info("Generating batch ${batchHandlerActivityInput.batchRequest.id}...")
         final PopulationGenerator populationGenerator = new PopulationGenerator()
-        populationGenerator.readSpecificationParameters(batchHandlerActivityInput.datasetInput.specificationParametersPath)
+        populationGenerator.readSpecificationParameters(
+            batchHandlerActivityInput.datasetInput.specificationParametersPath
+        )
         populationGenerator.generateAndWriteFullBatch(
-            new ObjectMapper().readValue(batchHandlerActivityInput.generationCachePath, GenerationCache),
+            outputManager.readGenerationCache(),
             batchHandlerActivityInput.idOffsets,
             batchHandlerActivityInput.batchRequest,
             batchHandlerActivityInput.datasetInput.writeDicom,
