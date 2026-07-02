@@ -1,9 +1,6 @@
 package edu.washu.tag.generator.temporal.workflow
 
-import edu.washu.tag.generator.BatchProcessor
 import edu.washu.tag.generator.BatchRequest
-import edu.washu.tag.generator.Batcher
-import edu.washu.tag.generator.IdOffsets
 import edu.washu.tag.generator.OutputManager
 import edu.washu.tag.generator.temporal.activity.BatchHandlerActivity
 import edu.washu.tag.generator.temporal.activity.EarlySetupHandlerActivity
@@ -52,12 +49,10 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow, ExtendSpec
             input.outputDir = String.valueOf(Workflow.currentTimeMillis())
         }
 
-        final OutputManager outputManager = new OutputManager(input.outputFullPath())
-        outputManager.ensureNonempty()
-        outputManager.copySpecificationParameters(input.specificationParametersPath)
-        earlySetupActivity.initGenerationCache(input.specificationParametersPath, input.outputFullPath())
-        final IdOffsets fixedOffsets = new IdOffsets()
-        outputManager.writeFixedOffsets(fixedOffsets)
+        // All filesystem work and offset creation happens inside the activity so the workflow stays deterministic
+        // and side-effect free. setupNewDataset validates the output dir is empty, copies the spec, writes the
+        // generation cache, and creates + persists the fixed ID offsets that every batch reads back from disk.
+        earlySetupActivity.setupNewDataset(input)
 
         fulfillDataset(
             input,
@@ -65,8 +60,7 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow, ExtendSpec
                 input.specificationParametersPath,
                 input.outputFullPath(),
                 input.patientsPerFullBatch
-            ),
-            fixedOffsets
+            )
         )
     }
 
@@ -75,18 +69,20 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow, ExtendSpec
         logInfoWithWorkflowId("Beginning workflow ${this.class.simpleName}, continueGeneration")
 
         final GenerateDatasetInput datasetInput = new GenerateDatasetInput(
-            specificationParametersPath: continueGenerationWorkflowInput.newSpecificationPath,
             writeDicom: continueGenerationWorkflowInput.writeDicom,
             writeHl7: continueGenerationWorkflowInput.writeHl7,
             outputDir: continueGenerationWorkflowInput.previousDataset,
             patientsPerFullBatch: continueGenerationWorkflowInput.patientsPerFullBatch
         )
-
-        fulfillDataset(
-            datasetInput,
-            earlySetupActivity.resolveBatchesForContinuation(continueGenerationWorkflowInput),
-            new OutputManager(datasetInput.outputFullPath()).readFixedOffsets()
+        // resolveBatchesForContinuation archives the new spec as this run's continuation spec; point the batch
+        // handler at that archived copy rather than the caller-supplied path (which may not be reachable from the
+        // worker fulfilling a batch).
+        final BatchedRequestWithContinuation batches = earlySetupActivity.resolveBatchesForContinuation(continueGenerationWorkflowInput)
+        datasetInput.setSpecificationParametersPath(
+            new OutputManager(datasetInput.outputFullPath()).getContinuationSpecificationParametersPath(batches.continuation)
         )
+
+        fulfillDataset(datasetInput, batches)
     }
 
     @Override
@@ -97,21 +93,17 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow, ExtendSpec
             writeDicom: extendSpecWorkflowInput.writeDicom,
             writeHl7: extendSpecWorkflowInput.writeHl7,
             outputDir: extendSpecWorkflowInput.previousDataset,
-            patientsPerFullBatch: extendSpecWorkflowInput.patientsPerFullBatch,
+            patientsPerFullBatch: extendSpecWorkflowInput.patientsPerFullBatch
         )
-        final OutputManager outputManager = new OutputManager(datasetInput.outputFullPath())
         final BatchedRequestWithContinuation batches = earlySetupActivity.resolveBatchesForExtendedSpec(extendSpecWorkflowInput)
-
-        datasetInput.setSpecificationParametersPath(outputManager.getContinuationSpecificationParametersPath(batches.continuation))
-
-        fulfillDataset(
-            datasetInput,
-            batches,
-            outputManager.readFixedOffsets()
+        datasetInput.setSpecificationParametersPath(
+            new OutputManager(datasetInput.outputFullPath()).getContinuationSpecificationParametersPath(batches.continuation)
         )
+
+        fulfillDataset(datasetInput, batches)
     }
 
-    private void fulfillDataset(GenerateDatasetInput input, BatchedRequestWithContinuation batchesWithContinuation, IdOffsets idOffsets) {
+    private void fulfillDataset(GenerateDatasetInput input, BatchedRequestWithContinuation batchesWithContinuation) {
         final List<BatchRequest> batches = batchesWithContinuation.batches
         logInfoWithWorkflowId("fanning out ${batches.size()} standalone batches")
 
@@ -138,13 +130,12 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow, ExtendSpec
 
             Async.function(
                 batchHandlerActivity::formAndWriteBatch,
-                new BatchHandlerActivityInput(input, idOffsets, batchRequest))
+                new BatchHandlerActivityInput(input, batchRequest))
         }).get()
 
         logInfoWithWorkflowId("all batches have been written")
-        BatchProcessor.initDirs(input.outputFullPath())
 
-        // Output combined HL7(-ish) log files now that all results are prepared
+        // Output combined HL7(-ish) log files now that all results are prepared.
         Async.function(
             Workflow.newChildWorkflowStub(
                 CombineHl7Workflow,
@@ -153,10 +144,14 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow, ExtendSpec
                     .setWorkflowId("${Workflow.getInfo().workflowId}/combine-hl7")
                     .build()
             )::combineLogs,
-            BatchProcessor.hl7Output
+            Paths.get(input.outputFullPath(), 'hl7').toFile()
         ).get()
 
-        new OutputManager(input.outputFullPath()).writeContinuationToOutput(batchesWithContinuation.continuation)
+        // Advance the continuation cursor only after the entire run has succeeded. If the run fails before this,
+        // the latest cursor stays put, so a retry reuses the same offsets/batch ids and deterministically
+        // regenerates (each batch wipes its own output dir first), rather than skipping the range and orphaning
+        // the partial data.
+        earlySetupActivity.persistContinuation(input.outputFullPath(), batchesWithContinuation.continuation)
     }
 
     private void logInfoWithWorkflowId(String logged) {

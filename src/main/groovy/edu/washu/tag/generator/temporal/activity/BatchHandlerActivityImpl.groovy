@@ -32,7 +32,7 @@ class BatchHandlerActivityImpl implements BatchHandlerActivity {
         )
         populationGenerator.generateAndWriteFullBatch(
             outputManager.readGenerationCache(),
-            batchHandlerActivityInput.idOffsets,
+            outputManager.readFixedOffsets(),
             batchHandlerActivityInput.batchRequest,
             batchHandlerActivityInput.datasetInput.writeDicom,
             batchHandlerActivityInput.datasetInput.writeHl7,

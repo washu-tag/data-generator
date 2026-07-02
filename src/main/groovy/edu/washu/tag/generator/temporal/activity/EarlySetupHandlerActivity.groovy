@@ -1,9 +1,11 @@
 package edu.washu.tag.generator.temporal.activity
 
 import edu.washu.tag.generator.BatchRequest
+import edu.washu.tag.generator.Continuation
 import edu.washu.tag.generator.temporal.model.BatchedRequestWithContinuation
 import edu.washu.tag.generator.temporal.model.ContinueGenerationWorkflowInput
 import edu.washu.tag.generator.temporal.model.ExtendSpecWorkflowInput
+import edu.washu.tag.generator.temporal.model.GenerateDatasetInput
 import io.temporal.activity.ActivityInterface
 import io.temporal.activity.ActivityMethod
 
@@ -20,6 +22,9 @@ interface EarlySetupHandlerActivity {
     BatchedRequestWithContinuation resolveBatchesForContinuation(ContinueGenerationWorkflowInput continueGenerationWorkflowInput)
 
     @ActivityMethod
-    void initGenerationCache(String specificationParamsPath, String outputPath)
+    void setupNewDataset(GenerateDatasetInput input)
+
+    @ActivityMethod
+    void persistContinuation(String outputDir, Continuation continuation)
 
 }

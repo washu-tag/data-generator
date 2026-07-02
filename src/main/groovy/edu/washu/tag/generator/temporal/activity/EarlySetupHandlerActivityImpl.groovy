@@ -2,6 +2,8 @@ package edu.washu.tag.generator.temporal.activity
 
 import edu.washu.tag.generator.BatchProcessor
 import edu.washu.tag.generator.Batcher
+import edu.washu.tag.generator.Continuation
+import edu.washu.tag.generator.IdOffsets
 import edu.washu.tag.generator.OutputManager
 import edu.washu.tag.generator.PopulationGenerator
 import edu.washu.tag.generator.SpecificationParameters
@@ -11,6 +13,7 @@ import edu.washu.tag.generator.temporal.TemporalApplication
 import edu.washu.tag.generator.temporal.model.BatchedRequestWithContinuation
 import edu.washu.tag.generator.temporal.model.ContinueGenerationWorkflowInput
 import edu.washu.tag.generator.temporal.model.ExtendSpecWorkflowInput
+import edu.washu.tag.generator.temporal.model.GenerateDatasetInput
 import io.temporal.failure.ApplicationFailure
 import io.temporal.spring.boot.ActivityImpl
 import io.temporal.workflow.Workflow
@@ -67,6 +70,9 @@ class EarlySetupHandlerActivityImpl implements EarlySetupHandlerActivity {
 
         logger.info("Extension request has been resolved into ${batchRequests.size()} standalone batches")
 
+        // The effective spec must be persisted now because every batch reads it during generation. The continuation
+        // cursor, by contrast, is only written once the whole run succeeds (see persistContinuation), so a failed run
+        // leaves the latest cursor unadvanced and a retry deterministically regenerates the same offsets/batch ids.
         outputManager.writeContinuationSpecificationParameters(existingSpec, batchRequests.continuation)
 
         batchRequests
@@ -78,22 +84,37 @@ class EarlySetupHandlerActivityImpl implements EarlySetupHandlerActivity {
         BatchProcessor.initDirs(outputDir)
         final OutputManager outputManager = new OutputManager(outputDir)
 
+        final SpecificationParameters newSpec =
+            new YamlObjectMapper().readValue(new File(continueGenerationWorkflowInput.newSpecificationPath), SpecificationParameters)
         final BatchedRequestWithContinuation batchRequests = outputManager.initBatcherFromLatestContinuation(
-            new YamlObjectMapper().readValue(new File(continueGenerationWorkflowInput.newSpecificationPath), SpecificationParameters),
+            newSpec,
             continueGenerationWorkflowInput.patientsPerFullBatch
         ).resolveBatchesWithContinuation()
 
         logger.info("Continuation request has been resolved into ${batchRequests.size()} standalone batches")
 
+        outputManager.writeContinuationSpecificationParameters(newSpec, batchRequests.continuation)
+
         batchRequests
     }
 
     @Override
-    void initGenerationCache(String specificationParamsPath, String outputPath) {
+    void setupNewDataset(GenerateDatasetInput input) {
+        final String outputPath = input.outputFullPath()
+        final OutputManager outputManager = new OutputManager(outputPath)
+        outputManager.ensureNonempty()
         BatchProcessor.initDirs(outputPath)
+        outputManager.copySpecificationParameters(input.specificationParametersPath)
+
         final PopulationGenerator generator = new PopulationGenerator()
-        generator.readSpecificationParameters(specificationParamsPath)
-        new OutputManager(outputPath).writeGenerationCacheToFile(GenerationCache.initInstance(generator.specificationParameters))
+        generator.readSpecificationParameters(input.specificationParametersPath)
+        outputManager.writeGenerationCacheToFile(GenerationCache.initInstance(generator.specificationParameters))
+        outputManager.writeFixedOffsets(new IdOffsets())
+    }
+
+    @Override
+    void persistContinuation(String outputDir, Continuation continuation) {
+        new OutputManager(outputDir).writeContinuationToOutput(continuation)
     }
 
 }
