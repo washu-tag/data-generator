@@ -73,7 +73,12 @@ class EarlySetupHandlerActivityImpl implements EarlySetupHandlerActivity {
         // The effective spec must be persisted now because every batch reads it during generation. The continuation
         // cursor, by contrast, is only written once the whole run succeeds (see persistContinuation), so a failed run
         // leaves the latest cursor unadvanced and a retry deterministically regenerates the same offsets/batch ids.
-        outputManager.writeContinuationSpecificationParameters(existingSpec, batchRequests.continuation)
+        outputManager.writeExtendedContinuationSpecificationParameters(
+            batchRequests.continuation,
+            extendSpecWorkflowInput.newPatients,
+            extendSpecWorkflowInput.newStudies,
+            extendSpecWorkflowInput.newSeries
+        )
 
         batchRequests
     }
@@ -93,7 +98,7 @@ class EarlySetupHandlerActivityImpl implements EarlySetupHandlerActivity {
 
         logger.info("Continuation request has been resolved into ${batchRequests.size()} standalone batches")
 
-        outputManager.writeContinuationSpecificationParameters(newSpec, batchRequests.continuation)
+        outputManager.copyContinuationSpecificationParameters(continueGenerationWorkflowInput.newSpecificationPath, batchRequests.continuation)
 
         batchRequests
     }

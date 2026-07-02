@@ -1,6 +1,7 @@
 package edu.washu.tag.generator
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
 import edu.washu.tag.generator.metadata.GenerationCache
 import io.temporal.failure.ApplicationFailure
 
@@ -45,8 +46,31 @@ class OutputManager {
         Paths.get(outputDir, continuation.specificationParamsFileName()).toString()
     }
 
-    void writeContinuationSpecificationParameters(SpecificationParameters specificationParameters, Continuation continuation) {
-        write(continuation.specificationParamsFileName(), specificationParameters)
+    /**
+     * Persists this run's effective spec for an extension by patching the original spec's YAML tree rather than
+     * serializing a {@link SpecificationParameters} object. The Protocol/SeriesType hierarchy exposes derived
+     * getters (e.g. modality, allSeriesTypes) that dereference generation-time context and blow up when Jackson
+     * walks them, so the object graph is not round-trippable; operating on the parsed tree avoids invoking them.
+     * Only the top-level counts need updating — they drive averageStudiesPerPatient during generation; cohort
+     * counts were already consumed in-memory during batch resolution and are unused by the batch handler.
+     */
+    void writeExtendedContinuationSpecificationParameters(Continuation continuation, int numPatients, int numStudies, int numSeries) {
+        final ObjectNode spec = (ObjectNode) yamlObjectMapper.readTree(Paths.get(outputDir, SPECIFICATION_FILE_NAME).toFile())
+        spec.put('numPatients', numPatients)
+        spec.put('numStudies', numStudies)
+        spec.put('numSeries', numSeries)
+        yamlObjectMapper.writeValue(Paths.get(outputDir, continuation.specificationParamsFileName()).toFile(), spec)
+    }
+
+    /**
+     * Persists this run's effective spec for a continuation by copying the caller-supplied spec file verbatim.
+     * It is already a valid authored YAML, so no (unsupported) serialization of the object graph is needed.
+     */
+    void copyContinuationSpecificationParameters(String source, Continuation continuation) {
+        Files.copy(
+            Paths.get(source),
+            Paths.get(outputDir, continuation.specificationParamsFileName())
+        )
     }
 
     Continuation findLatestContinuation() {
