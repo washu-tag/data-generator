@@ -56,7 +56,7 @@ class EarlySetupHandlerActivityImpl implements EarlySetupHandlerActivity {
                 logger.warn("Existing cohort ${cohort.name} was not found in extension object, falling back to original patient count of ${cohort.numPatients}")
             }
         }
-        final List<String> unknownCohorts = extendSpecWorkflowInput.existingCohortAdditions.keySet().findAll {
+        final Set<String> unknownCohorts = extendSpecWorkflowInput.existingCohortAdditions.keySet().findAll {
             !existingSpec.cohorts*.name.contains(it)
         }
         if (unknownCohorts.size() > 0) {
