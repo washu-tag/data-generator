@@ -42,5 +42,5 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
-          tags: ${{ ENV.REGISTRY }}/washu-tag/data-generator:continuation
+          tags: ${{ ENV.REGISTRY }}/washu-tag/data-generator:latest
           push: true
