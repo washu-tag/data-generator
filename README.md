@@ -155,6 +155,23 @@ Currently, the properties of that object are:
 - `writeHl7`: (Optional) a boolean for controlling if HL7 files (and aggregated "hl7ish" log files) should be written for the dataset corresponding to radiology reports. Defaults to `true`.
 - `outputDir`: (Optional) an optional relative path for the output data within the `/output` mount. Defaults to a timestamp.
 
+If you are attempting to extend a previous dataset, you can launch a workflow in the same manner, but with a "Workflow Type"
+of instead `ExtendSpecWorkflow` or `ContinueGenerationWorkflow` depending on your use case. `ExtendSpecWorkflow` references the specification
+parameters in your existing dataset and gives some small knobs to tweaks on counts:
+- `previousDataset`: (_Required_) the subdirectory within the output directory for the previous data
+- `newPatients`: (Optional) number of studies to create in new dataset
+- `newStudies`: (Optional) number of studies to create in new dataset
+- `newSeries`: (Optional) number of series to create in new dataset
+- `existingCohortAdditions`: (Optional) dictionary of cohort names (must be defined in the previous dataset) to integer counts of patients to create for the cohort
+- `writeDicom`: see above
+- `writeHl7`: see above
+
+With `ContinueGenerationWorkflow`, you specify the path to a new specification parameters file entirely to use:
+- `previousDataset`: (_Required_) see above
+- `newSpecificationPath`: (_Required_) path to new specification parameters YAML
+- `writeDicom`: see above
+- `writeHl7`: see above
+
 ---
 
 ## Possible updates to make
