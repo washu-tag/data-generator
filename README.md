@@ -138,7 +138,7 @@ the chart, those values will be used to create Kubernetes secrets to expose with
 needing to specify the credentials at runtime. A full example installation command might look like:
 
 ```shell
-helm upgrade --install -n data-generator data-generator helm/ -f helm/values.yaml --set env.secret.AZURE_OPENAI_KEY=$AZURE_OPENAI_KEY --set volumes[0].hostPath.path=/scout/generator --set volumes[1].hostPath.path=/scout/output
+helm upgrade --install -n data-generator data-generator helm/data-generator -f helm/data-generator/values.yaml --set env.secret.AZURE_OPENAI_KEY=$AZURE_OPENAI_KEY --set volumes[0].hostPath.path=/scout/generator --set volumes[1].hostPath.path=/scout/output
 ```
 
 Once deployed as a temporal worker, you can launch a data generation workflow in the temporal UI by clicking the "Start Workflow" button and filling out the form:
