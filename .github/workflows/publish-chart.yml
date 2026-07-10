@@ -1,0 +1,70 @@
+name: Publish Helm chart
+
+# Two publishing channels, both to GHCR as OCI artifacts under
+# oci://ghcr.io/washu-tag/charts/data-generator :
+#   - main pushes  -> floating "dev" chart version 0.0.0-dev (overwritten each time), appVersion=latest.
+#     Only republished when something under helm/ actually changes.
+#   - release tags -> immutable chart version taken from the tag (SemVer; a leading "v" is optional and
+#     stripped for the chart version). appVersion is the raw tag, i.e. the image tag the release expects.
+on:
+  push:
+    branches: [main]
+    tags:
+      # Match SemVer-style tags with or without a leading "v": 1.4.0, 1.4.0-rc1, v2.0.0, ...
+      - '[0-9]+.[0-9]+.[0-9]+*'
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+
+env:
+  REGISTRY: ghcr.io
+  CHART_PATH: helm/data-generator
+  CHART_REPO: oci://ghcr.io/washu-tag/charts
+
+jobs:
+  publish-chart:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0   # need history so the chart-change diff below can compare against github.event.before
+
+      # Decide whether to publish. Tags always publish (release). On main we only publish the dev chart when
+      # something under helm/ actually changed, using git directly rather than a third-party path-filter action.
+      - name: Decide whether to publish
+        id: decide
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            before="${{ github.event.before }}"
+            if [[ -z "$before" || "$before" == 0000000000000000000000000000000000000000 ]]; then
+              echo "publish=true" >> "$GITHUB_OUTPUT"          # new/unknown base ref -> publish to be safe
+            elif git diff --quiet "$before" "$GITHUB_SHA" -- helm/; then
+              echo "publish=false" >> "$GITHUB_OUTPUT"         # chart unchanged on this push
+            else
+              echo "publish=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Set up Helm
+        if: steps.decide.outputs.publish == 'true'
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+
+      - name: Package and push chart
+        if: steps.decide.outputs.publish == 'true'
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"     # release chart version: SemVer, leading "v" stripped if present
+            APP_VERSION="$GITHUB_REF_NAME"     # appVersion = image tag this release expects (raw tag)
+          else
+            VERSION="0.0.0-dev"                # floating "latest" dev channel
+            APP_VERSION="latest"               # matches the moving image tag built from main
+          fi
+          echo "Publishing chart: version=$VERSION appVersion=$APP_VERSION"
+          helm registry login "$REGISTRY" -u "${{ github.actor }}" --password-stdin <<< "${{ secrets.GITHUB_TOKEN }}"
+          helm package "$CHART_PATH" --version "$VERSION" --app-version "$APP_VERSION"
+          helm push "data-generator-${VERSION}.tgz" "$CHART_REPO"
