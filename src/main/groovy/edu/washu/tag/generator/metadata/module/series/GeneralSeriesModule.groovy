@@ -61,7 +61,7 @@ class GeneralSeriesModule implements SeriesLevelModule<Series> {
     }
 
     protected static void setSeriesDescription(Study study, Series series) {
-        series.setSeriesDescription(series.seriesType.getSeriesDescription(series.scanner, study.bodyPartExamined)) // TODO: series should be able to overwrite body part
+        series.setSeriesDescription(series.seriesType.resolveSeriesDescription(series, study.bodyPartExamined)) // TODO: series should be able to overwrite body part
     }
 
     protected static void setProtocolName(Study study, Series series) {

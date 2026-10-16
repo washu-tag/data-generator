@@ -22,6 +22,10 @@ abstract class SeriesType {
 
     abstract String getSeriesDescription(Equipment scanner, BodyPart bodyPartExamined)
 
+    String resolveSeriesDescription(Series series, BodyPart bodyPartExamined) {
+        getSeriesDescription(series.scanner, bodyPartExamined)
+    }
+
     abstract List<Class<? extends Equipment>> getCompatibleEquipment()
 
     abstract ImageType getImageType(Equipment equipment)
@@ -75,6 +79,10 @@ abstract class SeriesType {
     }
 
     Laterality laterality() {
+        null
+    }
+
+    Double sampleSliceThickness(Equipment equipment) {
         null
     }
 

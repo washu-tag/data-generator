@@ -57,6 +57,7 @@ class Study implements DicomEncoder, PrivateElementContainer {
     @JsonIgnore List<Person> primaryOperators
     @JsonIgnore List<String> performingPhysiciansName // Series level field, but in most cases it's going to be fixed across a study
     @JsonIgnore String additionalGenerationContext
+    @JsonIgnore List<Class<? extends GeneratedReport>> requestedReportClasses = [] // set from a cohort step; only needed while reports are generated
     private static final Logger logger = LoggerFactory.getLogger(Study)
 
     Study randomize(SpecificationParameters specificationParameters, SequentialIdGenerator studyIdGenerator) {

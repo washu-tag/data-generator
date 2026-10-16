@@ -7,5 +7,7 @@ class StringReplacements {
     public static final String VIEW = '%VIEW%'
     public static final String FPS = '%FPS%'
     public static final String PROMPT_ADDITIONS = '%PROMPT_ADDITIONS%'
+    public static final String SLICE_THICKNESS = '%THICKNESS%'
+    public static final String CONVOLUTION_KERNEL = '%KERNEL%'
 
 }

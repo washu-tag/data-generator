@@ -6,6 +6,7 @@ import edu.washu.tag.generator.metadata.Equipment
 import edu.washu.tag.generator.metadata.ImageType
 import edu.washu.tag.generator.metadata.enums.BodyPart
 import edu.washu.tag.generator.util.RandomGenUtils
+import edu.washu.tag.generator.util.StringReplacements
 
 class Topogram extends CtSeriesType {
 
@@ -23,7 +24,17 @@ class Topogram extends CtSeriesType {
 
     @Override
     String getSeriesDescription(Equipment scanner, BodyPart bodyPartExamined) {
-        "Topogram ${sliceThicknesses.sample()} ${kernels.sample()}"
+        "Topogram ${StringReplacements.SLICE_THICKNESS} ${StringReplacements.CONVOLUTION_KERNEL}"
+    }
+
+    @Override
+    Double sampleSliceThickness(Equipment equipment) {
+        sliceThicknesses.sample()
+    }
+
+    @Override
+    String sampleConvolutionKernel(Equipment equipment) {
+        kernels.sample()
     }
 
     @Override

@@ -18,4 +18,12 @@ abstract class ReportGenerator {
 
     abstract void generateReportsForPatients(List<Patient> patients, boolean temporalHeartbeat, List<CustomGeneratedReportGuarantee> reportGuarantees = [])
 
+    /**
+     * Whether this generator picks report classes through ReportRegistry.randomReportClass for cohort studies, and so honors
+     * the reportClasses requested on a cohort step.
+     */
+    boolean honorsRequestedReportClasses() {
+        false
+    }
+
 }

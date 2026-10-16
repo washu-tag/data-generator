@@ -42,7 +42,9 @@ import java.util.concurrent.ThreadLocalRandom
         @JsonSubTypes.Type(value = GreekMri, name = 'greek_mri'),
         @JsonSubTypes.Type(value = ContouredMriWithKo, name = 'mri_rt_ko'),
         @JsonSubTypes.Type(value = MammogramWithAnnotations, name = 'mg_pr'),
-        @JsonSubTypes.Type(value = PetCtGemini, name = 'petct2')
+        @JsonSubTypes.Type(value = PetCtGemini, name = 'petct2'),
+        @JsonSubTypes.Type(value = LiverMri, name = 'mri_liver'),
+        @JsonSubTypes.Type(value = LiverCt, name = 'ct_liver')
 ])
 abstract class Protocol implements Randomizeable {
 

@@ -2,6 +2,7 @@ package edu.washu.tag.generator
 
 import edu.washu.tag.generator.hl7.v2.FixedSampleReportGenerator
 import edu.washu.tag.generator.hl7.v2.ReportGenerator
+import edu.washu.tag.generator.hl7.v2.ReportVersion
 import edu.washu.tag.generator.metadata.Institution
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.Protocol
@@ -51,8 +52,33 @@ class SpecificationParameters {
     List<Institution> institutionOverrides = []
     List<SpecializedCohort> cohorts = []
 
+    private void validateReportSelection() {
+        if (!generateRadiologyReports) {
+            return
+        }
+        final List<String> cohortsRequestingClasses = cohorts.findAll { it.requestsReportClasses() }*.name
+        if (cohortsRequestingClasses && !reportGeneratorImplementation.honorsRequestedReportClasses()) {
+            throw new IllegalArgumentException(
+                "Cohorts ${cohortsRequestingClasses} request reportClasses, but the report generator would ignore them. " +
+                    'Use the gpt report generator with customReportFraction set (any value; cohort patients always get customized reports).'
+            )
+        }
+        customReportGuarantees.each { guarantee ->
+            final List<ReportVersion> supportedVersions = guarantee.reportClass.getDeclaredConstructor().newInstance().supportedVersions()
+            final List<ReportVersion> unsupported = guarantee.reportVersions - supportedVersions
+            if (unsupported) {
+                throw new IllegalArgumentException(
+                    "Report guarantee for ${guarantee.reportClass.simpleName} requests HL7 versions ${unsupported}, but it only supports ${supportedVersions}"
+                )
+            }
+        }
+    }
+
     void postprocess() {
+        validateReportSelection()
         cohorts.each { cohort ->
+            cohort.validateDiagnosisCodes()
+            cohort.validateReportClasses()
             cohort.trajectory.each { studyRequest ->
                 studyRequest.protocol.postprocess(this)
             }

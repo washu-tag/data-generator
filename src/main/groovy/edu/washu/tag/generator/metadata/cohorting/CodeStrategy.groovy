@@ -29,13 +29,14 @@ enum CodeStrategy {
     },
     STRICT_SUBSET ({ Map<String, Integer> codes ->
         randomizeSubsetOfSize(
-            RandomUtils.insecure().randomInt(1, codes.size()),
-
+            RandomUtils.insecure().randomInt(1, codes.size()), // with a single code, this still returns that code
+            codes
         )
     }),
     SUBSET ({ Map<String, Integer> codes ->
         randomizeSubsetOfSize(
-            RandomUtils.insecure().randomInt(1, codes.size() + 1)
+            RandomUtils.insecure().randomInt(1, codes.size() + 1),
+            codes
         )
     })
 
@@ -53,7 +54,8 @@ enum CodeStrategy {
         }
     }
 
-    private List<String> randomizeSubsetOfSize(int subsetSize, Map<String, Integer> weightedCodes) {
+    // static because the randomizer closures are created while the enum constants are constructed
+    private static List<String> randomizeSubsetOfSize(int subsetSize, Map<String, Integer> weightedCodes) {
         RandomGenUtils.sampleWithoutReplacement(subsetSize, weightedCodes)
     }
 

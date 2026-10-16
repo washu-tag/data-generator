@@ -1,6 +1,8 @@
 package edu.washu.tag.generator.metadata.cohorting
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import edu.washu.tag.generator.ai.GeneratedReport
+import edu.washu.tag.generator.ai.catalog.ReportRegistry
 import edu.washu.tag.generator.metadata.Diagnosis
 import edu.washu.tag.generator.metadata.Protocol
 import edu.washu.tag.generator.metadata.Study
@@ -15,6 +17,7 @@ class StudyRequest {
     CodeStrategy codeStrategy = CodeStrategy.ONLY_ONE_FIXED_FOR_PATIENT
     int studyOffsetMin
     int studyOffsetMax
+    List<String> reportClasses = [] // simple names of report classes to choose from; empty means any applicable class
 
     @JsonIgnore
     List<Diagnosis> randomizeCodes(Study study) {
@@ -23,6 +26,11 @@ class StudyRequest {
             combinedCodes.put(code, 10)
         }
         codeStrategy.randomizeAndActualizeCodes(study, combinedCodes)
+    }
+
+    @JsonIgnore
+    List<Class<? extends GeneratedReport>> resolveReportClasses() {
+        reportClasses.collect { ReportRegistry.lookupReportClass(it) }
     }
 
 }

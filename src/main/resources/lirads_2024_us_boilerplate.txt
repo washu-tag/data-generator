@@ -1,0 +1,10 @@
+US LI-RADS 2024 REFERENCE:
+US Category:
+US-1 Negative: No ultrasound evidence of hepatocellular carcinoma (HCC).
+US-2 Subthreshold: Observation<10 mm in diameter, not definitely benign.
+US-3 Positive: Observation detected that may warrant multi-phase contrast-enhanced imaging. Observation >/= 10 mm in diameter, not definitely benign, including areas of parenchymal distortion OR new thrombus in vein.
+
+Visualization Score:
+A. No or minimal limitations: Limitations, if any, are unlikely to meaningfully affect sensitivity. The liver is homogenous or minimally heterogenous with minimal beam attenuation or shadowing, and is visualized in near entirety.
+B. Moderate limitations: Limitations may obscure small masses. The liver is moderately heterogenous with moderate beam attenuation or shadowing, and some portions of the liver or diaphragm are not visualized.
+C. Severe limitations: Limitations significantly lower sensitivity for focal liver lesions. The liver is severely heterogeneous with severe beam attenuation or shadowing, and the majority (>50%) of the liver or diaphragm is not visualized. Consider alternative surveillance imaging modality depending on risk factors.

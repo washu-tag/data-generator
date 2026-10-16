@@ -340,5 +340,23 @@
       "codeMeaning": "CT HEAD WO",
       "alternateText": "CT head w/o contrast"
     }
+  },
+  "mri liver w/wo": {
+    "impliedModality": "MR",
+    "codedTriplet": {
+      "codeValue": "IMG2579",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "MRI ABDOMEN LIVER W WO CONTRAST",
+      "alternateText": "LIVER MRI"
+    }
+  },
+  "ct liver multiphase": {
+    "impliedModality": "CT",
+    "codedTriplet": {
+      "codeValue": "IMG4161",
+      "codingSchemeDesignator": "UNKDEV",
+      "codeMeaning": "CT ABDOMEN LIVER W WO CONTRAST",
+      "alternateText": "CT liver multiphase"
+    }
   }
 }

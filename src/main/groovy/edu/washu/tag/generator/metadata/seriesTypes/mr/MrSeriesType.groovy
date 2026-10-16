@@ -71,11 +71,12 @@ abstract class MrSeriesType extends SeriesType {
         } else {
             ZippedCachedPixelSpec.ofRsnaTestData(
                 switch (series.bodyPartExamined) {
-                    case BodyPart.ABDOMEN -> 'PICKER/MRIM50'
+                    case BodyPart.ABDOMEN -> 'PICKER/MRIM57'
                     case BodyPart.BRAIN -> 'GEMS/MR/IM229'
                     case BodyPart.CHEST -> 'TOSHIBA/PAT00054/STD00055/SFS00056/OBJ00057'
                     case BodyPart.HEAD -> 'GEMS/MR/IM223'
                     case BodyPart.HEART -> 'PHILIPS/MR4_5/MRHEARTR'
+                    case BodyPart.LIVER -> 'TOSHIBA/PAT00034/STD00035/SFS00036/OBJ00037' // axial T2 with focal right-lobe lesion
                     default -> throw new RuntimeException("Unknown body part: ${series.bodyPartExamined}")
                 }
             )

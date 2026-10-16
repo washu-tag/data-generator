@@ -120,6 +120,11 @@ class CyclicVariedGptGenerator extends CyclicVariedGenerator {
     }
 
     @Override
+    boolean honorsRequestedReportClasses() {
+        customReportFraction != null // otherwise cohort patients are generated in bulk as ClassicReports
+    }
+
+    @Override
     protected overwriteReport(RadiologyReport reportToOverwrite, Class<? extends GeneratedReport> reportClass) {
         reportToOverwrite.setGeneratedReport(
             openAiWrapper.generateReportsForPatient(

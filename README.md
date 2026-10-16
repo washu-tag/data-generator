@@ -55,6 +55,8 @@ but there are a few booleans that could use explanation:
     * chest - MR
     * head - MR
     * heart - MR
+    * liver - CT
+    * liver - MR
     * pelvis - MR
     * heart - NM
     * US (body part is not usually referenced in DICOM)
@@ -97,6 +99,20 @@ Implemented:
     + PT w/ Attenuation Correction
     + PT w/o Attenuation Correction
     + "Patient Protocol" secondary capture
+* **CT**: A multiphase liver CT (as used for LI-RADS) simulated from a combined dual-modality scanner with series:
+    + Topogram
+    + Precontrast (optional, included in a configurable `precontrastFraction` of studies)
+    + Late arterial
+    + Portal venous
+    + Delayed
+* **MR**: A multiphase liver MRI (as used for LI-RADS) with series:
+    + Coronal localizer
+    + Axial T1 in/opposed phase
+    + Axial T2
+    + Axial DWI
+    + Axial dynamic T1 (precontrast, late arterial, portal venous, delayed). The `contrastAgent` option is `EXTRACELLULAR`
+      (default), `GADOBENATE` (same phases), or `GADOXETATE`, which replaces the delayed phase with transitional and
+      hepatobiliary phases.
 * **CR**: An xray simulated from a mobile Philips scanner with a single anteroposterior view of the chest or abdomen
 * **DX**: An xray simulated from a GE scanner with a single view of one of the following body parts (selected randomly):
     + Abdomen

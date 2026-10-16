@@ -39,7 +39,7 @@ class CodeCache {
 
     static Diagnosis lookupDiagnosis(DiagnosisCodeDesignator designator, String code) {
         codes[designator].find {
-            it.code = code
+            it.code == code
         }
     }
 
