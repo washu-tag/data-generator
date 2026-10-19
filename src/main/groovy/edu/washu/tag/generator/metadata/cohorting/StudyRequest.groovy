@@ -7,7 +7,7 @@ import edu.washu.tag.generator.metadata.Diagnosis
 import edu.washu.tag.generator.metadata.Protocol
 import edu.washu.tag.generator.metadata.Study
 
-class StudyRequest {
+class StudyRequest implements TrajectoryStep {
 
     String name
     Protocol protocol
@@ -18,6 +18,12 @@ class StudyRequest {
     int studyOffsetMin
     int studyOffsetMax
     List<String> reportClasses = [] // simple names of report classes to choose from; empty means any applicable class
+
+    @JsonIgnore
+    @Override
+    List<TrajectoryBranch> expand(List<TrajectoryBranch> branches) {
+        branches.collect { b -> new TrajectoryBranch(name: b.name, numPatients: b.numPatients, steps: b.steps + this) }
+    }
 
     @JsonIgnore
     List<Diagnosis> randomizeCodes(Study study) {

@@ -1,0 +1,40 @@
+numPatients: 0
+numStudies: 0
+numSeries: 0
+protocols: []
+cohorts:
+  - name: hcc_quick_treatment_family
+    numPatients: 30
+    trajectory:
+      - name: surveillance_us
+        protocol:
+          type: us
+        reportClasses: [LiRadsUsSurveillance]
+        codeStrategy: ONLY_ONE
+        diagnosisCodes: [K74.60]
+        additionalGenerationContext: 'Routine 6-month HCC surveillance ultrasound in a patient with cirrhosis.'
+      - branch:
+          - name: adequate_response
+            numPatients: 15
+            steps:
+              - name: post_tace_ct
+                protocol:
+                  type: ct_liver
+                reportClasses: [LiRadsCtMriNonradiationTra]
+                codeStrategy: ONLY_ONE
+                diagnosisCodes: [C22.0]
+                additionalGenerationContext: 'The observation(s) were treated with conventional TACE about one month ago. The cancer seems to have been adequately treated.'
+                studyOffsetMin: 60
+                studyOffsetMax: 90
+          - name: equivocal_response
+            numPatients: 15
+            steps:
+              - name: post_tace_ct
+                protocol:
+                  type: ct_liver
+                reportClasses: [LiRadsCtMriNonradiationTra]
+                codeStrategy: ONLY_ONE
+                diagnosisCodes: [C22.0]
+                additionalGenerationContext: 'Write the category as exactly "LR-TR equivocal".'
+                studyOffsetMin: 60
+                studyOffsetMax: 90

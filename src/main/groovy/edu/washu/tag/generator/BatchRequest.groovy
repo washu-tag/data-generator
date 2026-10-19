@@ -1,7 +1,7 @@
 package edu.washu.tag.generator
 
 import edu.washu.tag.generator.metadata.Patient
-import edu.washu.tag.generator.metadata.cohorting.SpecializedCohort
+import edu.washu.tag.generator.metadata.cohorting.ResolvedCohort
 import edu.washu.tag.generator.util.SequentialIdGenerator
 import io.temporal.activity.Activity
 import org.slf4j.Logger
@@ -21,7 +21,7 @@ class BatchRequest {
 
     void generateBatchWithHandler(BatchRequestContext batchRequestContext) {
         final SpecificationParameters specificationParameters = batchRequestContext.specificationParameters
-        final SpecializedCohort cohort = lookupCohort(specificationParameters)
+        final ResolvedCohort cohort = lookupCohort(specificationParameters)
         specificationParameters.postprocess()
         batchRequestContext.generationCache.cache()
 
@@ -101,11 +101,11 @@ class BatchRequest {
         }
     }
 
-    private SpecializedCohort lookupCohort(SpecificationParameters specificationParameters) {
+    private ResolvedCohort lookupCohort(SpecificationParameters specificationParameters) {
         if (cohortName == null) {
             null
         } else {
-            final SpecializedCohort cohort = specificationParameters.cohorts.find { it.name == cohortName }
+            final ResolvedCohort cohort = specificationParameters.cohorts.find { it.name == cohortName }
             if (cohort == null) {
                 throw new IllegalStateException("Could not find cohort with name ${cohortName}")
             }

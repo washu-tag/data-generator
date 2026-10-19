@@ -6,6 +6,7 @@ import edu.washu.tag.generator.hl7.v2.ReportVersion
 import edu.washu.tag.generator.metadata.Institution
 import edu.washu.tag.generator.metadata.Patient
 import edu.washu.tag.generator.metadata.Protocol
+import edu.washu.tag.generator.metadata.cohorting.ResolvedCohort
 import edu.washu.tag.generator.metadata.cohorting.SpecializedCohort
 import edu.washu.tag.generator.metadata.patient.DefaultPatientRandomizer
 import edu.washu.tag.generator.metadata.patient.GreekPatientRandomizer
@@ -50,7 +51,21 @@ class SpecificationParameters {
         (new KoreanPatientRandomizer(randomizerWeight: 5))
     ]
     List<Institution> institutionOverrides = []
-    List<SpecializedCohort> cohorts = []
+    private List<ResolvedCohort> cohorts = []
+
+    List<ResolvedCohort> getCohorts() {
+        cohorts
+    }
+
+    /**
+     * Resolves each cohort's trajectory on assignment, so every other reader of {@code cohorts}
+     * (validation, batching, patient generation) only ever sees plain, branch-free
+     * {@link ResolvedCohort}s - regardless of whether this came from YAML or a direct constructor
+     * call (Groovy's map constructor also goes through this setter).
+     */
+    void setCohorts(List<SpecializedCohort> rawCohorts) {
+        cohorts = rawCohorts?.collectMany { it.resolve() } ?: []
+    }
 
     private void validateReportSelection() {
         if (!generateRadiologyReports) {

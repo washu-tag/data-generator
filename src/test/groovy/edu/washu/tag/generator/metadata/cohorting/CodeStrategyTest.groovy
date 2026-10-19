@@ -79,8 +79,8 @@ class CodeStrategyTest {
         new StudyRequest(name: "step${codes}", diagnosisCodes: codes, codeStrategy: strategy)
     }
 
-    private static SpecializedCohort cohort(StudyRequest... steps) {
-        new SpecializedCohort(name: 'test', trajectory: steps as List<StudyRequest>)
+    private static ResolvedCohort cohort(StudyRequest... steps) {
+        new SpecializedCohort(name: 'test', trajectory: steps as List<TrajectoryStep>).resolve()[0]
     }
 
 }

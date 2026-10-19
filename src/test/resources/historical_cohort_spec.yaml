@@ -1,0 +1,34 @@
+numPatients: 0
+numStudies: 0
+numSeries: 0
+protocols: []
+cohorts:
+  - name: hcc_surveillance_quick_treatment
+    numPatients: 30
+    trajectory:
+      - name: surveillance_us_1
+        protocol:
+          type: us
+        reportClasses: [LiRadsUsSurveillance]
+        codeStrategy: ONLY_ONE
+        diagnosisCodes: [K74.60]
+        additionalGenerationContext: 'Routine 6-month HCC surveillance ultrasound in a patient with cirrhosis. There is at least one (US-3) observation, prompting diagnostic imaging.'
+      - name: diagnostic_mri
+        protocol:
+          type: mri_liver
+        reportClasses: [LiRadsCtMriDiagnostic]
+        codeStrategy: ONLY_ONE
+        diagnosisCodes: [C22.0]
+        additionalGenerationContext: 'Diagnostic MRI for the observation(s) in previous report. The observation meets LR-5 criteria. May or may not note new observations.'
+        studyOffsetMin: 14
+        studyOffsetMax: 42
+      - name: post_tace_ct
+        protocol:
+          type: ct_liver
+          precontrastFraction: 1.0
+        reportClasses: [LiRadsCtMriNonradiationTra]
+        codeStrategy: ONLY_ONE
+        diagnosisCodes: [C22.0]
+        additionalGenerationContext: 'The observation(s) were treated with conventional TACE about one month ago. The cancer seems to have been adequately treated.'
+        studyOffsetMin: 60
+        studyOffsetMax: 90

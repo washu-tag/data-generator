@@ -2,7 +2,7 @@ package edu.washu.tag.generator.metadata
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import edu.washu.tag.generator.GenerationContext
-import edu.washu.tag.generator.metadata.cohorting.SpecializedCohort
+import edu.washu.tag.generator.metadata.cohorting.ResolvedCohort
 import edu.washu.tag.generator.metadata.cohorting.StudyRequest
 import edu.washu.tag.generator.metadata.enums.Nationality
 import edu.washu.tag.generator.metadata.enums.Race
@@ -42,9 +42,9 @@ class Patient implements DicomEncoder {
     @JsonIgnore double personalWeightMod
     @JsonIgnore boolean reportsMatched = false
     @JsonIgnore boolean compareAdjacentStudies = false
-    @JsonIgnore SpecializedCohort parentCohort
+    @JsonIgnore ResolvedCohort parentCohort
 
-    Patient randomize(GenerationContext generationContext, SequentialIdGenerator studyIdGenerator, SpecializedCohort parentCohort = null) {
+    Patient randomize(GenerationContext generationContext, SequentialIdGenerator studyIdGenerator, ResolvedCohort parentCohort = null) {
         final LocalDate sixteenthBirthday = dateOfBirth.plusYears(16)
         patientInstanceUid = UIDUtils.createUID()
         patientIds = generationContext.patientIdGenerators.collectEntries { idGen ->
