@@ -6,6 +6,7 @@ import edu.washu.tag.generator.ai.catalog.ReportRegistry
 import edu.washu.tag.generator.metadata.Diagnosis
 import edu.washu.tag.generator.metadata.Protocol
 import edu.washu.tag.generator.metadata.Study
+import edu.washu.tag.generator.util.RandomGenUtils
 
 class StudyRequest implements TrajectoryStep {
 
@@ -14,6 +15,9 @@ class StudyRequest implements TrajectoryStep {
     List<String> diagnosisCodes = []
     Map<String, Integer> diagnosisCodesWeighted = [:]
     String additionalGenerationContext = ''
+    // Appended to additionalGenerationContext, one entry chosen per patient by weight - for
+    // minor per-patient wording variation that doesn't warrant a separate branch/population.
+    Map<String, Integer> additionalGenerationContextOptions = [:]
     CodeStrategy codeStrategy = CodeStrategy.ONLY_ONE_FIXED_FOR_PATIENT
     int studyOffsetMin
     int studyOffsetMax
@@ -23,6 +27,15 @@ class StudyRequest implements TrajectoryStep {
     @Override
     List<TrajectoryBranch> expand(List<TrajectoryBranch> branches) {
         branches.collect { b -> new TrajectoryBranch(name: b.name, numPatients: b.numPatients, steps: b.steps + this) }
+    }
+
+    @JsonIgnore
+    String resolveAdditionalGenerationContext() {
+        if (!additionalGenerationContextOptions) {
+            return additionalGenerationContext
+        }
+        final String choice = RandomGenUtils.setupWeightedLottery(additionalGenerationContextOptions).sample()
+        "${additionalGenerationContext} ${choice}".trim()
     }
 
     @JsonIgnore
