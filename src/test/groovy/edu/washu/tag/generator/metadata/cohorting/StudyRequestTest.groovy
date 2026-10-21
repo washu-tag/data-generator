@@ -3,18 +3,21 @@ package edu.washu.tag.generator.metadata.cohorting
 import org.testng.annotations.Test
 
 import static org.testng.Assert.assertEquals
+import static org.testng.Assert.assertNull
 import static org.testng.Assert.assertTrue
 
 class StudyRequestTest {
 
     @Test
-    void testNoOptionsReturnsBaseContextUnchanged() {
+    void testNoOptionsReturnsBaseContextUnchangedAndNoChosenOption() {
         final StudyRequest request = new StudyRequest(additionalGenerationContext: 'Base context.')
-        assertEquals(request.resolveAdditionalGenerationContext(), 'Base context.')
+        final ResolvedGenerationContext resolved = request.resolveGenerationContext()
+        assertEquals(resolved.text, 'Base context.')
+        assertNull(resolved.chosenOption)
     }
 
     @Test
-    void testOptionsAreAppendedAndWeighted() {
+    void testOptionsAreAppendedWeightedAndChosenOptionIsReported() {
         final StudyRequest request = new StudyRequest(
             additionalGenerationContext: 'Base context.',
             additionalGenerationContextOptions: ['common': 90, 'rare': 10]
@@ -22,9 +25,10 @@ class StudyRequestTest {
 
         final Map<String, Integer> counts = [common: 0, rare: 0]
         1000.times {
-            final String resolved = request.resolveAdditionalGenerationContext()
-            assertTrue(resolved in ['Base context. common', 'Base context. rare'], resolved)
-            counts[resolved.endsWith('common') ? 'common' : 'rare']++
+            final ResolvedGenerationContext resolved = request.resolveGenerationContext()
+            assertTrue(resolved.text in ['Base context. common', 'Base context. rare'], resolved.text)
+            assertEquals(resolved.chosenOption, resolved.text.endsWith('common') ? 'common' : 'rare')
+            counts[resolved.chosenOption]++
         }
 
         // Not an exact check on a random process - just confirms the weighting clearly favors

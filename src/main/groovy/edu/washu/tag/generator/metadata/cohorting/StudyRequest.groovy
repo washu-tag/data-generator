@@ -30,12 +30,12 @@ class StudyRequest implements TrajectoryStep {
     }
 
     @JsonIgnore
-    String resolveAdditionalGenerationContext() {
+    ResolvedGenerationContext resolveGenerationContext() {
         if (!additionalGenerationContextOptions) {
-            return additionalGenerationContext
+            return new ResolvedGenerationContext(text: additionalGenerationContext)
         }
         final String choice = RandomGenUtils.setupWeightedLottery(additionalGenerationContextOptions).sample()
-        "${additionalGenerationContext} ${choice}".trim()
+        new ResolvedGenerationContext(text: "${additionalGenerationContext} ${choice}".trim(), chosenOption: choice)
     }
 
     @JsonIgnore

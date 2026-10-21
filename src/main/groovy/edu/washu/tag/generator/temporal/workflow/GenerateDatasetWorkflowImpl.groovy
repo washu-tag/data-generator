@@ -4,6 +4,7 @@ import edu.washu.tag.generator.BatchRequest
 import edu.washu.tag.generator.OutputManager
 import edu.washu.tag.generator.temporal.activity.BatchHandlerActivity
 import edu.washu.tag.generator.temporal.activity.EarlySetupHandlerActivity
+import edu.washu.tag.generator.temporal.activity.FormManifestActivity
 import edu.washu.tag.generator.temporal.model.BatchHandlerActivityInput
 import edu.washu.tag.generator.temporal.model.BatchedRequestWithContinuation
 import edu.washu.tag.generator.temporal.model.ContinueGenerationWorkflowInput
@@ -37,6 +38,19 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow, ExtendSpec
                 .setRetryOptions(
                     RetryOptions.newBuilder()
                         .setMaximumAttempts(1)
+                        .build()
+                ).build()
+        )
+
+    private final FormManifestActivity manifestActivity =
+        Workflow.newActivityStub(
+            FormManifestActivity,
+            ActivityOptions.newBuilder()
+                .setStartToCloseTimeout(Duration.ofHours(1))
+                .setRetryOptions(
+                    RetryOptions.newBuilder()
+                        .setMaximumInterval(Duration.ofSeconds(1))
+                        .setMaximumAttempts(3)
                         .build()
                 ).build()
         )
@@ -135,16 +149,21 @@ class GenerateDatasetWorkflowImpl implements GenerateDatasetWorkflow, ExtendSpec
 
         logInfoWithWorkflowId("all batches have been written")
 
-        // Output combined HL7(-ish) log files now that all results are prepared.
-        Async.function(
-            Workflow.newChildWorkflowStub(
-                CombineHl7Workflow,
-                ChildWorkflowOptions.newBuilder()
-                    .setTaskQueue(TemporalApplication.TASK_QUEUE)
-                    .setWorkflowId("${Workflow.getInfo().workflowId}/combine-hl7")
-                    .build()
-            )::combineLogs,
-            Paths.get(input.outputFullPath(), 'hl7').toFile()
+        // Output combined HL7(-ish) log files and the cross-batch manifest now that all results are prepared.
+        // Both operations are independent re-reads of each batch's own output subtree, so they run concurrently.
+        final File hl7BaseDir = Paths.get(input.outputFullPath(), 'hl7').toFile()
+        Promise.allOf(
+            Async.function(
+                Workflow.newChildWorkflowStub(
+                    CombineHl7Workflow,
+                    ChildWorkflowOptions.newBuilder()
+                        .setTaskQueue(TemporalApplication.TASK_QUEUE)
+                        .setWorkflowId("${Workflow.getInfo().workflowId}/combine-hl7")
+                        .build()
+                )::combineLogs,
+                hl7BaseDir
+            ),
+            Async.function(manifestActivity::combineManifests, hl7BaseDir)
         ).get()
 
         // Advance the continuation cursor only after the entire run has succeeded. If the run fails before this,

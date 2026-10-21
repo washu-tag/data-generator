@@ -86,6 +86,7 @@ class BatchProcessor {
                 hl7Logger.writeToHl7ishLogFile(hl7LogFile)
                 println("Wrote log file: ${hl7LogFile.asFile.name}")
             }
+            ManifestMerger.combineManifests(hl7Output)
             println("STAGE 3 complete (HL7-ish logs)")
         }
     }
