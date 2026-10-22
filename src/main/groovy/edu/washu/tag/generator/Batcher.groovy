@@ -48,7 +48,8 @@ class Batcher {
                 cohortPatients,
                 cohortStudies,
                 0, // obviously not true, but we don't need this
-                { id -> "cohort ${cohort.name} batch ${id}" }
+                { id -> "cohort ${cohort.name} batch ${id}" },
+                cohort.trajectory.size()
             )
             batchesForCohort.each { batch ->
                 batch.setCohortName(cohort.name)
@@ -73,7 +74,15 @@ class Batcher {
         )
     }
 
-    private List<BatchRequest> computeBatchesFrom(int numPatients, int numStudies, int numSeries, Function<Integer, String> summarizer) {
+    // perPatientStudyCount is only known for cohorts, where every patient produces exactly trajectory.size()
+    // studies. When given, each batch's numStudies/studyOffset is derived from that batch's own numPatients
+    // rather than independently proportioned from the total - otherwise a patient split that doesn't divide
+    // evenly across batches (e.g. 17/17/16) can diverge from an independently-rounded study split (e.g.
+    // 117/117/116 instead of the true 119/119/112), causing one batch's studyIdGenerator to run past its
+    // allocation into the next batch's range and hand out duplicate studyIds - and therefore duplicate
+    // AccessionNumbers - to two different patients. The non-cohort path has no fixed per-patient study count
+    // to derive from (patients there can have a varying number of studies), so it keeps the proportional split.
+    private List<BatchRequest> computeBatchesFrom(int numPatients, int numStudies, int numSeries, Function<Integer, String> summarizer, Integer perPatientStudyCount = null) {
         if (numPatients == 0) {
             return []
         }
@@ -81,10 +90,30 @@ class Batcher {
 
         final int patientsInSmallerBatches = numPatients / totalNumBatches
         final int patientRemainder = numPatients % totalNumBatches
-        final int studiesInSmallerBatch = numStudies / totalNumBatches
-        final int studyRemainder = numStudies % totalNumBatches
         final int seriesInSmallerBatch = numSeries / totalNumBatches
         final int seriesRemainder = numSeries % totalNumBatches
+
+        if (perPatientStudyCount != null) {
+            int cumulativeStudyOffset = studyOffset
+            return (0 ..< totalNumBatches).collect { batchId ->
+                final int batchPatients = patientsInSmallerBatches + (batchId < patientRemainder ? 1 : 0)
+                final int batchStudies = batchPatients * perPatientStudyCount
+                final BatchRequest batch = new BatchRequest(
+                    id: idOffset + batchId,
+                    numPatients: batchPatients,
+                    numStudies: batchStudies,
+                    numSeries: seriesInSmallerBatch + (batchId < seriesRemainder ? 1 : 0),
+                    patientOffset: patientOffset + (patientsInSmallerBatches * batchId) + Math.min(batchId, patientRemainder),
+                    studyOffset: cumulativeStudyOffset,
+                    temporalSummary: summarizer.apply(batchId)
+                )
+                cumulativeStudyOffset += batchStudies
+                batch
+            }
+        }
+
+        final int studiesInSmallerBatch = numStudies / totalNumBatches
+        final int studyRemainder = numStudies % totalNumBatches
 
         (0 ..< totalNumBatches).collect { batchId ->
             new BatchRequest(
