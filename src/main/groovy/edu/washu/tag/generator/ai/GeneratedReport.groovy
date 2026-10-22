@@ -1,6 +1,7 @@
 package edu.washu.tag.generator.ai
 
 import ca.uhn.hl7v2.model.v281.message.ORU_R01
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
 import edu.washu.tag.generator.ai.catalog.builder.HistoricalReportTextBuilder
 import edu.washu.tag.generator.ai.catalog.builder.ModernReportTextBuilder
@@ -49,6 +50,19 @@ abstract class GeneratedReport<T extends GeneratedReport<T>> {
     void preserveState(T destination) {
 
     }
+
+    /**
+     * Optional hook invoked (via a plain property read, not a method call) immediately after
+     * {@link #preserveState}, with the same destination. Exists because a per-instance
+     * {@code metaClass.preserveState = { ... }} override does not reliably take effect here: Groovy's
+     * method dispatch compares the closure's declared parameter type against the already-compiled,
+     * generically-typed {@code preserveState(T)} and keeps the real method unless the closure's
+     * parameter type is a more specific match than {@code T} - something a caller can't express when
+     * the concrete destination type is only known dynamically. A plain closure property has no such
+     * competing overload to lose to.
+     */
+    @JsonIgnore
+    Closure stateOverride
 
     void postprocessReport(RadiologyReport radiologyReport) {
 

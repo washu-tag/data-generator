@@ -39,8 +39,14 @@ trait WithDiagnosisCodes {
             return true
         }
         final List<String> split = diagnoses.split(',')*.trim()
-        final List<String> valid = split.findAll { code ->
-            designator.validateCode(code)
+        final List<String> valid = split.findResults { candidate ->
+            if (designator.validateCode(candidate)) {
+                return candidate
+            }
+            // GPT sometimes appends a human-readable description after the code, e.g. "I63.9 - Cerebral
+            // infarction, unspecified" - tolerate that by also trying just the part before the dash.
+            final String codeOnly = candidate.replaceFirst(/\s*[-–—]\s+.*/, '')
+            designator.validateCode(codeOnly) ? codeOnly : null
         }
         if (valid.size() > 0) {
             parsedDiagnoses = valid
