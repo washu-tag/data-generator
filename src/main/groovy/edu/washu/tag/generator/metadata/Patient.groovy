@@ -3,6 +3,7 @@ package edu.washu.tag.generator.metadata
 import com.fasterxml.jackson.annotation.JsonIgnore
 import edu.washu.tag.generator.GenerationContext
 import edu.washu.tag.generator.metadata.cohorting.ResolvedCohort
+import edu.washu.tag.generator.metadata.cohorting.ResolvedGenerationContext
 import edu.washu.tag.generator.metadata.cohorting.StudyRequest
 import edu.washu.tag.generator.metadata.enums.Nationality
 import edu.washu.tag.generator.metadata.enums.Race
@@ -92,7 +93,10 @@ class Patient implements DicomEncoder {
                     studyDate: startDate.plusDays(offsetMapForCohort.get(studyRequest))
                 ).randomize(generationContext.specificationParameters, studyIdGenerator)
                 study.setDiagnoses(studyRequest.randomizeCodes(study))
-                study.setAdditionalGenerationContext(studyRequest.resolveAdditionalGenerationContext())
+                final ResolvedGenerationContext resolvedContext = studyRequest.resolveGenerationContext()
+                study.setAdditionalGenerationContext(resolvedContext.text)
+                study.setCohortStepName(studyRequest.name)
+                study.setChosenGenerationContextOption(resolvedContext.chosenOption)
                 study.setRequestedReportClasses(studyRequest.resolveReportClasses())
                 studies << study
                 generationContext.previouslyGeneratedStudies++

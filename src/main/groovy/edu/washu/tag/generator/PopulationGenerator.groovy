@@ -109,6 +109,9 @@ class PopulationGenerator {
             }
         }
         generateBatchWithHandler(generationCache, idOffsets, batchRequest, patientConsumer, true, temporalHeartbeat)
+        if (writeHl7) {
+            outputHandler.writeManifest()
+        }
     }
 
     private void generateBatchWithHandler(GenerationCache generationCache, IdOffsets idOffsets, BatchRequest batchRequest, Consumer<Patient> handler, boolean generateReports, boolean temporalHeartbeat = false) {

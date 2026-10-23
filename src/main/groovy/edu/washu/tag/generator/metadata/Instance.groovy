@@ -11,7 +11,22 @@ import edu.washu.tag.generator.metadata.privateElements.StringPrivateElement
 
 class Instance implements DicomEncoder, PrivateElementContainer {
 
-    private static final List<Integer> IMAGE_PIXEL_TAGS = [Tag.Rows, Tag.Columns, Tag.PixelData, Tag.SamplesPerPixel, Tag.PhotometricInterpretation, Tag.BitsAllocated, Tag.BitsStored, Tag.HighBit, Tag.PixelRepresentation, Tag.WindowCenter, Tag.WindowWidth].sort()
+    private static final List<Integer> SINGLE_FRAME_IMAGE_TAGS = [
+        Tag.Rows,
+        Tag.Columns,
+        Tag.PixelData,
+        Tag.SamplesPerPixel,
+        Tag.PhotometricInterpretation,
+        Tag.BitsAllocated,
+        Tag.BitsStored,
+        Tag.HighBit,
+        Tag.PixelRepresentation,
+        Tag.WindowCenter,
+        Tag.WindowWidth,
+        Tag.RescaleIntercept,
+        Tag.RescaleSlope,
+        Tag.RescaleType
+    ].sort()
     String sopClassUid
     String sopInstanceUid
     String instanceNumber
@@ -46,7 +61,7 @@ class Instance implements DicomEncoder, PrivateElementContainer {
         final Attributes image = pixelSource.produceImage(study, series)
         attributes.addSelected(
             image,
-            IMAGE_PIXEL_TAGS.toArray() as int[]
+            SINGLE_FRAME_IMAGE_TAGS.toArray() as int[]
         )
         image.getString(Tag.TransferSyntaxUID)
     }

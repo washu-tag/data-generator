@@ -45,6 +45,7 @@ class BatchSpecification implements QuerySourceData {
         patients.each { patient ->
             outputHandler.writeHl7ForPatient(patient)
         }
+        outputHandler.writeManifest()
 
         println("Successfully wrote batch with id ${id} to HL7 [${index + 1}/${totalNumBatches}]")
     }

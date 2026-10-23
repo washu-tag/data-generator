@@ -136,4 +136,43 @@ class BatchingTest {
         assertEquals(batch3.cohortName, 'cohort2')
     }
 
+    // A multi-study-per-patient cohort whose patient count doesn't divide evenly across the batches it
+    // lands in: numStudies per batch must equal that batch's own numPatients * trajectory size, not an
+    // independently-proportioned share of the cohort's total study count.
+    @Test
+    void testBatchingCohortWithUnevenPatientSplit() {
+        final int trajectorySize = 7
+        final List<BatchRequest> batchRequests = new Batcher(
+            new SpecificationParameters(
+                cohorts: [
+                    new SpecializedCohort(
+                        name: 'cohort1',
+                        numPatients: 50,
+                        trajectory: (1..trajectorySize).collect { i ->
+                            new StudyRequest(name: "step${i}", protocol: new SimpleCt())
+                        }
+                    )
+                ]
+            ),
+            20
+        ).resolveBatches()
+
+        assertEquals(batchRequests.size(), 3)
+        assertEquals(batchRequests*.numPatients, [17, 17, 16])
+        batchRequests.each { batch ->
+            assertEquals(batch.numStudies, batch.numPatients * trajectorySize, "batch ${batch.id}")
+        }
+
+        // The real-world symptom: each batch draws studyIds from its own SequentialIdGenerator, one per
+        // actual study generated (numPatients * trajectorySize), regardless of what numStudies says it was
+        // allocated. If a batch's real draw count exceeds its allocation, it runs into the next batch's
+        // starting offset and both end up handing out the same studyId - and therefore the same
+        // AccessionNumber - to two different patients.
+        final List<Integer> allStudyIds = batchRequests.collectMany { batch ->
+            final int realStudyCount = batch.numPatients * trajectorySize
+            (1..realStudyCount).collect { batch.studyOffset + it }
+        }
+        assertEquals(allStudyIds.size(), allStudyIds.toSet().size(), "duplicate studyIds across batches: ${allStudyIds}")
+    }
+
 }

@@ -91,7 +91,12 @@ class CyclicVariedGptGenerator extends CyclicVariedGenerator {
                                 "The diagnoses for this report are ${dxString}, which should inform the rest of the report. The meanings for these codes are: ${codeMeanings}."
                             }
                             placeholderReport.designator = DiagnosisCodeDesignator.ICD_10
-                            placeholderReport.metaClass.preserveState = { WithDiagnosisCodes report ->
+                            // A metaClass override of preserveState itself does not reliably fire here (Groovy's
+                            // method dispatch keeps the real, generically-typed preserveState(T) over a per-instance
+                            // closure unless the closure's parameter type is more specific than T, which isn't
+                            // expressible when the concrete report class is only known dynamically). stateOverride
+                            // is a plain closure property instead, so there's no competing overload to lose to.
+                            placeholderReport.stateOverride = { WithDiagnosisCodes report ->
                                 report.setDesignator(DiagnosisCodeDesignator.ICD_10)
                                 report.setDiagnoses(dxString)
                             }

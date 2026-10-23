@@ -84,6 +84,7 @@ class OpenAiWrapper {
                 promptReport.class as Class<? extends GeneratedReport>
             ).withValidation({ GeneratedReport report ->
                 promptReport.preserveState(report)
+                promptReport.stateOverride?.call(report)
                 report.validateReport()
             }).withHeartbeat(heartbeat).issueQuery()
             generatedReport.setUid(studyRep.uid)
