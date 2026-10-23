@@ -45,12 +45,10 @@ jobs:
           set -euo pipefail
           # Release tags publish the image under the raw tag name (matching the release chart's appVersion).
           # Every other push refreshes the moving :latest that the dev chart's appVersion tracks.
-          # TEMPORARY: this branch publishes under a fixed "prompt-mapping" tag instead, for cluster testing.
-          # Revert this block before merging to main.
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             TAG="$GITHUB_REF_NAME"
           else
-            TAG="prompt-mapping"
+            TAG="latest"
           fi
           echo "ref=${REGISTRY}/washu-tag/data-generator:${TAG}" >> "$GITHUB_OUTPUT"
 
