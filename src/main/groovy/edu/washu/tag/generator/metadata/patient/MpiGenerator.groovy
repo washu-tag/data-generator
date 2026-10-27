@@ -7,6 +7,8 @@ import edu.washu.tag.generator.metadata.Study
 
 class MpiGenerator extends SimplePatientIdGenerator {
 
+    private static final List<ReportVersion> LEGACY_VERSIONS_WITH_MPI = [ReportVersion.V2_3, ReportVersion.V2_4]
+
     MpiGenerator(int offset) {
         super(
             offset,
@@ -32,7 +34,7 @@ class MpiGenerator extends SimplePatientIdGenerator {
     @Override
     boolean conditionalIncludeIdOn(Study study) {
         study.radReport.hl7Version == ReportVersion.V2_7 && study.patient.studies.any {
-            it.radReport.hl7Version == ReportVersion.V2_3
+            it.radReport.hl7Version in LEGACY_VERSIONS_WITH_MPI
         }
     }
 }
