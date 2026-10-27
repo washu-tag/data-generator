@@ -84,6 +84,56 @@ class OutputHandlerTest {
         assertTrue(commonIds.size() > rareIds.size(), options.toString())
     }
 
+    @Test
+    void testManifestIncludesStepsWithoutWeightedOptions() {
+        CodeCache.codes.put(DiagnosisCodeDesignator.ICD_10, [
+            new Diagnosis(designator: DiagnosisCodeDesignator.ICD_10, code: 'K74.60', codeMeaning: 'Unspecified cirrhosis of liver')
+        ])
+        final SpecificationParameters specificationParameters = new SpecificationParameters(
+            numPatients: 0,
+            generateRadiologyReports: true,
+            includePixelData: false,
+            reportGeneratorImplementation: new CannedGenerator(),
+            protocols: [],
+            cohorts: [new SpecializedCohort(
+                name: 'hcc',
+                numPatients: 20,
+                trajectory: [new StudyRequest(
+                    name: 'diagnostic_mri',
+                    protocol: new LiverMri(),
+                    reportClasses: ['LiRadsCtMriDiagnostic'],
+                    diagnosisCodes: ['K74.60'],
+                    additionalGenerationContext: 'Base context, no options.'
+                )]
+            )]
+        )
+        specificationParameters.postprocess()
+
+        final File datasetRoot = Files.createTempDirectory('output-handler-test').toFile()
+        BatchProcessor.initDirs(datasetRoot.path)
+
+        final List<Patient> patients = []
+        new BatchRequest(id: 0, numPatients: 20, cohortName: 'hcc').generateBatchWithHandler(
+            new BatchRequestContext()
+                .specificationParameters(specificationParameters)
+                .generationCache(GenerationCache.initInstance(specificationParameters))
+                .idOffsets(new IdOffsets())
+                .patientRandomizers(RandomGenUtils.setupWeightedLottery([(new DefaultPatientRandomizer() as PatientRandomizer): 1]))
+                .handler({ Patient patient -> patients << patient })
+        )
+
+        final OutputHandler outputHandler = new OutputHandler(0)
+        patients.each { outputHandler.writeHl7ForPatient(it) }
+        outputHandler.writeManifest()
+
+        final Map manifest = new ObjectMapper().readValue(new File(BatchProcessor.hl7Output, 'batch_0/manifest.json'), Map)
+        final Map options = manifest.hcc.diagnostic_mri as Map
+        final List<String> ids = options.get('Base context, no options.') as List<String>
+
+        final Set<String> expectedIds = patients.collect { it.studies[0].radReport.messageControlId }
+        assertEquals(ids as Set, expectedIds)
+    }
+
     /** Stands in for the LLM, mirroring LiRadsReportTest's CannedLiRadsGenerator. */
     static class CannedGenerator extends CyclicVariedGenerator {
 
