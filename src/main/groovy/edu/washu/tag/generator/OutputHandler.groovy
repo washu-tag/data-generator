@@ -19,7 +19,9 @@ class OutputHandler {
     private Path layer
     private boolean dicomDirPrepared = false
     private boolean hl7DirPrepared = false
-    // cohort name -> step name -> chosen additionalGenerationContextOptions entry -> message control ids
+    // cohort name -> step name -> resolved generation context (the chosen additionalGenerationContextOptions
+    // entry, or the step's fixed additionalGenerationContext when it has no weighted options) -> message
+    // control ids
     private final Map<String, Map<String, Map<String, List<String>>>> manifest = [:]
 
     OutputHandler(int id) {
@@ -72,26 +74,27 @@ class OutputHandler {
     }
 
     /**
-     * Records which additionalGenerationContextOptions entry (if any) produced this study's report, keyed by
-     * the resolved cohort/step it came from. Only cohort patients whose step actually used weighted options
-     * produce an entry - nothing to disambiguate otherwise.
+     * Records which generation context produced this study's report, keyed by the resolved cohort/step it
+     * came from - the chosen additionalGenerationContextOptions entry when the step has weighted options,
+     * otherwise the step's one fixed additionalGenerationContext, so every cohort study is represented.
+     * Only cohort patients produce an entry - nothing to key by for the non-cohort population.
      */
     private void recordManifestEntry(Patient patient, Study study, RadiologyReport radiologyReport) {
         final String cohortName = patient.parentCohort?.name
-        final String chosenOption = study.chosenGenerationContextOption
-        if (!cohortName || !chosenOption) {
+        if (!cohortName) {
             return
         }
+        final String context = study.chosenGenerationContextOption ?: study.additionalGenerationContext
         manifest
             .computeIfAbsent(cohortName) { [:] }
             .computeIfAbsent(study.cohortStepName) { [:] }
-            .computeIfAbsent(chosenOption) { [] }
+            .computeIfAbsent(context) { [] }
             << radiologyReport.messageControlId
     }
 
     /**
      * Writes this batch's manifest to manifest.json alongside its HL7 output. Call once, after every patient
-     * in the batch has been written. A no-op if nothing in this batch used weighted options.
+     * in the batch has been written. A no-op if this batch had no cohort patients.
      */
     void writeManifest() {
         if (!hl7DirPrepared || manifest.isEmpty()) {
